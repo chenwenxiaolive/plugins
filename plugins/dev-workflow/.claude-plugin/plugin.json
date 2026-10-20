@@ -1,0 +1,9 @@
+{
+  "name": "dev-workflow",
+  "version": "0.1.0",
+  "description": "Personal development workflow: design discussions, GitLab issues, implementation, review, retrospectives, and GPU cluster operations.",
+  "author": {
+    "name": "chenwenxiaolive"
+  },
+  "repository": "https://github.com/chenwenxiaolive/plugins"
+}

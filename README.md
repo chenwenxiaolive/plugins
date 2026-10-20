@@ -9,6 +9,13 @@ The marketplace name is `chenwenxiaolive-plugins`.
 | Plugin | Version | Purpose |
 | --- | --- | --- |
 | [preview](plugins/preview/skills/preview/SKILL.md) | 0.1.0 | Write HTML and Markdown artifacts to the existing preview service and return verified browser links. |
+| [dev-workflow](plugins/dev-workflow/skills/implement/SKILL.md) | 0.1.0 | Discuss designs, create tickets, implement and review changes, operate the GPU cluster, and improve the development workflow. |
+| [docker-build](plugins/docker-build/skills/docker-build/SKILL.md) | 0.1.0 | Build and publish container images through the existing dedicated build host. |
+
+`dev-workflow` contains `gpu-cluster`, `grilling`, `implement`,
+`improve-codebase-architecture`, `retro`, and `to-tickets`. These skills share
+relative links, so they ship together without duplicating the cluster procedures.
+The last three retain their explicit-invocation policy.
 
 `preview` packages instructions and the personal service mapping. It has no MCP
 server, hooks, executable scripts, package dependencies, or credentials. The
@@ -21,8 +28,6 @@ the machine.
 
 ### Codex
 
-After the plugin branch is merged into `main`:
-
 ```bash
 codex plugin marketplace add chenwenxiaolive/plugins --ref main
 codex plugin add preview@chenwenxiaolive-plugins
@@ -33,14 +38,18 @@ in /preview and give me its browser URL."
 
 ### Claude Code
 
-After the plugin branch is merged into `main`:
-
 ```bash
 claude plugin marketplace add chenwenxiaolive/plugins
 claude plugin install preview@chenwenxiaolive-plugins
 ```
 
 Start a new session and invoke `/preview:preview`, or ask for a document preview.
+
+Replace `preview` in the installation command with another plugin name to install
+it separately. For Claude Code, a skill in the workflow bundle is invoked as
+`/dev-workflow:implement`, `/dev-workflow:grilling`, or the corresponding skill
+name. New plugins become available from GitHub's `main` after their import PR is
+merged.
 
 ### Local development
 
@@ -52,6 +61,26 @@ Use the same plugin installation commands above after adding the local source.
 codex plugin marketplace add /volume/workspace/plugins
 claude plugin marketplace add /volume/workspace/plugins
 ```
+
+## Imported personal skills
+
+The global skills were imported from `/root/.agents/skills` with their referenced
+documents, scripts, and client metadata. Only plugin manifests and marketplace
+entries were added around them; their operating procedures were preserved.
+
+The import excludes the third-party `find-skills` package from
+`vercel-labs/skills`, Herdr's automatically maintained `herdr-gpui-browser`, and
+the clients' system or curated skills.
+
+The original local skills remain in place and active. This import does not
+install a second active copy of them or change their local links. When adopting
+the repository versions, choose one discovery source for each skill to avoid
+loading both the original and plugin copy.
+
+These are personal environment workflows. `gpu-cluster` expects the existing
+global instructions, SSH aliases, credentials, and cluster layout; `docker-build`
+expects the configured build host and registry access. Installing the plugins
+does not create that infrastructure or authorize jobs or publication.
 
 ## Preview behavior
 
@@ -73,9 +102,10 @@ Each plugin lives in `plugins/<name>/`. Register it in both marketplace catalogs
 - `.agents/plugins/marketplace.json` for Codex.
 - `.claude-plugin/marketplace.json` for Claude Code.
 
-The preview instructions are shared between both clients. Its portable
-`plugin.json` and Claude manifest carry the same name and version. Increment both
-versions when publishing an update and update the table above.
+Instructions are shared between both clients. Each portable `plugin.json` and
+Claude manifest carry the same name and version. Increment both versions when
+publishing an update and update the table above. Preserve skill-relative
+references and explicit-invocation settings when moving or editing skills.
 
 Validate metadata with the installed client:
 
@@ -84,6 +114,12 @@ claude plugin validate --strict .
 claude plugin validate --strict plugins/preview
 claude plugin validate --strict plugins/preview/skills
 ```
+
+Repeat the plugin and skill checks for each changed plugin. Metadata validation
+does not exercise infrastructure workflows: copying a Docker helper is not a
+container build, and importing cluster instructions does not require running a
+GPU job. Check imported file contents and modes against their source, resolve
+relative references inside each package, and report this validation scope.
 
 Use a development branch and pull request for changes. Merge only on the owner's
 request.

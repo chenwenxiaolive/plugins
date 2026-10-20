@@ -1,0 +1,5 @@
+interface:
+  display_name: "Improve Codebase Architecture"
+  short_description: "Propose focused architecture changes from code evidence"
+policy:
+  allow_implicit_invocation: false
