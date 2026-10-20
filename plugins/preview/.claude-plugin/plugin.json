@@ -1,0 +1,9 @@
+{
+  "name": "preview",
+  "version": "0.1.0",
+  "description": "Publish HTML and Markdown artifacts through the existing preview service.",
+  "author": {
+    "name": "chenwenxiaolive"
+  },
+  "repository": "https://github.com/chenwenxiaolive/plugins"
+}

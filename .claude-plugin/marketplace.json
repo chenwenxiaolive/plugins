@@ -1,0 +1,14 @@
+{
+  "name": "chenwenxiaolive-plugins",
+  "description": "Personal agent plugins for Codex and Claude Code.",
+  "owner": {
+    "name": "chenwenxiaolive"
+  },
+  "plugins": [
+    {
+      "name": "preview",
+      "source": "./plugins/preview",
+      "description": "Publish HTML and Markdown artifacts through the existing preview service."
+    }
+  ]
+}
