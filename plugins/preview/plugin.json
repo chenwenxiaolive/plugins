@@ -1,0 +1,30 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "preview",
+  "version": "0.1.0",
+  "description": "Publish HTML and Markdown artifacts through the existing preview service.",
+  "author": {
+    "name": "chenwenxiaolive"
+  },
+  "repository": "https://github.com/chenwenxiaolive/plugins",
+  "extensions": {
+    "com.openai": {
+      "requires_local_executor": true,
+      "interface": {
+        "displayName": "Preview",
+        "shortDescription": "HTML and Markdown preview links",
+        "longDescription": "Create standalone HTML and Markdown artifacts in the local preview directory, check their service URLs, and return browser links.",
+        "developerName": "chenwenxiaolive",
+        "category": "Productivity",
+        "capabilities": [
+          "Read",
+          "Write"
+        ],
+        "defaultPrompt": [
+          "Use preview to create a Markdown report and return its browser URL.",
+          "Use preview to publish an HTML document in /preview."
+        ]
+      }
+    }
+  }
+}
