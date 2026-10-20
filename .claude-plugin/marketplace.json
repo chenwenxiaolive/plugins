@@ -9,6 +9,16 @@
       "name": "preview",
       "source": "./plugins/preview",
       "description": "Publish HTML and Markdown artifacts through the existing preview service."
+    },
+    {
+      "name": "dev-workflow",
+      "source": "./plugins/dev-workflow",
+      "description": "Personal development workflow: design discussions, GitLab issues, implementation, review, retrospectives, and GPU cluster operations."
+    },
+    {
+      "name": "docker-build",
+      "source": "./plugins/docker-build",
+      "description": "Build and publish Docker images through the configured remote build host and private registry."
     }
   ]
 }

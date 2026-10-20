@@ -1,0 +1,26 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "dev-workflow",
+  "version": "0.1.0",
+  "description": "Personal development workflow: design discussions, GitLab issues, implementation, review, retrospectives, and GPU cluster operations.",
+  "author": {
+    "name": "chenwenxiaolive"
+  },
+  "repository": "https://github.com/chenwenxiaolive/plugins",
+  "extensions": {
+    "com.openai": {
+      "requires_local_executor": true,
+      "interface": {
+        "displayName": "Development workflow",
+        "shortDescription": "Personal coding and cluster workflows",
+        "longDescription": "Personal development workflow: design discussions, GitLab issues, implementation, review, retrospectives, and GPU cluster operations.",
+        "developerName": "chenwenxiaolive",
+        "category": "Productivity",
+        "capabilities": [
+          "Read",
+          "Write"
+        ]
+      }
+    }
+  }
+}
