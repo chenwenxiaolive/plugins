@@ -88,5 +88,7 @@ These rules govern each cluster's shared `/volume`; the control machine has inde
   - The script swallows ssh errors: **no output from the dry run does not mean there are no processes on the node**; cross-check separately with `ssh <node> nvidia-smi`
   - A single checkout may have multiple jobs. Confirm each one against the PID and launch command recorded for the job; if the candidate list mixes in processes from other jobs, do not clean them up as a batch
   - By default the script watches GPU memory usage across all GPUs on the node, so it may time out because of other people's jobs. **Do not widen the cleanup scope because of this**; judge the cleanup result by whether the target processes exited and whether memory on the relevant GPUs dropped
-- Before launching, confirm the GPUs to be used have enough free memory
+- Before launching, confirm the GPUs to be used are free and have enough free memory
+  - On th-0, th-1 and zg-0 an idle GPU still shows 100% utilization and a `keepalive.py --occupy <GPU UUID>` process (cwd `/`): it yields to a new job by itself (machines.md). Count only other processes, e.g. by each compute PID's `/proc/<pid>/cmdline`, and never stop the workers; `free-gpus.sh` leaves them whatever the selector (`LEAVE ... keepalive's worker`)
+  - The workers' teardown overlaps a job's first 0.1–0.2 s after its CUDA contexts appear; time only after warm-up
 - When looking up processes with `pgrep -f` or `ps | grep`, the `bash -c` process that ssh runs on the remote will itself match; exclude it when counting
