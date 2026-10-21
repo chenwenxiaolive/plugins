@@ -1,0 +1,124 @@
+:root {
+  color-scheme: light;
+  --background: #f4f6fa;
+  --surface: #ffffff;
+  --text: #253249;
+  --heading: #172e4d;
+  --muted: #64748b;
+  --link: #245fb0;
+  --border: #dde5ef;
+  --subtle: #edf3fa;
+  --hover: #edf3fc;
+  --stripe: #fafcfe;
+  --quote: #f4f8fd;
+  --accent: #80a4d3;
+  --code: #edf2f8;
+  --pre-background: #15283f;
+  --pre-text: #e8eef7;
+  --header-background: #14273f;
+  --header-text: #f7faff;
+  --header-muted: #b9c7d9;
+  --shadow: #14273f06;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+  color: var(--text);
+  background: var(--background);
+}
+/* Screen-only overrides leave printed pages in the light palette. */
+@media screen {
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --background: #0e1520;
+    --surface: #172231;
+    --text: #dbe5f2;
+    --heading: #f0f5fc;
+    --muted: #a5b5ca;
+    --link: #93c5fd;
+    --border: #35465d;
+    --subtle: #243449;
+    --hover: #30435c;
+    --stripe: #1b2839;
+    --quote: #1e2e42;
+    --accent: #7da9df;
+    --code: #293b52;
+    --pre-background: #0b121d;
+    --pre-text: #e0eafa;
+    --header-background: #0b121d;
+    --header-text: #f0f5fc;
+    --header-muted: #a5b5ca;
+    --shadow: #00000026;
+  }
+}
+/* Follow the system even when JavaScript is unavailable. */
+@media screen and (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --background: #0e1520;
+    --surface: #172231;
+    --text: #dbe5f2;
+    --heading: #f0f5fc;
+    --muted: #a5b5ca;
+    --link: #93c5fd;
+    --border: #35465d;
+    --subtle: #243449;
+    --hover: #30435c;
+    --stripe: #1b2839;
+    --quote: #1e2e42;
+    --accent: #7da9df;
+    --code: #293b52;
+    --pre-background: #0b121d;
+    --pre-text: #e0eafa;
+    --header-background: #0b121d;
+    --header-text: #f0f5fc;
+    --header-muted: #a5b5ca;
+    --shadow: #00000026;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+a { color: var(--link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+a:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.topbar { background: var(--header-background); color: var(--header-text); padding: 17px max(24px, calc((100vw - 1080px) / 2)); display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; }
+.brand { color: inherit; font-weight: 700; letter-spacing: .02em; }
+.topbar-tools { display: flex; align-items: center; gap: 20px; }
+.tagline { color: var(--header-muted); font-size: 13px; }
+.theme-control { display: none; align-items: center; gap: 8px; font-size: 13px; }
+:root[data-theme] .theme-control { display: flex; }
+.theme-control select { font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 7px; padding: 6px 8px; cursor: pointer; }
+.container { max-width: 1080px; margin: 30px auto 70px; padding: 0 24px; }
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; justify-content: space-between; margin: 0 0 18px; }
+.location { font-size: 14px; color: var(--muted); overflow-wrap: anywhere; }
+.actions { display: flex; gap: 9px; flex-wrap: wrap; }
+.button { display: inline-block; border: 1px solid var(--border); border-radius: 7px; padding: 7px 12px; color: var(--text); background: var(--surface); font-size: 13px; }
+.button:hover { background: var(--hover); text-decoration: none; }
+.paper { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 36px 42px; box-shadow: 0 4px 20px var(--shadow); }
+.markdown { font-size: 16px; line-height: 1.8; overflow-wrap: anywhere; }
+.markdown > :first-child { margin-top: 0; }
+h1, h2, h3, h4, h5, h6 { color: var(--heading); line-height: 1.4; scroll-margin-top: 24px; }
+h1 { font-size: 28px; margin: 0 0 24px; }
+h2 { font-size: 23px; margin: 38px 0 18px; padding-bottom: 9px; border-bottom: 1px solid var(--border); }
+h3 { font-size: 19px; margin: 25px 0 12px; }
+p { margin: 14px 0; }
+ul, ol { padding-left: 26px; }
+li { margin: 5px 0; }
+blockquote { margin: 20px 0; padding: 4px 18px; border-left: 4px solid var(--accent); color: var(--muted); background: var(--quote); }
+code, pre { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; font-size: .9em; }
+code { background: var(--code); padding: 3px 6px; border-radius: 4px; }
+pre { overflow-x: auto; padding: 20px; background: var(--pre-background); color: var(--pre-text); line-height: 1.6; border-radius: 8px; }
+pre code { background: transparent; color: inherit; padding: 0; border: 0; font-size: 1em; }
+table { border-collapse: collapse; width: 100%; margin: 20px 0; font-size: 14px; }
+th, td { border: 1px solid var(--border); padding: 10px 13px; text-align: left; vertical-align: top; }
+th { background: var(--subtle); color: var(--heading); font-weight: 650; }
+tr:nth-child(even) td { background: var(--stripe); }
+.markdown table { display: block; overflow-x: auto; }
+.markdown img { max-width: 100%; height: auto; }
+hr { border: 0; border-top: 1px solid var(--border); margin: 28px 0; }
+.file-table td { vertical-align: middle; }
+.file-table td:first-child { overflow-wrap: anywhere; }
+.file-table .details { color: var(--muted); white-space: nowrap; font-size: 13px; }
+.file-table .file-actions { white-space: nowrap; font-size: 13px; }
+.file-actions a + a { margin-left: 12px; }
+.empty, .hint { color: var(--muted); font-size: 14px; }
+.tag { display: inline-block; font-size: 11px; font-weight: 700; color: var(--muted); background: var(--subtle); padding: 2px 6px; border-radius: 4px; margin-right: 9px; }
+@media (max-width: 700px) { .container { margin-top: 20px; padding: 0 12px; } .paper { padding: 23px 19px; } h1 { font-size: 23px; } h2 { font-size: 20px; } .file-table .details { display: none; } .file-table th, .file-table td { padding: 9px 7px; } .markdown { font-size: 15px; } .topbar { padding: 16px 20px; } .tagline { display: none; } }
+@media print { :root, body { background: white; } .topbar, .toolbar { display: none; } .container { padding: 0; margin: 0; max-width: none; } .paper { border: 0; padding: 0; box-shadow: none; } pre { white-space: pre-wrap; } }

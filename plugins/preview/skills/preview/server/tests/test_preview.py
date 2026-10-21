@@ -1,0 +1,178 @@
+"""Exercise rendering and file serving through the real HTTP handler."""
+
+from functools import partial
+from http.server import ThreadingHTTPServer
+import importlib.util
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import tempfile
+import threading
+import unittest
+from urllib.error import HTTPError
+from urllib.parse import quote, urljoin
+from urllib.request import ProxyHandler, Request, build_opener
+
+
+sys.dont_write_bytecode = True
+HERE = Path(__file__).resolve().parents[1]
+spec = importlib.util.spec_from_file_location("preview_server", HERE / "server.py")
+module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+
+
+class PreviewHTTPTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.scratch = tempfile.TemporaryDirectory(prefix="preview-check-", dir=os.environ.get("PREVIEW_TEST_TMPDIR"))
+        cls.root = Path(cls.scratch.name) / "files"
+        cls.root.mkdir()
+        cls.source = cls.root / "中文 document.md"
+        cls.source.write_text(
+            "# Preview — 中文示例\n\n"
+            "| Name | Value |\n| --- | --- |\n| First | 中文 |\n\n"
+            "## Details\n\n"
+            "| Setting | Value |\n| --- | --- |\n| Encoding | UTF-8 |\n\n"
+            "Documents render without browser CDN requests.\n",
+            encoding="utf-8",
+        )
+        cls.nested = cls.root / "嵌套 目录"
+        cls.nested.mkdir()
+        cls.html = '<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="style.css"><h1>中文 HTML</h1><script src="app.js"></script>'
+        (cls.nested / "example.html").write_text(cls.html, encoding="utf-8")
+        (cls.nested / "style.css").write_text("h1 { color: blue; }", encoding="utf-8")
+        (cls.nested / "app.js").write_text("document.title = 'HTML preview';", encoding="utf-8")
+        (cls.nested / "example.md").write_text('# 标题\n\n| A | B |\n| --- | --- |\n| 甲 | 乙 |\n\n```python\nprint("中文")\n```\n\n[HTML](example.html)\n\n<script>alert(1)</script>\n', encoding="utf-8")
+        (cls.root / "bad.md").write_bytes(b"\xff\xfeinvalid")
+        outside = Path(cls.scratch.name) / "outside.txt"
+        outside.write_text("outside-preview-marker", encoding="utf-8")
+        (cls.root / "outside-link.txt").symlink_to(outside)
+        cls.httpd = ThreadingHTTPServer(("127.0.0.1", 0), partial(module.PreviewHandler, directory=str(cls.root)))
+        cls.httpd.node = shutil.which("node")
+        cls.worker = threading.Thread(target=cls.httpd.serve_forever, daemon=True)
+        cls.worker.start()
+        cls.base = f"http://127.0.0.1:{cls.httpd.server_port}"
+        cls.client = build_opener(ProxyHandler({}))
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.httpd.shutdown()
+        cls.httpd.server_close()
+        cls.worker.join()
+        cls.scratch.cleanup()
+
+    def fetch(self, path, method="GET", headers=None):
+        with self.client.open(Request(self.base + path, method=method, headers=headers or {}), timeout=10) as response:
+            return response.headers, response.read()
+
+    def test_document_is_rendered(self):
+        headers, body = self.fetch("/" + quote(self.source.name))
+        html = body.decode("utf-8")
+        self.assertEqual(headers.get_content_type(), "text/html")
+        self.assertEqual(headers.get_content_charset(), "utf-8")
+        self.assertIn("<h1 id=", html)
+        self.assertIn("Preview — 中文示例", html)
+        self.assertEqual(html.count("<table>"), 2)
+        self.assertIn("Documents render without browser CDN requests.", html)
+        self.assertNotIn("<script src=\"https://", html)
+
+    def test_original_source_download_and_head(self):
+        path = "/" + quote(self.source.name)
+        headers, body = self.fetch(path + "?raw=1")
+        self.assertEqual(body, self.source.read_bytes())
+        self.assertEqual(headers.get_content_type(), "text/plain")
+        headers, body = self.fetch(path + "?download=1")
+        self.assertEqual(body, self.source.read_bytes())
+        self.assertIn("filename*=UTF-8''", headers["Content-Disposition"])
+        headers, body = self.fetch(path, method="HEAD")
+        self.assertEqual(headers.get_content_type(), "text/html")
+        self.assertEqual(body, b"")
+        self.assertGreater(int(headers["Content-Length"]), 0)
+
+    def test_markdown_features_and_relative_html_link(self):
+        path = "/" + quote(self.nested.name) + "/example.md"
+        _, body = self.fetch(path)
+        html = body.decode("utf-8")
+        self.assertIn('<h1 id="标题">标题</h1>', html)
+        self.assertIn("<table>", html)
+        self.assertIn('class="language-python"', html)
+        self.assertIn('href="example.html"', html)
+        self.assertNotIn("<script>alert(1)</script>", html)
+        linked_path = urljoin(path, "example.html")
+        headers, body = self.fetch(linked_path)
+        self.assertEqual(headers.get_content_type(), "text/html")
+        self.assertEqual(body.decode("utf-8"), self.html)
+
+    def test_html_relative_css_and_javascript(self):
+        prefix = "/" + quote(self.nested.name) + "/"
+        headers, body = self.fetch(prefix + "style.css")
+        self.assertEqual(headers.get_content_type(), "text/css")
+        self.assertIn(b"color: blue", body)
+        headers, body = self.fetch(prefix + "app.js")
+        self.assertIn("javascript", headers.get_content_type())
+        self.assertIn(b"document.title", body)
+
+    def test_directory_links_and_styles(self):
+        _, body = self.fetch("/")
+        html = body.decode("utf-8")
+        self.assertIn(quote(self.source.name), html)
+        self.assertIn("?download=1", html)
+        self.assertNotIn("outside-link.txt", html)
+        _, body = self.fetch("/" + quote(self.nested.name))
+        self.assertIn(b"Parent directory", body)
+        headers, body = self.fetch("/_preview_assets/style.css")
+        self.assertEqual(headers.get_content_type(), "text/css")
+        self.assertIn(b"@media", body)
+
+    def test_theme_controls_and_script_on_generated_pages(self):
+        for path in ["/", "/" + quote(self.source.name), "/" + quote(self.nested.name) + "/"]:
+            with self.subTest(path=path):
+                _, body = self.fetch(path)
+                html = body.decode("utf-8")
+                self.assertIn('for="theme-select"', html)
+                self.assertIn('<select id="theme-select"', html)
+                for theme in ["system", "light", "dark"]:
+                    self.assertIn(f'<option value="{theme}">', html)
+                self.assertIn('<script src="/_preview_assets/theme.js"></script>', html)
+                self.assertLess(html.index("theme.js"), html.index("style.css"))
+        headers, body = self.fetch("/_preview_assets/theme.js")
+        self.assertEqual(headers.get_content_type(), "application/javascript")
+        self.assertEqual(body, (HERE / "assets/theme.js").read_bytes())
+        headers, head = self.fetch("/_preview_assets/theme.js", method="HEAD")
+        self.assertEqual(head, b"")
+        self.assertEqual(int(headers["Content-Length"]), len(body))
+
+    def test_theme_behavior(self):
+        result = subprocess.run(
+            [self.httpd.node, "--test", str(HERE / "tests/theme.test.cjs")],
+            capture_output=True, text=True, timeout=15,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_paths_cannot_escape_the_preview_root(self):
+        for path in ["/%2e%2e/outside.txt", "/outside-link.txt"]:
+            with self.subTest(path=path), self.assertRaises(HTTPError) as error:
+                self.fetch(path)
+            self.assertEqual(error.exception.code, 403)
+
+    def test_clear_missing_file_and_encoding_errors(self):
+        for path, status in [("/missing.md", 404), ("/bad.md", 422)]:
+            with self.subTest(path=path), self.assertRaises(HTTPError) as error:
+                self.fetch(path)
+            self.assertEqual(error.exception.code, status)
+
+    def test_refresh_reads_the_current_file(self):
+        source = self.root / "refresh.md"
+        source.write_text("# First version", encoding="utf-8")
+        self.fetch("/refresh.md")
+        source.write_text("# Updated version", encoding="utf-8")
+        headers, body = self.fetch("/refresh.md", headers={"If-Modified-Since": "Tue, 01 Jan 2099 00:00:00 GMT"})
+        self.assertEqual(headers["Cache-Control"], "no-store")
+        self.assertIn(b"Updated version", body)
+        self.assertNotIn(b"First version", body)
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)

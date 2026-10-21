@@ -8,7 +8,7 @@
     {
       "name": "preview",
       "source": "./plugins/preview",
-      "description": "Publish HTML and Markdown artifacts through the existing preview service."
+      "description": "Publish HTML and Markdown previews and manage the bundled preview service."
     },
     {
       "name": "dev-workflow",
