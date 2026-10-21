@@ -218,15 +218,29 @@ class PreviewHTTPTests(unittest.TestCase):
                 self.assertEqual(table.headings[2]["href"], self.sort_url + "?sort=updated&order=asc")
 
     def test_directory_sort_redirect_head_and_empty_directory(self):
-        query = "?sort=size&order=desc"
+        query = "?sort=updated&order=desc"
         _, body = self.fetch(self.sort_url.rstrip("/") + query)
         self.assertEqual(DirectoryTable(body.decode()).names,
-                         ["A-dir", "z-dir", "Alpha.txt", "beta.txt", "delta.txt", "gamma.txt"])
+                         ["z-dir", "A-dir", "delta.txt", "beta.txt", "Alpha.txt", "gamma.txt"])
         headers, body = self.fetch(self.sort_url + query, method="HEAD")
         self.assertEqual(body, b"")
         self.assertGreater(int(headers["Content-Length"]), 0)
         _, body = self.fetch(self.sort_url + "A-dir/" + query)
         self.assertIn(b"This directory is empty", body)
+
+    def test_directory_sort_ties_use_deterministic_name_order(self):
+        with tempfile.TemporaryDirectory(dir=self.root) as directory:
+            path = Path(directory)
+            for name in ["beta.txt", "Beta.txt", "Alpha.txt"]:
+                fixture = path / name
+                fixture.write_bytes(b"same size")
+                os.utime(fixture, ns=(1700000000000000000, 1700000000000000000))
+            for column in ["size", "updated"]:
+                for order in ["asc", "desc"]:
+                    with self.subTest(column=column, order=order):
+                        _, body = self.fetch(f"/{path.name}/?sort={column}&order={order}")
+                        self.assertEqual(DirectoryTable(body.decode()).names,
+                                         ["Alpha.txt", "Beta.txt", "beta.txt"])
 
     def test_theme_controls_and_script_on_generated_pages(self):
         for path in ["/", "/" + quote(self.source.name), "/" + quote(self.nested.name) + "/"]:
