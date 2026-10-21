@@ -1,6 +1,6 @@
 {
   "name": "preview",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Publish HTML and Markdown previews and manage the bundled preview service.",
   "author": {
     "name": "chenwenxiaolive"

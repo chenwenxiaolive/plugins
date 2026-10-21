@@ -88,7 +88,10 @@ class PreviewHandler(SimpleHTTPRequestHandler):
         if path.is_dir():
             if not decoded.endswith("/"):
                 self.send_response(301)
-                self.send_header("Location", quote(decoded + "/", safe="/"))
+                location = quote(decoded + "/", safe="/")
+                if request.query:
+                    location += "?" + request.query
+                self.send_header("Location", location)
                 self.send_header("Content-Length", "0")
                 self.end_headers()
                 return None
@@ -144,9 +147,13 @@ class PreviewHandler(SimpleHTTPRequestHandler):
         return self.response_bytes(page(path.name, result.stdout, decoded, actions))
 
     def directory_page(self, path, decoded):
-        rows = []
+        query = parse_qs(urlsplit(self.path).query)
+        column = query.get("sort", ["name"])
+        column = column[0] if len(column) == 1 and column[0] in {"name", "size", "updated"} else "name"
+        descending = query.get("order") == ["desc"]
+        entries = []
         try:
-            children = sorted(path.iterdir(), key=lambda child: (not child.is_dir(), child.name.casefold()))
+            children = list(path.iterdir())
         except OSError:
             self.send_error(403, "Directory could not be read")
             return None
@@ -160,6 +167,19 @@ class PreviewHandler(SimpleHTTPRequestHandler):
                 stat = child.stat()
             except (OSError, RuntimeError):
                 continue
+            entries.append((child, is_directory, stat))
+
+        # Stable sorts keep name ties deterministic and directories first in either direction.
+        entries.sort(key=lambda entry: (entry[0].name.casefold(), entry[0].name))
+        sort_keys = {
+            "name": lambda entry: (entry[0].name.casefold(), entry[0].name),
+            "size": lambda entry: 0 if entry[1] else entry[2].st_size,
+            "updated": lambda entry: entry[2].st_mtime_ns,
+        }
+        entries.sort(key=sort_keys[column], reverse=descending)
+        entries.sort(key=lambda entry: not entry[1])
+        rows = []
+        for child, is_directory, stat in entries:
             url = quote(decoded + child.name + ("/" if is_directory else ""), safe="/")
             kind = "DIR" if is_directory else child.suffix.lstrip(".").upper() or "FILE"
             size = "—" if is_directory else f"{stat.st_size / 1024:.1f} KB"
@@ -169,7 +189,17 @@ class PreviewHandler(SimpleHTTPRequestHandler):
         title = "Files in /preview" if decoded == "/" else "Files in " + decoded
         content = f'<h1>{escape(title)}</h1><p class="hint">Open a Markdown or HTML file to preview it. Refresh after updating a file.</p>'
         if rows:
-            content += '<table class="file-table"><thead><tr><th>Name</th><th class="details">Size</th><th class="details">Updated</th><th>Original</th></tr></thead><tbody>' + "".join(rows) + '</tbody></table>'
+            headings = []
+            for key, label in (("name", "Name"), ("size", "Size"), ("updated", "Updated")):
+                active = column == key
+                next_order = "desc" if active and not descending else "asc"
+                direction = "descending" if descending else "ascending"
+                aria = f' aria-sort="{direction}"' if active else ""
+                indicator = ("▼" if descending else "▲") if active else "↕"
+                url = quote(decoded, safe="/") + f"?sort={key}&order={next_order}"
+                next_direction = "descending" if next_order == "desc" else "ascending"
+                headings.append(f'<th scope="col"{aria}><a class="sort-heading" href="{escape(url, quote=True)}" aria-label="Sort by {label} {next_direction}">{label} <span aria-hidden="true">{indicator}</span></a></th>')
+            content += '<table class="file-table"><thead><tr>' + "".join(headings) + '<th scope="col">Original</th></tr></thead><tbody>' + "".join(rows) + '</tbody></table>'
         else:
             content += '<p class="empty">This directory is empty.</p>'
         actions = button("Parent directory", quote(decoded.rstrip("/").rsplit("/", 1)[0] + "/", safe="/")) if decoded != "/" else ""

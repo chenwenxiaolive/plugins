@@ -1,6 +1,7 @@
 """Exercise rendering and file serving through the real HTTP handler."""
 
 from functools import partial
+from html.parser import HTMLParser
 from http.server import ThreadingHTTPServer
 import importlib.util
 import os
@@ -21,6 +22,43 @@ HERE = Path(__file__).resolve().parents[1]
 spec = importlib.util.spec_from_file_location("preview_server", HERE / "server.py")
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
+
+
+class DirectoryTable(HTMLParser):
+    """Read the rendered table as a user following its links would."""
+
+    def __init__(self, html):
+        super().__init__()
+        self.names = []
+        self.headings = []
+        self.cell = 0
+        self.heading = None
+        self.name_link = False
+        self.feed(html)
+
+    def handle_starttag(self, tag, attributes):
+        attrs = dict(attributes)
+        if tag == "tr":
+            self.cell = 0
+        elif tag == "td":
+            self.cell += 1
+        elif tag == "th":
+            self.heading = attrs
+            self.headings.append(attrs)
+        elif tag == "a":
+            if self.heading is not None:
+                self.heading.update(attrs)
+            self.name_link = self.cell == 1
+
+    def handle_endtag(self, tag):
+        if tag == "th":
+            self.heading = None
+        elif tag == "a":
+            self.name_link = False
+
+    def handle_data(self, text):
+        if self.name_link:
+            self.names.append(text)
 
 
 class PreviewHTTPTests(unittest.TestCase):
@@ -49,6 +87,23 @@ class PreviewHTTPTests(unittest.TestCase):
         outside = Path(cls.scratch.name) / "outside.txt"
         outside.write_text("outside-preview-marker", encoding="utf-8")
         (cls.root / "outside-link.txt").symlink_to(outside)
+        cls.sort_root = cls.root / "sort 中文 #?"
+        cls.sort_root.mkdir()
+        cls.sort_url = "/" + quote(cls.sort_root.name) + "/"
+        for name, size, timestamp in [
+            ("Alpha.txt", 2048, 1700000000.2),
+            ("beta.txt", 20, 1700000000.3),
+            ("gamma.txt", 10, 1700000000.1),
+            ("delta.txt", 19, 1700000000.4),
+        ]:
+            fixture = cls.sort_root / name
+            fixture.write_bytes(b"x" * size)
+            os.utime(fixture, (timestamp, timestamp))
+        for name, timestamp in [("A-dir", 1700000010), ("z-dir", 1700000020)]:
+            fixture = cls.sort_root / name
+            fixture.mkdir()
+            os.utime(fixture, (timestamp, timestamp))
+        (cls.sort_root / "outside-link.txt").symlink_to(outside)
         cls.httpd = ThreadingHTTPServer(("127.0.0.1", 0), partial(module.PreviewHandler, directory=str(cls.root)))
         cls.httpd.node = shutil.which("node")
         cls.worker = threading.Thread(target=cls.httpd.serve_forever, daemon=True)
@@ -125,6 +180,53 @@ class PreviewHTTPTests(unittest.TestCase):
         headers, body = self.fetch("/_preview_assets/style.css")
         self.assertEqual(headers.get_content_type(), "text/css")
         self.assertIn(b"@media", body)
+
+    def test_directory_sorting_each_column_and_direction(self):
+        cases = {
+            ("name", "asc"): ["A-dir", "z-dir", "Alpha.txt", "beta.txt", "delta.txt", "gamma.txt"],
+            ("name", "desc"): ["z-dir", "A-dir", "gamma.txt", "delta.txt", "beta.txt", "Alpha.txt"],
+            ("size", "asc"): ["A-dir", "z-dir", "gamma.txt", "delta.txt", "beta.txt", "Alpha.txt"],
+            ("size", "desc"): ["A-dir", "z-dir", "Alpha.txt", "beta.txt", "delta.txt", "gamma.txt"],
+            ("updated", "asc"): ["A-dir", "z-dir", "gamma.txt", "Alpha.txt", "beta.txt", "delta.txt"],
+            ("updated", "desc"): ["z-dir", "A-dir", "delta.txt", "beta.txt", "Alpha.txt", "gamma.txt"],
+        }
+        for (column, order), expected in cases.items():
+            with self.subTest(column=column, order=order):
+                _, body = self.fetch(self.sort_url + f"?sort={column}&order={order}")
+                table = DirectoryTable(body.decode())
+                self.assertEqual(table.names, expected)
+                index = ["name", "size", "updated"].index(column)
+                self.assertEqual(table.headings[index]["aria-sort"], "ascending" if order == "asc" else "descending")
+                self.assertEqual(sum("aria-sort" in h for h in table.headings), 1)
+                opposite = "desc" if order == "asc" else "asc"
+                self.assertEqual(table.headings[index]["href"], self.sort_url + f"?sort={column}&order={opposite}")
+                _, toggled = self.fetch(table.headings[index]["href"])
+                self.assertEqual(DirectoryTable(toggled.decode()).names, cases[column, opposite])
+                self.assertNotIn("href", table.headings[3])
+                for heading in table.headings[:3]:
+                    self.assertEqual(heading["scope"], "col")
+                    self.assertIn("Sort by", heading["aria-label"])
+
+    def test_directory_sort_defaults_and_invalid_parameters(self):
+        expected = ["A-dir", "z-dir", "Alpha.txt", "beta.txt", "delta.txt", "gamma.txt"]
+        for query in ["", "?sort=unknown&order=invalid", "?sort=name&order=", "?sort=size&sort=updated&order=asc"]:
+            with self.subTest(query=query):
+                _, body = self.fetch(self.sort_url + query)
+                table = DirectoryTable(body.decode())
+                self.assertEqual(table.names, expected)
+                self.assertEqual(table.headings[1]["href"], self.sort_url + "?sort=size&order=asc")
+                self.assertEqual(table.headings[2]["href"], self.sort_url + "?sort=updated&order=asc")
+
+    def test_directory_sort_redirect_head_and_empty_directory(self):
+        query = "?sort=size&order=desc"
+        _, body = self.fetch(self.sort_url.rstrip("/") + query)
+        self.assertEqual(DirectoryTable(body.decode()).names,
+                         ["A-dir", "z-dir", "Alpha.txt", "beta.txt", "delta.txt", "gamma.txt"])
+        headers, body = self.fetch(self.sort_url + query, method="HEAD")
+        self.assertEqual(body, b"")
+        self.assertGreater(int(headers["Content-Length"]), 0)
+        _, body = self.fetch(self.sort_url + "A-dir/" + query)
+        self.assertIn(b"This directory is empty", body)
 
     def test_theme_controls_and_script_on_generated_pages(self):
         for path in ["/", "/" + quote(self.source.name), "/" + quote(self.nested.name) + "/"]:
