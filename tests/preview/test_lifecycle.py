@@ -87,3 +87,48 @@ class LifecycleTests(unittest.TestCase):
             os.kill(os.getpid(), 0)
         finally:
             record_path.write_text(saved)
+
+    def test_concurrent_starts_share_one_process(self):
+        from concurrent.futures import ThreadPoolExecutor
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            results = list(pool.map(lambda _: self.command('start'), range(2)))
+        self.assertEqual(results[0]['pid'], results[1]['pid'])
+
+    def test_environment_configuration_and_flag_precedence(self):
+        env = os.environ.copy()
+        env.update(PREVIEW_ROOT=str(self.root), PREVIEW_STATE_DIR=str(self.state),
+                   PREVIEW_BIND='127.0.0.1', PREVIEW_PORT=str(self.port),
+                   PREVIEW_BASE_URL='https://preview.example.test/documents')
+        result = subprocess.run([sys.executable, '-B', str(SCRIPT), 'start'],
+                                env=env, capture_output=True, text=True, timeout=20)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads(result.stdout)['base_url'],
+                         'https://preview.example.test/documents')
+        result = subprocess.run([sys.executable, '-B', str(SCRIPT), 'status',
+                                 '--base-url', self.url], env=env,
+                                capture_output=True, text=True, timeout=20)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads(result.stdout)['base_url'], self.url)
+
+    def test_unrelated_http_server_is_not_reused(self):
+        from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+        from functools import partial
+        import threading
+        httpd = ThreadingHTTPServer(('127.0.0.1', self.port),
+                                   partial(SimpleHTTPRequestHandler, directory=str(self.root)))
+        worker = threading.Thread(target=httpd.serve_forever, daemon=True)
+        worker.start()
+        try:
+            result = self.command('start', check=False)
+            self.assertNotEqual(result.returncode, 0)
+            with self.client.open(self.url, timeout=5) as response:
+                self.assertEqual(response.status, 200)
+        finally:
+            httpd.shutdown()
+            httpd.server_close()
+            worker.join()
+
+    def test_state_inside_plugin_is_rejected(self):
+        result = self.command('start', state=SCRIPT.parent / 'runtime', check=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertFalse((SCRIPT.parent / 'runtime').exists())
