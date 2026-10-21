@@ -8,7 +8,7 @@ The marketplace name is `chenwenxiaolive-plugins`.
 
 | Plugin | Version | Purpose |
 | --- | --- | --- |
-| [preview](plugins/preview/skills/preview/SKILL.md) | 0.1.0 | Write HTML and Markdown artifacts to the existing preview service and return verified browser links. |
+| [preview](plugins/preview/skills/preview/SKILL.md) | 0.2.0 | Publish HTML and Markdown previews and manage the bundled preview service. |
 | [dev-workflow](plugins/dev-workflow/skills/implement/SKILL.md) | 0.1.0 | Discuss designs, create tickets, implement and review changes, operate the GPU cluster, and improve the development workflow. |
 | [docker-build](plugins/docker-build/skills/docker-build/SKILL.md) | 0.1.0 | Build and publish container images through the existing dedicated build host. |
 
@@ -17,9 +17,10 @@ The marketplace name is `chenwenxiaolive-plugins`.
 relative links, so they ship together without duplicating the cluster procedures.
 The last three retain their explicit-invocation policy.
 
-`preview` packages instructions and the personal service mapping. It has no MCP
-server, hooks, executable scripts, package dependencies, or credentials. The
-preview web server is an existing environment prerequisite.
+`preview` bundles a pinned preview server, Markdown renderer, theme assets, and
+start/stop/status commands. It needs Linux, Python 3.10+, and Node.js 18+; no
+dependency installation is required. Installation does not start a service.
+Documents, logs, and process state live outside the installed plugin.
 
 ## Install
 
@@ -93,7 +94,10 @@ does not create that infrastructure or authorize jobs or publication.
 
 The current machine's address and override rules are documented in
 [the service reference](plugins/preview/skills/preview/references/service.md).
-The plugin reuses the service; it does not start or reconfigure it.
+The plugin reuses an available service and can start its bundled server when
+setup is requested. See the service reference for configuration and commands.
+The independent preview-server repository remains the source of bundled files;
+`tools/vendor_preview.py` exports a pinned commit and records its file hashes.
 
 ## Maintenance
 
