@@ -1,0 +1,15 @@
+{
+  "repository": "https://github.com/chenwenxiaolive/preview-server",
+  "commit": "a6bf15089737550b6642931bdc6876bf656242f2",
+  "sha256": {
+    "server.py": "401d7e89a7697b0c24efa5e0227b410459c8e008c63977d1c0cf8e62ab456486",
+    "renderer.cjs": "9f87da90653a16478c0dbbe90966713cba0cef6851e5ae21ec7b5cd87204ed0b",
+    "assets/style.css": "4f7ca01aba25ce83f31b727773d480b24193fb09375950c94e578124fcc89bbd",
+    "assets/theme.js": "fe13c6dc259c5f0f8d3e6dc3252f02bbc120142d89eb9e284c73507ab6b0353f",
+    "assets/markdown-it.min.cjs": "38c70a1e7ca91ab40e2d9e6e60129851a717ed1c7d4acbbdd41bf9503791cf68",
+    "assets/markdown-it.LICENSE": "792c48c5a849a15fdf9e37e8bcf9e6d1dd13b32b46c642a748a0a46a9919d473",
+    "assets/sources.json": "c07d8991bf1e0331266442ccf8478f6239f6a1f96aec4a9c0269c2199bbc0300",
+    "tests/test_preview.py": "32a600116c27ab8935aa3d83fbf869b75bd0ce1175ebb68ea92db76b884fe388",
+    "tests/theme.test.cjs": "89fdd911abf749502ccf2b44d48314c73f226091026e3b1ad65c7e6bbae3eba3"
+  }
+}

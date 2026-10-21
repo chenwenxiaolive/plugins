@@ -1,17 +1,22 @@
 ---
 name: preview
-description: Create or update standalone HTML and Markdown artifacts in the local /preview service and return verified browser links. Use for requested document previews, reports, or existing /preview artifacts. Keep tracked repository documentation in its established location.
+description: Create or update standalone HTML and Markdown artifacts in the local /preview service and return verified browser links. Use for requested document previews, reports, or existing /preview artifacts, and for starting, stopping, or checking the bundled preview service. Keep tracked repository documentation in its established location.
 ---
 
 # Preview
 
-Publish the requested artifact through the existing preview service.
+Publish the requested artifact through a verified preview service. For service
+management, read [the service reference](references/service.md) and use
+`scripts/preview.py start|status|stop`. Installing the plugin alone starts nothing.
+Reuse an available service. A request to set up or start preview authorizes using
+the bundled helper; a document-only request does not authorize changing shared
+services or network configuration.
 
 ## Resolve the destination
 
 Read [the service reference](references/service.md) before the first publication
 in a task. Apply an explicit destination from the user, then environment overrides,
-then the documented machine defaults. The directory and browser base URL must
+then the applicable service mapping or portable defaults. The directory and browser base URL must
 refer to the same service.
 
 Confirm that the preview directory exists. If the service mapping is unknown,
@@ -58,6 +63,6 @@ Return a descriptive Markdown link to the artifact's browser URL. Include source
 or download links when useful, using the service's documented query parameters.
 
 If the service is unavailable, retain the artifact, report its local path and the
-failed access check, and distinguish an expected URL from a verified one. Do not
-start a replacement server, open ports, or change shared service configuration
-unless the user requested that operations work.
+failed access check, and distinguish an expected URL from a verified one. Use the bundled helper when service setup is within the user’s request. Do not
+replace an existing service or change shared network configuration as a side
+effect of document publication.

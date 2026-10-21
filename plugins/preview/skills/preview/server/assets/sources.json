@@ -1,0 +1,14 @@
+[
+  {
+    "file": "markdown-it.min.cjs",
+    "url": "https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js",
+    "sha256": "38c70a1e7ca91ab40e2d9e6e60129851a717ed1c7d4acbbdd41bf9503791cf68",
+    "bytes": 123618
+  },
+  {
+    "file": "markdown-it.LICENSE",
+    "url": "https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/LICENSE",
+    "sha256": "792c48c5a849a15fdf9e37e8bcf9e6d1dd13b32b46c642a748a0a46a9919d473",
+    "bytes": 1073
+  }
+]

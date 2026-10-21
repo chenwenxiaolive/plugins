@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "preview",
-  "version": "0.1.0",
-  "description": "Publish HTML and Markdown artifacts through the existing preview service.",
+  "version": "0.2.0",
+  "description": "Publish HTML and Markdown previews and manage the bundled preview service.",
   "author": {
     "name": "chenwenxiaolive"
   },
@@ -13,7 +13,7 @@
       "interface": {
         "displayName": "Preview",
         "shortDescription": "HTML and Markdown preview links",
-        "longDescription": "Create standalone HTML and Markdown artifacts in the local preview directory, check their service URLs, and return browser links.",
+        "longDescription": "Create HTML and Markdown previews, verify browser links, and start, stop, or inspect the bundled preview service.",
         "developerName": "chenwenxiaolive",
         "category": "Productivity",
         "capabilities": [

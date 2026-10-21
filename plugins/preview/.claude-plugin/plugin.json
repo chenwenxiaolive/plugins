@@ -1,7 +1,7 @@
 {
   "name": "preview",
-  "version": "0.1.0",
-  "description": "Publish HTML and Markdown artifacts through the existing preview service.",
+  "version": "0.2.0",
+  "description": "Publish HTML and Markdown previews and manage the bundled preview service.",
   "author": {
     "name": "chenwenxiaolive"
   },
