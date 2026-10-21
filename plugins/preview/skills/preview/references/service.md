@@ -72,6 +72,10 @@ HTML is served directly. `.md` and `.markdown` render as HTML at the same URL.
 Markdown accepts UTF-8 and is limited to 8 MiB for rendering. The server has no
 authentication; its document directory contains only intended preview content.
 Generated pages support persistent System, Light, and Dark themes.
+Directory headings sort by Name, Size, or Updated, toggling ascending and
+descending order. Directories remain first; sizes use bytes and modification
+times use their full precision. Sorting works without JavaScript and is retained
+in the page URL when refreshed.
 
 The independent source repository remains
 `https://github.com/chenwenxiaolive/preview-server`. `server/upstream.json` records
