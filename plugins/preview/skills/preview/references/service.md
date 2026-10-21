@@ -1,6 +1,6 @@
 # Preview service
 
-The plugin bundles a pinned preview-server release, including the Markdown
+The plugin contains the preview service source, including the Markdown
 renderer and theme assets. It requires Linux, Python 3.10+ and Node.js 18+ on PATH;
 no package installation, build, or browser CDN is required.
 
@@ -77,12 +77,23 @@ descending order. Directories remain first; sizes use bytes and modification
 times use their full precision. Sorting works without JavaScript and is retained
 in the page URL when refreshed.
 
-The independent source repository remains
-`https://github.com/chenwenxiaolive/preview-server`. `server/upstream.json` records
-the exact source commit and file hashes. Maintainers refresh the bundle with the
-repository's `tools/vendor_preview.py --source <checkout> --commit <full-sha>`.
-That command exports committed files through Git; do not edit bundled files by
-hand. Update the source repository first, then refresh and test the plugin.
+The plugin repository is the source of truth for the service. Edit the files
+under `plugins/preview/skills/preview/server/` directly and release changes with
+the plugin; no separate service checkout or import command is needed.
+
+- `server.py`: HTTP routes, directory listing, sorting, and file handling.
+- `renderer.cjs`: Markdown rendering through the existing Node executable.
+- `assets/style.css` and `assets/theme.js`: styling and saved theme selection.
+- `tests/`: HTTP integration and theme behavior tests.
+
+The third-party markdown-it renderer remains pinned to 14.1.0. Its source URLs
+and SHA-256 hashes are in `server/assets/sources.json`, with its MIT license in
+`server/assets/markdown-it.LICENSE`. Update these records when updating those
+third-party assets. They do not pin the plugin's own service code.
+
+Restart a managed service with the helper after changing service code or the
+renderer. Document and stylesheet edits appear on refresh. Keep launch scripts,
+logs, PIDs, and run records outside the checkout.
 
 Run the service and lifecycle suites from the plugin repository:
 
