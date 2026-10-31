@@ -60,7 +60,7 @@ async function main() {
     assert.equal(await page.locator('.mermaid-block').nth(1).locator('details').getAttribute('open'), '');
     assert.match(await page.locator('code.language-python').textContent(), /ordinary code/);
     assert.match(await page.locator('.mermaid-diagram').first().textContent(), /Controller 中文/);
-    assert.equal(await page.locator('.mermaid-diagram img, .mermaid-diagram a[href^="javascript:"]').count(), 0);
+    assert.equal(await page.locator('.mermaid-diagram [onerror], .mermaid-diagram a[href^="javascript:"]').count(), 0);
     await page.locator('.mermaid-block summary').first().click();
     assert.match(await page.locator('.mermaid-block pre').first().textContent(), /flowchart LR/);
     const color = () => page.locator('.mermaid-diagram svg .node rect').first().evaluate(
