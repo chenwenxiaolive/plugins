@@ -111,3 +111,14 @@ python3 -B -m unittest discover -s tests/preview -v
 ```
 
 Set `PREVIEW_TEST_TMPDIR` to an external run directory for fixtures and logs.
+For browser coverage, use an existing Playwright installation and Chromium:
+
+```sh
+PREVIEW_PLAYWRIGHT_MODULE=/path/to/node_modules/playwright \
+  node plugins/preview/skills/preview/server/tests/diagrams.browser.cjs
+```
+
+Set `PLAYWRIGHT_BROWSERS_PATH` when the browser is installed outside its default
+cache. The browser check covers real SVG rendering, theme changes, syntax errors,
+source/download preservation, strict-mode handling, and operation without external
+requests. Screenshots and server logs stay in `PREVIEW_TEST_TMPDIR`.

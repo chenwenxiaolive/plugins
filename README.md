@@ -8,7 +8,7 @@ The marketplace name is `chenwenxiaolive-plugins`.
 
 | Plugin | Version | Purpose |
 | --- | --- | --- |
-| [preview](plugins/preview/skills/preview/SKILL.md) | 0.3.1 | Publish HTML and Markdown previews and manage the bundled preview service. |
+| [preview](plugins/preview/skills/preview/SKILL.md) | 0.4.0 | Publish HTML and Markdown previews and manage the bundled preview service. |
 | [dev-workflow](plugins/dev-workflow/skills/implement/SKILL.md) | 0.1.0 | Discuss designs, create tickets, implement and review changes, operate the GPU cluster, and improve the development workflow. |
 | [docker-build](plugins/docker-build/skills/docker-build/SKILL.md) | 0.1.0 | Build and publish container images through the existing dedicated build host. |
 

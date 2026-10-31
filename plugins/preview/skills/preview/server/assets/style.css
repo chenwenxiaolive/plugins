@@ -106,6 +106,12 @@ code, pre { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospac
 code { background: var(--code); padding: 3px 6px; border-radius: 4px; }
 pre { overflow-x: auto; padding: 20px; background: var(--pre-background); color: var(--pre-text); line-height: 1.6; border-radius: 8px; }
 pre code { background: transparent; color: inherit; padding: 0; border: 0; font-size: 1em; }
+.mermaid-block { margin: 20px 0; border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+.mermaid-diagram { overflow-x: auto; text-align: center; }
+.mermaid-diagram svg { max-width: 100%; height: auto; }
+.mermaid-block summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+.mermaid-block summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.mermaid-error { color: var(--muted); text-align: left; }
 table { border-collapse: collapse; width: 100%; margin: 20px 0; font-size: 14px; }
 th, td { border: 1px solid var(--border); padding: 10px 13px; text-align: left; vertical-align: top; }
 th { background: var(--subtle); color: var(--heading); font-weight: 650; }

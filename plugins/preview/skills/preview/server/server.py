@@ -16,13 +16,13 @@ SERVICE_DIR = Path(__file__).resolve().parent
 MARKDOWN_SUFFIXES = {".md", ".markdown"}
 
 
-def page(title, content, location, actions=""):
+def page(title, content, location, actions="", scripts=""):
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{escape(title)} · Preview</title>
 <script src="/_preview_assets/theme.js"></script>
-<link rel="stylesheet" href="/_preview_assets/style.css"></head>
+<link rel="stylesheet" href="/_preview_assets/style.css">{scripts}</head>
 <body><header class="topbar"><a class="brand" href="/">Directory Preview</a>
 <div class="topbar-tools"><span class="tagline">Markdown &amp; HTML</span>
 <label class="theme-control" for="theme-select">Theme
@@ -71,6 +71,9 @@ class PreviewHandler(SimpleHTTPRequestHandler):
             return self.response_bytes((SERVICE_DIR / "assets/style.css").read_bytes(), "text/css; charset=utf-8")
         if request.path == "/_preview_assets/theme.js":
             return self.response_bytes((SERVICE_DIR / "assets/theme.js").read_bytes(), "application/javascript; charset=utf-8")
+        if request.path in {"/_preview_assets/mermaid.min.js", "/_preview_assets/diagrams.js"}:
+            asset = SERVICE_DIR / "assets" / request.path.rsplit("/", 1)[1]
+            return self.response_bytes(asset.read_bytes(), "application/javascript; charset=utf-8")
         try:
             decoded = unquote(request.path, errors="strict")
             if "\x00" in decoded:
@@ -144,7 +147,10 @@ class PreviewHandler(SimpleHTTPRequestHandler):
         url = quote(decoded, safe="/")
         parent = quote(decoded.rsplit("/", 1)[0] + "/", safe="/")
         actions = button("Files", parent) + button("Source", url + "?raw=1") + button("Download", url + "?download=1")
-        return self.response_bytes(page(path.name, result.stdout, decoded, actions))
+        scripts = ""
+        if '<code class="language-mermaid">' in result.stdout:
+            scripts = '<script defer src="/_preview_assets/mermaid.min.js"></script><script defer src="/_preview_assets/diagrams.js"></script>'
+        return self.response_bytes(page(path.name, result.stdout, decoded, actions, scripts))
 
     def directory_page(self, path, decoded):
         query = parse_qs(urlsplit(self.path).query)

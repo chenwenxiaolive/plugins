@@ -10,5 +10,17 @@
     "url": "https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/LICENSE",
     "sha256": "792c48c5a849a15fdf9e37e8bcf9e6d1dd13b32b46c642a748a0a46a9919d473",
     "bytes": 1073
+  },
+  {
+    "file": "mermaid.min.js",
+    "url": "https://cdn.jsdelivr.net/npm/mermaid@12.2.0/dist/mermaid.min.js",
+    "sha256": "a8a6a6f805b074a8261a2825c86f99c8054acb3b35f50bb7e24a4f9f2c3c3b9f",
+    "bytes": 5494801
+  },
+  {
+    "file": "mermaid.LICENSE",
+    "url": "https://cdn.jsdelivr.net/npm/mermaid@12.2.0/LICENSE",
+    "sha256": "ec9fb67dcb25eccc416ed56e1aab819222c805a2a4bfe4cb19e7556bf2ffde80",
+    "bytes": 1089
   }
 ]
