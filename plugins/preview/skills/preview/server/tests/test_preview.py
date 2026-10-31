@@ -146,6 +146,27 @@ class PreviewHTTPTests(unittest.TestCase):
         self.assertEqual(body, b"")
         self.assertGreater(int(headers["Content-Length"]), 0)
 
+    def test_mermaid_page_loads_local_renderer_and_preserves_source(self):
+        source = '```mermaid\nflowchart LR\n  A["<script>alert(1)</script>"] --> B[Done]\n```\n'
+        (self.root / "diagram.md").write_text(source, encoding="utf-8")
+        _, body = self.fetch("/diagram.md")
+        html = body.decode("utf-8")
+        self.assertIn('class="language-mermaid"', html)
+        self.assertIn('&lt;script&gt;alert(1)&lt;/script&gt;', html)
+        self.assertNotIn('<script>alert(1)</script>', html)
+        self.assertIn('<script defer src="/_preview_assets/mermaid.min.js"></script>', html)
+        self.assertIn('<script defer src="/_preview_assets/diagrams.js"></script>', html)
+        for suffix in ["?raw=1", "?download=1"]:
+            _, body = self.fetch("/diagram.md" + suffix)
+            self.assertEqual(body.decode("utf-8"), source)
+        for path in ["/", "/" + quote(self.source.name)]:
+            _, body = self.fetch(path)
+            self.assertNotIn(b'/_preview_assets/mermaid.min.js', body)
+        for asset in ["mermaid.min.js", "diagrams.js"]:
+            headers, body = self.fetch("/_preview_assets/" + asset)
+            self.assertEqual(headers.get_content_type(), "application/javascript")
+            self.assertEqual(body, (HERE / "assets" / asset).read_bytes())
+
     def test_markdown_features_and_relative_html_link(self):
         path = "/" + quote(self.nested.name) + "/example.md"
         _, body = self.fetch(path)

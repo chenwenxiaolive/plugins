@@ -8,7 +8,7 @@ The marketplace name is `chenwenxiaolive-plugins`.
 
 | Plugin | Version | Purpose |
 | --- | --- | --- |
-| [preview](plugins/preview/skills/preview/SKILL.md) | 0.3.1 | Publish HTML and Markdown previews and manage the bundled preview service. |
+| [preview](plugins/preview/skills/preview/SKILL.md) | 0.4.0 | Publish HTML and Markdown previews and manage the bundled preview service. |
 | [dev-workflow](plugins/dev-workflow/skills/implement/SKILL.md) | 0.1.0 | Discuss designs, create tickets, implement and review changes, operate the GPU cluster, and improve the development workflow. |
 | [docker-build](plugins/docker-build/skills/docker-build/SKILL.md) | 0.1.0 | Build and publish container images through the existing dedicated build host. |
 
@@ -88,6 +88,8 @@ does not create that infrastructure or authorize jobs or publication.
 - Standalone deliverables go under `/preview`; tracked repository documentation
   stays in its repository.
 - The service renders Markdown at its `.md` URL and serves HTML directly.
+- Markdown `mermaid` fences render as diagrams with theme support and a source
+  toggle, using a bundled library without browser CDN requests.
 - `?raw=1` returns source text; `?download=1` downloads the original file.
 - Directory listings can be sorted by Name, Size, or Updated. Click a column
   heading again to reverse its order; directories remain first.

@@ -72,6 +72,13 @@ HTML is served directly. `.md` and `.markdown` render as HTML at the same URL.
 Markdown accepts UTF-8 and is limited to 8 MiB for rendering. The server has no
 authentication; its document directory contains only intended preview content.
 Generated pages support persistent System, Light, and Dark themes.
+Markdown fences labeled `mermaid` render as diagrams in the browser using the
+bundled Mermaid 12.2.0 library. Diagrams follow the page's theme and include a
+collapsible source view. Invalid diagrams show an error and keep their source
+visible; other diagrams still render. Without JavaScript, the original code
+blocks remain readable. Mermaid uses its strict security mode and makes no
+external rendering requests. The bundle requires a modern browser (Safari 17.4+,
+Chromium 121+, or Firefox 123+); server-side Markdown still needs only Node.js 18+.
 Directory headings sort by Name, Size, or Updated, toggling ascending and
 descending order. Directories remain first; sizes use bytes and modification
 times use their full precision. Sorting works without JavaScript and is retained
@@ -84,11 +91,12 @@ the plugin; no separate service checkout or import command is needed.
 - `server.py`: HTTP routes, directory listing, sorting, and file handling.
 - `renderer.cjs`: Markdown rendering through the existing Node executable.
 - `assets/style.css` and `assets/theme.js`: styling and saved theme selection.
+- `assets/diagrams.js`: browser rendering and theme updates for Mermaid fences.
 - `tests/`: HTTP integration and theme behavior tests.
 
-The third-party markdown-it renderer remains pinned to 14.1.0. Its source URLs
-and SHA-256 hashes are in `server/assets/sources.json`, with its MIT license in
-`server/assets/markdown-it.LICENSE`. Update these records when updating those
+The third-party markdown-it renderer is pinned to 14.1.0 and Mermaid to 12.2.0.
+Their source URLs and SHA-256 hashes are in `server/assets/sources.json`, with
+their MIT licenses alongside the bundles. Update these records when updating those
 third-party assets. They do not pin the plugin's own service code.
 
 Restart a managed service with the helper after changing service code or the
@@ -103,3 +111,14 @@ python3 -B -m unittest discover -s tests/preview -v
 ```
 
 Set `PREVIEW_TEST_TMPDIR` to an external run directory for fixtures and logs.
+For browser coverage, use an existing Playwright installation and Chromium:
+
+```sh
+PREVIEW_PLAYWRIGHT_MODULE=/path/to/node_modules/playwright \
+  node plugins/preview/skills/preview/server/tests/diagrams.browser.cjs
+```
+
+Set `PLAYWRIGHT_BROWSERS_PATH` when the browser is installed outside its default
+cache. The browser check covers real SVG rendering, theme changes, syntax errors,
+source/download preservation, strict-mode handling, and operation without external
+requests. Screenshots and server logs stay in `PREVIEW_TEST_TMPDIR`.
