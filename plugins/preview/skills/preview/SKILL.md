@@ -1,6 +1,6 @@
 ---
 name: preview
-description: Create or update standalone HTML and Markdown artifacts in the local /preview service and return verified browser links. Use for requested document previews, reports, or existing /preview artifacts, and for starting, stopping, or checking the bundled preview service. Keep tracked repository documentation in its established location.
+description: Create or update standalone HTML and Markdown artifacts in the local /preview service, verify them, and return browser links for local or SSH tunnel access. Use for requested document previews, reports, existing /preview artifacts, or managing the bundled service. Keep tracked repository documentation in its established location.
 ---
 
 # Preview
@@ -22,6 +22,10 @@ refer to the same service.
 Confirm that the preview directory exists. If the service mapping is unknown,
 inspect the relevant local configuration or ask for the missing address. A
 listener on port 8000 alone does not establish a browser URL.
+
+For SSH access, distinguish the server's local endpoint from the browser-side
+forwarded address. Use the configured browser base URL for links. Keep the
+service bound to loopback unless network exposure is explicitly requested.
 
 ## Write the artifact
 
@@ -49,8 +53,10 @@ preview root. URL-encode path components, including spaces, Unicode, `#`, and `?
 preserve directory separators. Do not include the filesystem's `/preview` prefix
 unless it is part of the configured URL base.
 
-Fetch the actual artifact URL with a bounded request, for example
-`curl --fail --silent --show-error --max-time 10 <url>`. Check the response status,
+Fetch the artifact with a bounded request, for example
+`curl --fail --silent --show-error --max-time 10 <url>`. For SSH access, verify
+the artifact at the server's local endpoint; a successful server-side check does
+not establish that the user's tunnel is connected. Check the response status,
 content type, and an expected part of this artifact. For Markdown, confirm that
 the response contains rendered HTML. A directory listing or a successful file
 write alone is insufficient.
@@ -59,7 +65,9 @@ Check required local assets too. If a browser tool is available, inspect HTML
 layout or interactions when the artifact depends on them; otherwise state any
 material verification limit.
 
-Return a descriptive Markdown link to the artifact's browser URL. Include source
+Return a descriptive Markdown link to the artifact's browser URL. For SSH access,
+state that the user needs an active local forward and provide the service
+reference's tunnel command when setup is needed. Include source
 or download links when useful, using the service's documented query parameters.
 
 If the service is unavailable, retain the artifact, report its local path and the

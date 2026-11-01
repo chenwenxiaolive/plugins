@@ -1,7 +1,7 @@
 {
   "name": "preview",
-  "version": "0.4.0",
-  "description": "Publish HTML and Markdown previews and manage the bundled preview service.",
+  "version": "0.4.1",
+  "description": "Preview HTML and Markdown locally or through an SSH tunnel, and manage the bundled service.",
   "author": {
     "name": "chenwenxiaolive"
   },

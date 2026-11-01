@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "preview",
-  "version": "0.4.0",
-  "description": "Publish HTML and Markdown previews and manage the bundled preview service.",
+  "version": "0.4.1",
+  "description": "Preview HTML and Markdown locally or through an SSH tunnel, and manage the bundled service.",
   "author": {
     "name": "chenwenxiaolive"
   },
@@ -12,8 +12,8 @@
       "requires_local_executor": true,
       "interface": {
         "displayName": "Preview",
-        "shortDescription": "HTML and Markdown preview links",
-        "longDescription": "Create HTML and Markdown previews, verify browser links, and start, stop, or inspect the bundled preview service.",
+        "shortDescription": "Local and SSH tunnel document previews",
+        "longDescription": "Create HTML and Markdown previews with verified local links, manage the bundled service, and use SSH tunnels for remote browser access.",
         "developerName": "chenwenxiaolive",
         "category": "Productivity",
         "capabilities": [
