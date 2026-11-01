@@ -21,6 +21,39 @@
 - The coder reviews its own MR on its existing development branch under the bounded loop below. If I explicitly request a standalone review in a separate worktree, use detached HEAD at the MR's exact source commit so the development branch remains available. Preserve any existing review worktrees.
 - When I later ask for changes based on human feedback, read the latest discussions and source commit and continue on the MR's development branch. After the automatic round limit, follow my specific instructions; resume automatic rounds only with an explicit new allowance.
 
+### Issue branch identity
+
+Name a new branch implementing issue `#K` as
+`agent/K-<title-slug>-<8-hex-hash>`. For a title such as `Fix cache`, this becomes
+`agent/K-fix-cache-<8-hex-hash>`; `fix-cache` is an example, not a fixed label.
+Match herdr-gpui's name sanitization: lowercase `K-<issue title>`, retain ASCII
+letters and digits, replace runs of other characters with a single `-`, truncate
+that entire name portion to 64 characters, and trim trailing `-`. Append the
+hash only after this truncation, so its eight characters are always preserved.
+
+Derive the hash from the issue's full identity using herdr-gpui's canonical key
+and UUIDv5 algorithm:
+
+- Use `provider:host:repository:K`, with provider `gitlab` or `github`, the source
+  host used by Herdr, the full namespace/repository path, and the decimal issue
+  number `K` without `#`. GitLab uses the project-local `iid`, not the global
+  issue ID. Use the issue's source repository, not a fork or local worktree path.
+- Match Herdr's source identity: lowercase the host, retain a non-default HTTP(S)
+  port when present, omit SSH ports, and remove leading/trailing `/` and the
+  trailing `.git` from the repository path. Preserve repository path case.
+- Before joining components with `:`, escape `%` as `%25`, then `:` as `%3A`
+  within each component. Do not URL-encode slashes or include the issue title.
+- Compute `uuid.uuid5(uuid.NAMESPACE_URL, canonical_key).hex[:8]` in Python.
+  This is the first eight lowercase hex digits of a UUIDv5, not a commit hash,
+  random suffix, or plain SHA digest. Keep it at the very end of the branch.
+
+For example, `github:github.com:penso/herdr-gpui:377` produces `97b1caca`.
+The upstream [key definition](https://github.com/penso/herdr-gpui/blob/main/crates/herdr-gpui/src/orchestrator/model.rs)
+and [branch naming and recognition](https://github.com/penso/herdr-gpui/blob/main/crates/herdr-gpui/src/orchestrator/naming.rs)
+define this identity. Herdr recognizes an `agent/` branch by its final `-<hash>`.
+Continue an existing issue/MR on its current branch; this naming rule does not
+authorize renaming existing branches or moving stable worktree directories.
+
 ## Issue execution record
 
 For an assigned implementation issue, maintain one editable issue comment using
@@ -29,6 +62,7 @@ implementation task. Read [gitlab.md](gitlab.md) before accessing GitLab. A task
 without an issue does not require creating one solely for tracking.
 
 - Before coding or resuming, read the issue's existing execution record and compare it with the actual checkout, branch and MR. Search all comment pages for the marker; reuse the existing comment by its note ID. Create one only when none exists. Multiple matching records or a conflicting active owner require resolving ownership before proceeding; do not overwrite or delete another coder's record.
+- **Read that record before naming an issue as available, not only before starting it**: recommending what to work on next, calling an issue unclaimed, or listing open work all assert that nobody owns it. An issue's comment count is the cheap signal — `glab issue view` prints `comments: N`, and on a `ready-for-agent` issue a nonzero count is usually an execution record, so reading the body alone answers the technical question and not the ownership one. Branch and worktree occupancy are the second signal (`git worktree list`, `git ls-remote --heads origin | grep '<K>-'`). Report an owned issue as owned, with its worktree and status, instead of proposing it.
 - Record the selected checkout's full absolute path and the branch actually checked out after the reuse checks. This identifies the current execution even when coders share one GitLab account; it is not a permanent issue-to-worktree assignment or an atomic lock. An old timestamp alone is not permission to take over. An explicit reassignment authorizes a handoff after checking the previous execution and preserving its work.
 
 ```markdown

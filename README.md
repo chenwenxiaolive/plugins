@@ -1,15 +1,16 @@
-# Personal plugins
+# Personal skills
 
-Personal agent plugins for Codex and Claude Code, maintained in
+Personal skills for Codex and Claude Code, maintained in
 [chenwenxiaolive/plugins](https://github.com/chenwenxiaolive/plugins).
-The marketplace name is `chenwenxiaolive-plugins`.
+Use `npx skills` to install and update one shared copy for both clients.
+The repository also retains the `chenwenxiaolive-plugins` packaging metadata.
 
 ## Plugins
 
 | Plugin | Version | Purpose |
 | --- | --- | --- |
 | [preview](plugins/preview/skills/preview/SKILL.md) | 0.4.1 | Preview HTML and Markdown locally or through an SSH tunnel, and manage the bundled service. |
-| [dev-workflow](plugins/dev-workflow/skills/implement/SKILL.md) | 0.1.0 | Discuss designs, create tickets, implement and review changes, operate the GPU cluster, and improve the development workflow. |
+| [dev-workflow](plugins/dev-workflow/skills/implement/SKILL.md) | 0.1.1 | Discuss designs, create tickets, implement and review changes, operate the GPU cluster, and improve the development workflow. |
 | [docker-build](plugins/docker-build/skills/docker-build/SKILL.md) | 0.1.0 | Build and publish container images through the existing dedicated build host. |
 
 `dev-workflow` contains `gpu-cluster`, `grilling`, `implement`,
@@ -22,46 +23,47 @@ start/stop/status commands. It needs Linux, Python 3.10+, and Node.js 18+; no
 dependency installation is required. Installation does not start a service.
 Documents, logs, and process state live outside the installed plugin.
 
-## Install
+## Install and update
 
 The repository is private. Use the GitHub authentication already configured on
-the machine.
+the machine. Install all eight skills for both clients with one command:
 
-### Codex
-
-```bash
-codex plugin marketplace add chenwenxiaolive/plugins --ref main
-codex plugin add preview@chenwenxiaolive-plugins
+```sh
+DISABLE_TELEMETRY=1 npx skills add chenwenxiaolive/plugins \
+  --skill '*' --global --agent codex claude-code --yes
 ```
 
-Start a new session and ask: "Use the preview plugin to create a Markdown report
-in /preview and give me its browser URL."
+The shared files live in `~/.agents/skills/<name>`. Codex reads that directory;
+Claude Code uses links under `~/.claude/skills/`. Keep the default symlink mode.
+The installer records each source in `~/.agents/.skill-lock.json`. Disabling
+telemetry also disables external skill-audit requests for this private source.
 
-### Claude Code
+Rerun the same command to refresh this repository's skills for both clients.
+To select a subset, replace `'*'` with skill names. Install all six `dev-workflow`
+skills together because their relative references cross skill directories.
 
-```bash
-claude plugin marketplace add chenwenxiaolive/plugins
-claude plugin install preview@chenwenxiaolive-plugins
+Start a new session and ask for the skill by name. In Claude Code, use `/preview`,
+`/implement`, or the corresponding skill name. The explicit-invocation policies
+of `improve-codebase-architecture`, `retro`, and `to-tickets` are preserved.
+
+Use this shared installation as the active source. If a repository plugin is
+already enabled in either client, verify the shared skills first, then remove
+that duplicate plugin registration. Keep unrelated plugins installed normally.
+
+### Current control machine
+
+The selected source is the real checkout at `/volume/repo/plugins`. After
+committing the intended changes there, install or update all its skills with:
+
+```sh
+DISABLE_TELEMETRY=1 npx skills add /volume/repo/plugins \
+  --skill '*' --global --agent codex claude-code --yes
 ```
 
-Start a new session and invoke `/preview:preview`, or ask for a document preview.
-
-Replace `preview` in the installation command with another plugin name to install
-it separately. For Claude Code, a skill in the workflow bundle is invoked as
-`/dev-workflow:implement`, `/dev-workflow:grilling`, or the corresponding skill
-name. New plugins become available from GitHub's `main` after their import PR is
-merged.
-
-### Local development
-
-To use an unmerged checkout, register its absolute path in place of the GitHub
-source. On the current control machine that path is `/volume/workspace/plugins`.
-Use the same plugin installation commands above after adding the local source.
-
-```bash
-codex plugin marketplace add /volume/workspace/plugins
-claude plugin marketplace add /volume/workspace/plugins
-```
+Local installations record the checkout as their source. `skills update` skips
+local sources; rerun this `skills add` command to refresh them. This updates the
+shared skill content and client links without changing the deployed preview
+service or starting infrastructure jobs.
 
 ## Imported personal skills
 
@@ -73,10 +75,10 @@ The import excludes the third-party `find-skills` package from
 `vercel-labs/skills`, Herdr's automatically maintained `herdr-gpui-browser`, and
 the clients' system or curated skills.
 
-The original local skills remain in place and active. This import does not
-install a second active copy of them or change their local links. When adopting
-the repository versions, choose one discovery source for each skill to avoid
-loading both the original and plugin copy.
+The repository is the maintained source for these personal skills. Before
+replacing an existing shared installation, compare its files with the repository
+and reconcile local edits into the repository. Update the shared files through
+`npx skills` after committing those changes; keep other skill sources unchanged.
 
 These are personal environment workflows. `gpu-cluster` expects the existing
 global instructions, SSH aliases, credentials, and cluster layout; `docker-build`
@@ -119,6 +121,7 @@ Instructions are shared between both clients. Each portable `plugin.json` and
 Claude manifest carry the same name and version. Increment both versions when
 publishing an update and update the table above. Preserve skill-relative
 references and explicit-invocation settings when moving or editing skills.
+Use the shared `npx skills` installation workflow for this repository's skills.
 
 Validate metadata with the installed client:
 
@@ -137,6 +140,8 @@ relative references inside each package, and report this validation scope.
 Use a development branch and pull request for changes. Merge only on the owner's
 request.
 
+The shared installer is documented in the
+[Skills CLI reference](https://github.com/vercel-labs/skills/blob/main/docs/commands.md).
 Package formats follow the official
 [OpenAI plugin documentation](https://developers.openai.com/plugins/build/plugins)
 and [Claude Code marketplace documentation](https://code.claude.com/docs/en/plugin-marketplaces).
