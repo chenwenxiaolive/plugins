@@ -20,11 +20,12 @@ the command. Explicit flags override the corresponding environment variables.
 
 The document directory must already exist. State and logs must be outside both
 the document root and the plugin directory. The helper supports IPv4 addresses
-and hostnames; use `0.0.0.0` to listen on all IPv4 interfaces. A wildcard bind uses
-`127.0.0.1` for local checks. Set a browser base URL explicitly when the user
-accesses another machine or a reverse proxy. A listening port alone does not
-establish a browser URL. The helper checks locally; the skill also verifies the
-actual artifact's browser URL.
+and hostnames. Keep the loopback bind for local viewing or SSH forwarding.
+`0.0.0.0` exposes the service on all IPv4 interfaces and requires an explicit
+request for network access. Set a browser base URL explicitly when the user's
+forwarded address differs from the server's local endpoint. A listening port
+alone does not establish a browser URL. The helper checks locally; for SSH
+access, verify artifacts locally and make the tunnel prerequisite clear.
 
 ```sh
 python3 -B scripts/preview.py start --directory /preview
@@ -56,14 +57,35 @@ These are mappings for the existing control machine only, not portable defaults:
 | Setting | Existing value |
 | --- | --- |
 | Filesystem root | `/preview` |
-| Browser base URL | `http://74.82.197.96:8000` |
+| Server bind | `127.0.0.1:8000` |
+| Browser base URL | `http://127.0.0.1:8000` through an SSH local forward |
 | Local diagnostic URL | `http://127.0.0.1:8000` |
-| Legacy service source | `/root/preview-server/server.py` |
+| Remote access | SSH only; no public HTTP listener |
 
-Reuse that service for document publication. Starting the helper against its
-endpoint reports `reused`; it neither replaces nor stops the legacy process.
-Explicit user settings and named environment overrides take precedence. On a
-different machine, use the portable settings above and its actual browser address.
+Reuse the managed service for document publication. The active state directory
+and deployed helper path are local deployment settings: obtain them from the
+current machine instructions and ownership record. Pass the existing state
+directory explicitly and preserve the deployed release when changing only
+service settings. Do not use the retired public port-8000 URL or reopen public
+access unless explicitly requested. On a different machine, use its explicit
+settings or the portable defaults above.
+
+Run this command on the user's computer and keep the terminal open:
+
+```sh
+ssh -NT \
+  -L 127.0.0.1:8000:127.0.0.1:8000 \
+  -o ExitOnForwardFailure=yes \
+  -o ServerAliveInterval=30 \
+  root@74.82.197.96
+```
+
+Use the user's usual SSH alias or login account if different. Then open
+`http://127.0.0.1:8000/`; artifact paths remain relative to that base. If local
+port 8000 is occupied, choose another client-side port and use that port in
+browser links while keeping the server endpoint at `127.0.0.1:8000`.
+The agent's local HTTP check verifies the server, not the tunnel on the user's
+computer. Do not claim the client tunnel is connected without checking it there.
 
 ## Files and maintenance
 

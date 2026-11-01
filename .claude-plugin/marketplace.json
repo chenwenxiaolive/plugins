@@ -8,7 +8,7 @@
     {
       "name": "preview",
       "source": "./plugins/preview",
-      "description": "Publish HTML and Markdown previews and manage the bundled preview service."
+      "description": "Preview HTML and Markdown locally or through an SSH tunnel, and manage the bundled service."
     },
     {
       "name": "dev-workflow",
