@@ -62,10 +62,10 @@ hc run --bg --name <name> --cwd <dir> --label "herdr.space=$SPACE" \
   codex --no-daemon --yolo -m gpt-6-astra -c 'model_reasoning_effort="xhigh"' "<task> $REPORT"
 ```
 
-- `--no-daemon` keeps Codex's commands inside hc. `--yolo` runs without
-  Codex's sandbox or approval prompts, so the worker reaches hc and never
-  waits for an approval nobody sees; a read-only task is read-only only
-  because the task says so.
+- `--no-daemon` keeps Codex's commands inside hc. `--yolo` gives the worker
+  full access with no approval prompts, like the user's own Codex sessions:
+  it can edit files and run commands, reaches hc, and never waits for an
+  approval nobody sees. The task sets what it may change.
 - Don't pass Codex `--worktree`: it reads its root only from
   `[desktop] git-worktree-root` in `~/.codex/config.toml`, never from `-c`,
   and leaves `<root>/<hex>/<repo>` checkouts behind. Create or reuse the
