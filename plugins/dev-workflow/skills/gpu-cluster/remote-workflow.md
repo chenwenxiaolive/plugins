@@ -15,7 +15,7 @@
 - Outside the selected `/volume` project path, perform local configuration/ops work or preparatory inspection. Ask for the intended matching path before starting project development there; do not silently select a different checkout.
 
 ## Reusing worktrees for issues and MR review
-- Worktree names may identify stable working directories such as `dev-1`, `dev-2`, `dev-3` and `review`. Each can serve successive issues/MRs without renaming the directory. When creating a worktree with an explicitly selected stable name, pass its full destination with herdr's `--path` option; the current branch is determined by Git.
+- Worktree names may identify stable working directories such as `dev-1`, `dev-2`, `dev-3` and `review`. Each can serve successive issues/MRs without renaming the directory. Create a stable-named worktree with Git from the target branch's fetched commit: `git fetch origin && git worktree add --no-track -b <branch> /volume/worktree/<repo>/<name> origin/<target>`, then push it with `git push -u origin <branch>`. The Herdr app's New worktree instead names the folder after the branch, under `~/.herdr/worktrees/<repo>/` (a link to `/volume/worktree/<repo>/` on this machine), and branches from the current HEAD.
 - On assignment or resumption, read the relevant issue, MR description, current diff and latest review discussions when present. Continue the same issue/MR on its existing development branch. Assignment to another issue authorizes creating or switching to its branch in this worktree without another confirmation. Base an independent issue's new branch on the intended target branch's current fetched commit; use an unmerged task branch as the base only for an explicitly intended dependency.
 - Handle one active task per worktree. Before switching a checkout to another issue/MR, require a clean working tree, commit and push the outgoing task's changes, and confirm that no other agent or running command uses that checkout. Apply these checks separately to an existing remote counterpart before changing it, including jobs on every node sharing its storage. Preserve unexpected changes and investigate branch occupancy instead of forcing a switch.
 - The coder reviews its own MR on its existing development branch under the bounded loop below. If I explicitly request a standalone review in a separate worktree, use detached HEAD at the MR's exact source commit so the development branch remains available. Preserve any existing review worktrees.
@@ -159,10 +159,10 @@ commit and scope, under the existing validation rules.
 
 ## How to operate remotely
 - Use `sh-0` for file/Git operations on the sh cluster, and `zg-0` for the zg cluster when that cluster is part of the task. Their storage is independent; an update on the sh cluster cannot update the zg cluster. **GPU jobs run only on the node I specify**; selecting a node for synchronization is not permission to use its GPUs.
-- Run local source operations in the selected real checkout. After the bootstrap exception above, every command acting on the remote project must first `cd` to the identical local `$PWD` and stop if it fails:
+- Run local source operations in the selected real checkout. After the bootstrap exception above, every command acting on the remote project must first `cd` to the checkout's physical path, `pwd -P`, and stop if it fails. In a Herdr app worktree `$PWD` keeps the `~/.herdr/worktrees` link, which the nodes don't have:
 
   ```bash
-  ssh sh-0 "cd -- $(printf %q "$PWD") && "'git status --short --branch'
+  ssh sh-0 "cd -- $(printf %q "$(pwd -P)") && "'git status --short --branch'
   ```
 
 - The single-quoted remote command is not expanded locally. Quote paths and arguments with `printf %q`. If the local shell is outside the project, first move into the selected local project directory before constructing a project command; do not accidentally use `/root` as the remote checkout.

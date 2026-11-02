@@ -1,6 +1,6 @@
 ---
 name: implement
-description: "Implement an assigned issue or agreed development task in the selected checkout, through validation, GitLab MR creation and coder-owned review."
+description: "Implement an assigned issue or agreed development task in the selected checkout, through validation, MR or PR creation and coder-owned review."
 ---
 
 # Implement
@@ -11,6 +11,10 @@ user selected. Read its project instructions and use
 [remote-workflow.md](../gpu-cluster/remote-workflow.md) and
 [gitlab.md](../gpu-cluster/gitlab.md). These are authoritative for checkout reuse,
 remote execution, GitLab access and the bounded review loop.
+
+On a GitHub repository, use `gh` for the same steps: a pull request is the MR,
+the execution record is an issue comment, and `gh pr merge --match-head-commit
+<sha>` is the merge API's `sha` guard. The project's own merge rules come first.
 
 ## Establish or resume the task
 

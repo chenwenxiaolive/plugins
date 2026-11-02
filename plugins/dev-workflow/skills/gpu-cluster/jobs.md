@@ -62,7 +62,7 @@ These rules govern each cluster's shared `/volume`; the control machine has inde
   ```bash
   printf -v remote_start \
     'cd -- %q && { nohup bash %q > %q 2>&1 </dev/null & printf "%%s\\n" "$!" > %q; }' \
-    "$PWD" "$run_dir/run.sh" "$run_dir/run.log" "$run_dir/run.pid"
+    "$(pwd -P)" "$run_dir/run.sh" "$run_dir/run.log" "$run_dir/run.pid"
   ssh <node> "$remote_start"
   ```
 
@@ -79,7 +79,7 @@ These rules govern each cluster's shared `/volume`; the control machine has inde
 
   ```bash
   node=sh-0    # Use zg-0 for a checkout in the zg cluster.
-  owner=$(ssh "$node" "cd -- $(printf %q "$PWD") && pwd -P")    # physical path of the project
+  owner=$(ssh "$node" "cd -- $(printf %q "$(pwd -P)") && pwd -P")    # physical path of the project
   ssh "$node" 'cat /volume/cluster-ops/free-gpus.sh' | DRY_RUN=1 OWNER_CWD="$owner" bash -s -- <node...>
   ```
 
