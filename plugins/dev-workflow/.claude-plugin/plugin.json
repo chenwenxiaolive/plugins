@@ -1,7 +1,7 @@
 {
   "name": "dev-workflow",
-  "version": "0.1.1",
-  "description": "Personal development workflow: design discussions, GitLab issues, implementation, review, retrospectives, and GPU cluster operations.",
+  "version": "0.1.2",
+  "description": "Personal development workflow: design discussions, GitLab issues, implementation, review, retrospectives, GPU cluster operations, and Alibaba Cloud PAI inspection.",
   "author": {
     "name": "chenwenxiaolive"
   },

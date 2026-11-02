@@ -13,7 +13,7 @@
     {
       "name": "dev-workflow",
       "source": "./plugins/dev-workflow",
-      "description": "Personal development workflow: design discussions, GitLab issues, implementation, review, retrospectives, and GPU cluster operations."
+      "description": "Personal development workflow: design discussions, GitLab issues, implementation, review, retrospectives, GPU cluster operations, and Alibaba Cloud PAI inspection."
     },
     {
       "name": "docker-build",
