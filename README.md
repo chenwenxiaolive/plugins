@@ -10,13 +10,15 @@ The repository also retains the `chenwenxiaolive-plugins` packaging metadata.
 | Plugin | Version | Purpose |
 | --- | --- | --- |
 | [preview](plugins/preview/skills/preview/SKILL.md) | 0.4.1 | Preview HTML and Markdown locally or through an SSH tunnel, and manage the bundled service. |
-| [dev-workflow](plugins/dev-workflow/skills/implement/SKILL.md) | 0.1.3 | Discuss designs, create tickets, implement and review changes, operate the GPU cluster, inspect Alibaba Cloud PAI, manage persistent agent terminals, and improve the development workflow. |
+| [dev-workflow](plugins/dev-workflow/skills/implement/SKILL.md) | 0.1.4 | Discuss designs, create tickets, implement and review changes, operate the GPU cluster, inspect Alibaba Cloud PAI, manage persistent agent terminals, lead background workers, and improve the development workflow. |
 | [docker-build](plugins/docker-build/skills/docker-build/SKILL.md) | 0.1.0 | Build and publish container images through the existing dedicated build host. |
 
 `dev-workflow` contains `aliyun-pai`, `gpu-cluster`, `grilling`, `herdr-core`,
-`implement`, `improve-codebase-architecture`, `retro`, and `to-tickets`. Several
-of these skills share relative links, so they ship together without duplicating
-the cluster procedures. The last three retain their explicit-invocation policy.
+`herdr-desktop`, `implement`, `improve-codebase-architecture`, `leader`, `retro`,
+and `to-tickets`. Several of these skills share relative links, so they ship
+together without duplicating the cluster procedures.
+`improve-codebase-architecture`, `leader`, `retro`, and `to-tickets` retain
+their explicit-invocation policy.
 
 `herdr-core` presents a copy of the `hc --skill` manual with local changes as a
 discoverable skill for persistent terminals, agent delegation, remote commands,
@@ -31,7 +33,7 @@ Documents, logs, and process state live outside the installed plugin.
 ## Install and update
 
 The repository is private. Use the GitHub authentication already configured on
-the machine. Install all ten skills for both clients with one command:
+the machine. Install all twelve skills for both clients with one command:
 
 ```sh
 DISABLE_TELEMETRY=1 npx skills add chenwenxiaolive/plugins \
@@ -50,7 +52,8 @@ directories.
 
 Start a new session and ask for the skill by name. In Claude Code, use `/preview`,
 `/implement`, or the corresponding skill name. The explicit-invocation policies
-of `improve-codebase-architecture`, `retro`, and `to-tickets` are preserved.
+of `improve-codebase-architecture`, `leader`, `retro`, and `to-tickets` are
+preserved.
 
 Use this shared installation as the active source. If a repository plugin is
 already enabled in either client, verify the shared skills first, then remove
@@ -92,8 +95,9 @@ These are personal environment workflows. `gpu-cluster` expects the existing
 global instructions, SSH aliases, credentials, and cluster layout; `aliyun-pai`
 expects an Alibaba Cloud CLI profile with read access to the selected PAI region
 and workspace; `docker-build` expects the configured build host and registry
-access; `herdr-core` expects `hc` (herdr-core) on `PATH`. Installing the plugins
-does not create that infrastructure or authorize jobs, cloud mutations, or
+access; `herdr-core` expects `hc` (herdr-core) on `PATH`, and `herdr-desktop`
+also expects signed-in Claude Code and Codex CLIs. Installing the plugins does
+not create that infrastructure or authorize jobs, cloud mutations, or
 publication.
 
 ## Preview behavior

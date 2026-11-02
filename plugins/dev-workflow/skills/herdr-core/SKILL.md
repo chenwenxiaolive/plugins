@@ -8,7 +8,8 @@ description: Run and coordinate persistent programs and coding agents with herdr
 This is `hc --skill` from hc 0.1.14 with local changes: this note replaces
 its opening heading, window control points to `herdr --skill` and Herdr UI,
 `--children` always names `all` or `any`, and Status adds the agent-version
-bullet and the final Codex `--worktree` bullet. If `hc --version` differs,
+bullet and the final Codex `--worktree` and herdr-desktop bullets. If
+`hc --version` differs,
 read `hc --skill` for the matching manual and keep these local changes.
 
 `hc` runs programs in persistent terminals. People can attach and take over.
@@ -186,3 +187,5 @@ paths start at your current folder. Prefer explicit paths for remote work.
   worktree workflow first (a person may use Herdr's New worktree…), then
   start Codex in it:
   `hc run --bg --name <name> --cwd <checkout> codex --no-daemon "<task>"`.
+- For verified Claude Code and Codex worker launches, and for showing workers
+  in the Herdr desktop app, follow [herdr-desktop](../herdr-desktop/SKILL.md).
