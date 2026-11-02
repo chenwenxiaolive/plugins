@@ -1,6 +1,6 @@
 {
   "name": "dev-workflow",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Personal development workflow: design discussions, GitLab issues, implementation, review, retrospectives, GPU cluster operations, Alibaba Cloud PAI inspection, and persistent agent terminal orchestration.",
   "author": {
     "name": "chenwenxiaolive"
