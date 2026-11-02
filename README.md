@@ -10,13 +10,18 @@ The repository also retains the `chenwenxiaolive-plugins` packaging metadata.
 | Plugin | Version | Purpose |
 | --- | --- | --- |
 | [preview](plugins/preview/skills/preview/SKILL.md) | 0.4.1 | Preview HTML and Markdown locally or through an SSH tunnel, and manage the bundled service. |
-| [dev-workflow](plugins/dev-workflow/skills/implement/SKILL.md) | 0.1.2 | Discuss designs, create tickets, implement and review changes, operate the GPU cluster, inspect Alibaba Cloud PAI, and improve the development workflow. |
+| [dev-workflow](plugins/dev-workflow/skills/implement/SKILL.md) | 0.1.3 | Discuss designs, create tickets, implement and review changes, operate the GPU cluster, inspect Alibaba Cloud PAI, manage persistent agent terminals, and improve the development workflow. |
 | [docker-build](plugins/docker-build/skills/docker-build/SKILL.md) | 0.1.0 | Build and publish container images through the existing dedicated build host. |
 
-`dev-workflow` contains `aliyun-pai`, `gpu-cluster`, `grilling`, `implement`,
-`improve-codebase-architecture`, `retro`, and `to-tickets`. These skills share
-relative links, so they ship together without duplicating the cluster procedures.
-The last three retain their explicit-invocation policy.
+`dev-workflow` contains `aliyun-pai`, `gpu-cluster`, `grilling`, `herdr-core`,
+`implement`, `improve-codebase-architecture`, `retro`, and `to-tickets`. Several
+of these skills share relative links, so they ship together without duplicating
+the cluster procedures. The last three retain their explicit-invocation policy.
+
+`herdr-core` presents a copy of the `hc --skill` manual with local changes as a
+discoverable skill for persistent terminals, agent delegation, remote commands,
+and remote files. Its header names the hc version it copies and lists the local
+changes; with a different hc, agents read `hc --skill` and keep those changes.
 
 `preview` includes its preview server, Markdown renderer, theme assets, and
 start/stop/status commands. It needs Linux, Python 3.10+, and Node.js 18+; no
@@ -26,7 +31,7 @@ Documents, logs, and process state live outside the installed plugin.
 ## Install and update
 
 The repository is private. Use the GitHub authentication already configured on
-the machine. Install all nine skills for both clients with one command:
+the machine. Install all ten skills for both clients with one command:
 
 ```sh
 DISABLE_TELEMETRY=1 npx skills add chenwenxiaolive/plugins \
@@ -39,8 +44,9 @@ The installer records each source in `~/.agents/.skill-lock.json`. Disabling
 telemetry also disables external skill-audit requests for this private source.
 
 Rerun the same command to refresh this repository's skills for both clients.
-To select a subset, replace `'*'` with skill names. Install all seven `dev-workflow`
-skills together because their relative references cross skill directories.
+To select a subset, replace `'*'` with skill names. Install the `dev-workflow`
+skills together because some of their relative references cross skill
+directories.
 
 Start a new session and ask for the skill by name. In Claude Code, use `/preview`,
 `/implement`, or the corresponding skill name. The explicit-invocation policies
@@ -70,6 +76,8 @@ service or starting infrastructure jobs.
 The global skills were imported from `/root/.agents/skills` with their referenced
 documents, scripts, and client metadata. Only plugin manifests and marketplace
 entries were added around them; their operating procedures were preserved.
+`herdr-core` is not an import: it copies `hc --skill`; re-sync it from hc and
+keep the local changes its header lists.
 
 The import excludes the third-party `find-skills` package from
 `vercel-labs/skills`, Herdr's automatically maintained `herdr-gpui-browser`, and
@@ -84,8 +92,9 @@ These are personal environment workflows. `gpu-cluster` expects the existing
 global instructions, SSH aliases, credentials, and cluster layout; `aliyun-pai`
 expects an Alibaba Cloud CLI profile with read access to the selected PAI region
 and workspace; `docker-build` expects the configured build host and registry
-access. Installing the plugins does not create that infrastructure or authorize
-jobs, cloud mutations, or publication.
+access; `herdr-core` expects `hc` (herdr-core) on `PATH`. Installing the plugins
+does not create that infrastructure or authorize jobs, cloud mutations, or
+publication.
 
 ## Preview behavior
 

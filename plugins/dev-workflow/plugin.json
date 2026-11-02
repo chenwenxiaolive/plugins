@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "dev-workflow",
-  "version": "0.1.2",
-  "description": "Personal development workflow: design discussions, GitLab issues, implementation, review, retrospectives, GPU cluster operations, and Alibaba Cloud PAI inspection.",
+  "version": "0.1.3",
+  "description": "Personal development workflow: design discussions, GitLab issues, implementation, review, retrospectives, GPU cluster operations, Alibaba Cloud PAI inspection, and persistent agent terminal orchestration.",
   "author": {
     "name": "chenwenxiaolive"
   },
@@ -12,8 +12,8 @@
       "requires_local_executor": true,
       "interface": {
         "displayName": "Development workflow",
-        "shortDescription": "Personal coding, cluster, and PAI workflows",
-        "longDescription": "Personal development workflow: design discussions, GitLab issues, implementation, review, retrospectives, GPU cluster operations, and Alibaba Cloud PAI inspection.",
+        "shortDescription": "Personal coding, cluster, PAI, and agent terminal workflows",
+        "longDescription": "Personal development workflow: design discussions, GitLab issues, implementation, review, retrospectives, GPU cluster operations, Alibaba Cloud PAI inspection, and persistent agent terminal orchestration.",
         "developerName": "chenwenxiaolive",
         "category": "Productivity",
         "capabilities": [
