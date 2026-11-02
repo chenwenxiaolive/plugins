@@ -10,7 +10,7 @@ The repository also retains the `chenwenxiaolive-plugins` packaging metadata.
 | Plugin | Version | Purpose |
 | --- | --- | --- |
 | [preview](plugins/preview/skills/preview/SKILL.md) | 0.4.1 | Preview HTML and Markdown locally or through an SSH tunnel, and manage the bundled service. |
-| [dev-workflow](plugins/dev-workflow/skills/implement/SKILL.md) | 0.1.4 | Discuss designs, create tickets, implement and review changes, operate the GPU cluster, inspect Alibaba Cloud PAI, manage persistent agent terminals, lead background workers, and improve the development workflow. |
+| [dev-workflow](plugins/dev-workflow/skills/implement/SKILL.md) | 0.1.5 | Discuss designs, create tickets, implement and review changes, operate the GPU cluster, inspect Alibaba Cloud PAI, manage persistent agent terminals, lead background workers, and improve the development workflow. |
 | [docker-build](plugins/docker-build/skills/docker-build/SKILL.md) | 0.1.0 | Build and publish container images through the existing dedicated build host. |
 
 `dev-workflow` contains `aliyun-pai`, `gpu-cluster`, `grilling`, `herdr-core`,
@@ -82,8 +82,7 @@ entries were added around them; their operating procedures were preserved.
 `herdr-app --skill` and checks on real workers.
 
 The import excludes the third-party `find-skills` package from
-`vercel-labs/skills`, Herdr's automatically maintained `herdr-gpui-browser`, and
-the clients' system or curated skills.
+`vercel-labs/skills` and the clients' system or curated skills.
 
 The repository is the maintained source for these personal skills. Before
 replacing an existing shared installation, compare its files with the repository

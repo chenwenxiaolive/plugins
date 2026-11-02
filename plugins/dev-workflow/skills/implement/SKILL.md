@@ -1,6 +1,6 @@
 ---
 name: implement
-description: "Implement an assigned issue or agreed development task in the selected checkout, through validation, GitLab MR creation and coder-owned review."
+description: "Implement an assigned issue or agreed development task in the selected checkout, through validation, MR or PR creation and coder-owned review."
 ---
 
 # Implement
@@ -12,11 +12,15 @@ user selected. Read its project instructions and use
 [gitlab.md](../gpu-cluster/gitlab.md). These are authoritative for checkout reuse,
 remote execution, GitLab access and the bounded review loop.
 
+On a GitHub repository, use `gh` for the same steps: a pull request is the MR,
+the execution record is an issue comment, and `gh pr merge --match-head-commit
+<sha>` is the merge API's `sha` guard. The project's own merge rules come first.
+
 ## Establish or resume the task
 
 - Read the issue, relevant discussions and any existing MR. Identify the intended result, acceptance criteria and prerequisites. Use an already agreed task directly; a separate issue is not a prerequisite to coding.
 - Continue an existing issue/MR on its development branch. For a new assignment, follow the worktree reuse checks before creating or switching branches. Keep the selected directory, including stable names such as `dev-1`.
-- Name a new issue implementation branch `agent/K-<title-slug>-<8-hex-hash>` using the [issue branch identity rules](../gpu-cluster/remote-workflow.md#issue-branch-identity). Derive the slug from the issue title and the hash from its full identity, so herdr-gpui can recognize the issue from the branch.
+- Name a new issue implementation branch `agent/K-<title-slug>-<8-hex-hash>` using the [issue branch identity rules](../gpu-cluster/remote-workflow.md#issue-branch-identity). Derive the slug from the issue title and the hash from its full identity, so the branch name identifies its issue.
 - When implementing an issue, read and maintain its [execution record](../gpu-cluster/remote-workflow.md#issue-execution-record). Confirm ownership before coding, reuse the same comment on resume, and record the actual worktree and branch. A task without an issue needs no extra issue or record.
 - If the MR was already merged, [reconcile its execution record](../gpu-cluster/merge-workflow.md#record-merge-completion) before resuming or reusing the checkout. Report the merged MR and any remaining issue scope; do not recreate a deleted source branch or resume implementation without a new assignment.
 - Resolve unmet dependencies before building on them. Use another unmerged task branch only for an explicitly intended dependency.
