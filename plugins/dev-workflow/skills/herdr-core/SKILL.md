@@ -21,15 +21,14 @@ with the Herdr app connected to this machine over SSH.
 hc --version && claude --version && codex --version
 claude auth status   # JSON: read only loggedIn
 codex login status   # read only whether it says "Logged in"
-hc exec -- sh -c 'command -v claude codex hc'   # what workers will find
 ```
 
 - Never print the auth output: capture it and report only signed in or not.
   If a CLI is missing, install it with its official installer. If one is
   not signed in, ask the user to sign in; never ask for a key or token.
-- Workers start with the core's environment, not this shell's. If the last
-  check misses an agent, a worker can't start it; if it misses `hc`, a worker
-  can't report. Write hc's absolute path into tasks: `HC=$(command -v hc)`.
+- Workers otherwise get the core's environment, whose `PATH` lacked
+  `~/.local/bin` (`hc`, `uv`). Launch them through `env PATH="$PATH"` so
+  they find the same tools as this shell.
 - Claude Code reports status from 2.1.295, Codex from 0.163.0. Older ones
   stay `reported: false`: no Herdr sidebar entry, and waits end only at exit
   or timeout (`hc wait --children all` counts them as working).
@@ -43,29 +42,31 @@ unavailable, tell the user instead of picking another. Don't let workers
 start more agents unless the task says so.
 
 ```sh
-HC=$(command -v hc)
 SPACE="sp$(python3 -c 'import uuid; print(uuid.uuid4().hex)')"
-REPORT="When done, run exactly once: $HC send $HC_TERMINAL_ID '<name> done: <one-line summary>'"
+REPORT="When done, run exactly once: hc send $HC_TERMINAL_ID '<name> done: <one-line summary>'"
 ```
 
-Claude Code:
+Both start the user's normal way, with full access and no approval prompts:
+they edit files, run commands and reach hc, and never wait for an approval
+nobody sees. The task sets what each may change.
+
+Claude Code (`IS_SANDBOX=1` lets root use `--dangerously-skip-permissions`):
 
 ```sh
 hc run --bg --name <name> --cwd <dir> --label "herdr.space=$SPACE" \
-  claude --model claude-opus-5-5 --effort xhigh "<task> $REPORT"
+  env IS_SANDBOX=1 PATH="$PATH" claude --dangerously-skip-permissions \
+  --model claude-opus-5-5 --effort xhigh "<task> $REPORT"
 ```
 
-Codex, started the user's normal way (`--yolo`):
+Codex:
 
 ```sh
 hc run --bg --name <name> --cwd <dir> --label "herdr.space=$SPACE" \
-  codex --no-daemon --yolo -m gpt-6-astra -c 'model_reasoning_effort="xhigh"' "<task> $REPORT"
+  env PATH="$PATH" codex --no-daemon --yolo -m gpt-6-astra \
+  -c 'model_reasoning_effort="xhigh"' "<task> $REPORT"
 ```
 
-- `--no-daemon` keeps Codex's commands inside hc. `--yolo` gives the worker
-  full access with no approval prompts, like the user's own Codex sessions:
-  it can edit files and run commands, reaches hc, and never waits for an
-  approval nobody sees. The task sets what it may change.
+- `--no-daemon` keeps Codex's commands inside hc.
 - Don't pass Codex `--worktree`: it reads its root only from
   `[desktop] git-worktree-root` in `~/.codex/config.toml`, never from `-c`,
   and leaves `<root>/<hex>/<repo>` checkouts behind. Create or reuse the
