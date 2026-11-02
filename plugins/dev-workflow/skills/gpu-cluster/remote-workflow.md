@@ -2,6 +2,13 @@
 
 <!-- Moved from ~/.claude/CLAUDE.md on 2026-10-16; the always-loaded rules there still apply. -->
 
+## Validation scope
+
+- Lightweight static checks may run on the control machine with existing tools: syntax, metadata, documentation links and Git ref checks. Do not install project dependencies or start project services for these checks.
+- Project tests, builds, benchmarks, training and GPU work run on the remote nodes, including small unit tests. Project formatters and linters use the node checkout's environment as described below. Follow [Git synchronization](#development-and-git-synchronization) for the committed snapshot and environment checks; GPU work still requires an authorized node and free GPUs.
+- For documentation-only changes, run the relevant static checks and inspect changed instructions against realistic task cases. An executable failing test is not required when no executable behavior changes.
+- Report validation against a clean, committed snapshot. Record the full SHA, checkout path, execution host, command and artifact directory; rerun affected checks after relevant source changes. Pre-commit formatting is preparation, not evidence that the final commit passed.
+
 ## Formatting a local file with a node's tools
 
 - Project formatters and linters therefore run from the node checkout's environment. To check a local file before committing, pipe it through that environment's tools, in the order the project's own format script or pre-commit config runs them, passing the file name so each tool finds the project's configuration. For example, for a project that formats with isort and black and lints with ruff: `ssh sh-0 "cd -- <checkout> && .venv/bin/isort --filename <path> - | .venv/bin/black -q --stdin-filename <path> - | .venv/bin/ruff check --fix --quiet --stdin-filename <path> -" < <path>`. Choose the node for the task's cluster. The node checkout must be on a commit with the same formatter configuration and its environment synced to that commit's lock.
@@ -78,12 +85,14 @@ without a separate reviewer role, review worktree, notification or polling step.
 4. A pass requires every in-scope acceptance criterion to be evidenced as met, a completed code review with no unresolved actionable findings, and the required checks passing on the current source SHA. Distinguish optional suggestions from defects and explain any rejected finding with evidence; unresolved disputed findings need human handling. Missing tools, an incomplete assessment/review or failed checks are not a pass. If review or validation cannot run, report the blocker and stop rather than silently substituting a different review route.
 5. Stop early when a review passes. If the re-review after corrective round 3 still does not pass, stop automated edits and reviews and wait for human handling. Preserve the branch and MR; report the MR link, reviewed SHA, round count, unmet or unverified criteria, remaining findings and check failures. Do not start round 4, reset the counter on resume, or treat review success as permission to merge.
 
-Record each pass's round number, source SHA, baseline, requirement acceptance,
-code-review findings, fixes and validation result in the MR description's
-review-status section. Updating that section is part
-of this workflow. Before starting a corrective round, record its number and mark
-it in progress; after an interruption, continue that round rather than restarting
-the count. Keep the status current before ending a turn, and update the issue's
+Keep the MR description's review-status section proportional to the change.
+For each pass, record the round, source SHA, target SHA and merge-base, checks and
+results, acceptance and review conclusions, and any findings or fixes. Use the
+[acceptance guidance](#requirement-acceptance-within-each-review-pass) below to
+choose a compact paragraph or a criterion table. The compact format still requires
+the full review and the same corrective-round limit. Before a corrective round,
+record its number and mark it in progress;
+resume that round after interruption. Keep the status current and update the issue's
 [execution record](#issue-execution-record) to match the current phase or outcome.
 Use the run artifact directory for detailed logs.
 
@@ -100,8 +109,11 @@ checkboxes. When there is no issue, use the agreed task. Distinguish this MR's
 scope from a larger parent issue. On resume or a scope change, refresh the source
 material and preserve the user's agreed requirements.
 
-In the MR's review-status section, map each criterion to its implementation and
-evidence for the reviewed source SHA:
+Assess every in-scope criterion on every pass. For a small, straightforward change,
+summarize how the checks establish the requested outcome in the review paragraph;
+no acceptance table is required. For changes with multiple behaviors, interfaces
+or performance requirements, map each criterion to its implementation and evidence
+for the reviewed source SHA:
 
 | Criterion and source | Implementation | Validation evidence | Result |
 |---|---|---|---|
@@ -136,8 +148,8 @@ commit and scope, under the existing validation rules.
 - When the divergence is verified to come solely from an authorized server-side rebase, use the [history-preserving synchronization procedure](merge-workflow.md#synchronize-an-authorized-server-rebase) in the same checkout. Other divergence still requires investigation.
 - **`/volume` is shared within each cluster** (see the machine table in machines.md): updating a given remote checkout once updates it for that cluster's nodes and gate. Do not pull separately on each node of a cluster; a checkout on the other cluster is a separate copy, synchronized through Git. Concurrent jobs requiring different versions need explicitly selected separate checkouts; do not create those implicitly.
 - Before validation, verify that the remote checkout is clean, its full HEAD equals the committed local code being validated, and its environment matches the committed lock (for a uv project, `uv sync --locked --dry-run` lists no dependency changes, though the project's own local packages may be rebuilt; sync it only while no job uses the checkout). All changes relevant to the test/review claim must be included in that commit; report unrelated local changes separately. Verify the MR source commit and comparison baseline for reviews.
-- For behavior changes, preserve the docs → failing test → minimal implementation → verification sequence. If the failing test requires the remote environment, push and validate the test phase there before implementing the fix locally. Intermediate development commits may be consolidated at merge time according to project conventions; do not rewrite history automatically.
-- Associate every result with the tested commit, checkout path, execution node, command, and artifact directory. Further source changes require another commit/sync and re-verification of affected behavior. Generated files or remote edits must be accounted for before claiming a clean test result.
+- For behavior changes, follow the [development sequence](#repository-and-development-principles). Push and validate the failing-test phase remotely before implementing the fix locally. Intermediate development commits may be consolidated at merge time according to project conventions; do not rewrite history automatically.
+- Record results under [validation scope](#validation-scope). Account for generated files or remote edits before claiming a clean test result.
 - Keep model weights, datasets, logs, caches, secrets, and temporary run scripts out of synchronization commits. Git is the routine source-code transport; temporary remote run artifacts use the directory rules in jobs.md.
 
 ## How to operate remotely
@@ -157,7 +169,6 @@ commit and scope, under the existing validation rules.
 - Work only in the selected local checkout and its remote counterpart at the same absolute path. Creating a missing remote counterpart under the rule above is allowed; other additional clones or worktrees, repository copies, and switches to another existing checkout require my request.
 - When the current directory genuinely cannot accomplish the task, first explain why and which path you intend to use, and wait for my approval before acting. "Isolated work", "easier comparison", and "preserving the old branch" do not count as reasons
 - Leave existing worktrees as they are; do not migrate or delete them in passing
-- Tests and reviews must target the same committed code state across the selected local and remote checkouts. Before starting, verify the full commit SHA, working-tree state, and comparison baseline; for an MR, also verify its source commit.
-  - Remote validation uses the committed snapshot; local changes are not remotely tested until committed, pushed, synchronized, and checked. Any further relevant changes require re-verification.
+- Use [validation scope](#validation-scope) for checks and result evidence, and [Git synchronization](#development-and-git-synchronization) before remote validation. Review the pinned MR source and baseline under the [review procedure](#coder-owned-review-after-opening-an-mr).
 - Projects are all internal and still under development: use KISS design, keep no backward-compatibility layers, and write no data migrations
 - For new features and bug fixes, follow this order: update docs and comments first → write a minimal test that currently fails → write the minimal implementation → finally check that tests, code, and docs are consistent
