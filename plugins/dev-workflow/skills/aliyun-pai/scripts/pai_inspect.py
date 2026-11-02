@@ -124,6 +124,10 @@ class Client:
         return env
 
     def require_running(self, kind: str, target_id: str, pod: str | None) -> None:
+        if kind == "dsw" and pod:
+            raise InspectionError(
+                "`--pod` applies only to DLC job execution; omit it for DSW."
+            )
         if kind == "dlc":
             result = self.api(
                 "pai-dlc",
@@ -258,7 +262,9 @@ requested = os.path.normpath(sys.argv[2])
 limit = int(sys.argv[3])
 if not os.path.isabs(requested):
     raise SystemExit("path must be absolute")
-if os.path.commonpath([mount_root, requested]) != mount_root:
+real_root = os.path.realpath(mount_root)
+real_requested = os.path.realpath(requested)
+if os.path.commonpath([real_root, real_requested]) != real_root:
     raise SystemExit("path escapes the configured mount root")
 
 entries = []
@@ -307,7 +313,9 @@ mount_root = os.path.normpath(sys.argv[1])
 requested = os.path.normpath(sys.argv[2])
 if not os.path.isabs(requested):
     raise SystemExit("path must be absolute")
-if os.path.commonpath([mount_root, requested]) != mount_root:
+real_root = os.path.realpath(mount_root)
+real_requested = os.path.realpath(requested)
+if os.path.commonpath([real_root, real_requested]) != real_root:
     raise SystemExit("path escapes the configured mount root")
 
 stat = os.statvfs(requested)

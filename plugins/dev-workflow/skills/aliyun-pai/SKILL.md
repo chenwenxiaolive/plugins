@@ -56,12 +56,12 @@ Use the bundled helper:
 ```bash
 python3 scripts/pai_inspect.py identity
 python3 scripts/pai_inspect.py jobs --workspace-id 513442
-python3 scripts/pai_inspect.py job dlcg1o7wr4c98522
+python3 scripts/pai_inspect.py job <job-id>
 python3 scripts/pai_inspect.py dsw-instances --workspace-id 513442
 python3 scripts/pai_inspect.py filesystems
-python3 scripts/pai_inspect.py mounts dlcg1o7wr4c98522
-python3 scripts/pai_inspect.py stat dlcg1o7wr4c98522 /cpfs01
-python3 scripts/pai_inspect.py ls dlcg1o7wr4c98522 /cpfs01/M3
+python3 scripts/pai_inspect.py mounts <running-dlc-job-id>
+python3 scripts/pai_inspect.py stat <running-dlc-job-id> /cpfs01
+python3 scripts/pai_inspect.py ls <running-dlc-job-id> /cpfs01/M3
 ```
 
 The helper reads the selected `~/.aliyun/config.json` profile in memory when it

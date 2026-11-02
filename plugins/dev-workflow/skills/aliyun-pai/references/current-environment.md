@@ -12,6 +12,10 @@ them.
 | CPFS type | CPFS for Lingjun, `bm_advance_400_large` |
 | CPFS mount in PAI jobs | `/cpfs01` |
 
+The job observed during setup, `dlcg1o7wr4c98522`, completed successfully at
+`2026-11-02T04:31:46Z`. It cannot be used for live mounted-filesystem access;
+select a DLC pod or DSW instance whose current status is `Running`.
+
 The control machine has the official `aliyun` CLI at `/usr/local/bin/aliyun`.
 Install PAI CLI at `/usr/local/bin/pai` if it is absent. The `pai-readonly`
 profile is only a local profile name; enforce read-only access through the RAM
