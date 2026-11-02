@@ -24,10 +24,11 @@
 ### Issue branch identity
 
 Name a new branch implementing issue `#K` as
-`agent/K-<short-description>`, for example `agent/42-fix-cache` for issue `#42`,
+`K-<short-description>`, for example `42-fix-cache` for issue `#42`,
 `Fix cache`. Use the issue number without `#`; GitLab uses the project-local
 `iid`, not the global issue ID. Summarize the issue in a short English description,
-usually 2–4 lowercase words separated by hyphens. Do not append a hash.
+usually 2–4 lowercase words separated by hyphens. Do not add an `agent/` prefix
+or a hash suffix.
 
 Resolve the issue in its source repository and use its execution record to track
 the actual worktree, branch and MR.
