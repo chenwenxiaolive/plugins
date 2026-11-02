@@ -154,6 +154,9 @@ paths start at your current folder. Prefer explicit paths for remote work.
 - State is `live` or `finished`. Status comes from the program's OSC 7501
   reports: `idle`, `working`, `done`, `blocked`, `error`; plain programs
   report none. Do not guess status from screen text.
+- Claude Code reports status from 2.1.295 and Codex from 0.163.0. Older
+  versions act as plain programs: `reported: false`, no Herdr sidebar
+  entry, and `hc wait` waits for exit. Check versions before blaming hc.
 - `blocked` means a person is needed (permission or a question): read the
   screen and ask your user. `send` refuses unless `--force`; don't use it to
   bypass a permission decision. `error`: read why, then send or kill.
@@ -172,3 +175,7 @@ paths start at your current folder. Prefer explicit paths for remote work.
   3 not_found, 7 needs_target, 9 blocked, 10 status_mismatch, 11 finished.
 - Codex must run with `--no-daemon` (including templates), or its commands
   execute outside hc.
+- Don't pass Codex `--worktree`. It ignores `-c` for its root, creates
+  `~/.codex/worktrees/<hex>/<repo>` checkouts, and never cleans them up.
+  Create the checkout with the project's worktree workflow (such as Herdr's
+  New worktree…), then start Codex with `--cwd` there.
