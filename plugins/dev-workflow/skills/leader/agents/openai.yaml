@@ -1,0 +1,5 @@
+interface:
+  display_name: "Leader"
+  short_description: "Plan, delegate to workers, integrate and verify"
+policy:
+  allow_implicit_invocation: false
