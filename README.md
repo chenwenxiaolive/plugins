@@ -82,8 +82,7 @@ entries were added around them; their operating procedures were preserved.
 `herdr-app --skill` and checks on real workers.
 
 The import excludes the third-party `find-skills` package from
-`vercel-labs/skills`, Herdr's automatically maintained `herdr-gpui-browser`, and
-the clients' system or curated skills.
+`vercel-labs/skills` and the clients' system or curated skills.
 
 The repository is the maintained source for these personal skills. Before
 replacing an existing shared installation, compare its files with the repository

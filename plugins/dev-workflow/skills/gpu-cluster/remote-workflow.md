@@ -26,19 +26,19 @@
 Name a new branch implementing issue `#K` as
 `agent/K-<title-slug>-<8-hex-hash>`. For a title such as `Fix cache`, this becomes
 `agent/K-fix-cache-<8-hex-hash>`; `fix-cache` is an example, not a fixed label.
-Match herdr-gpui's name sanitization: lowercase `K-<issue title>`, retain ASCII
+Sanitize the name: lowercase `K-<issue title>`, retain ASCII
 letters and digits, replace runs of other characters with a single `-`, truncate
 that entire name portion to 64 characters, and trim trailing `-`. Append the
 hash only after this truncation, so its eight characters are always preserved.
 
-Derive the hash from the issue's full identity using herdr-gpui's canonical key
-and UUIDv5 algorithm:
+Derive the hash from the issue's full identity with this canonical key and
+UUIDv5 algorithm:
 
-- Use `provider:host:repository:K`, with provider `gitlab` or `github`, the source
-  host used by Herdr, the full namespace/repository path, and the decimal issue
+- Use `provider:host:repository:K`, with provider `gitlab` or `github`, the
+  issue's source host, the full namespace/repository path, and the decimal issue
   number `K` without `#`. GitLab uses the project-local `iid`, not the global
   issue ID. Use the issue's source repository, not a fork or local worktree path.
-- Match Herdr's source identity: lowercase the host, retain a non-default HTTP(S)
+- Normalize the source: lowercase the host, retain a non-default HTTP(S)
   port when present, omit SSH ports, and remove leading/trailing `/` and the
   trailing `.git` from the repository path. Preserve repository path case.
 - Before joining components with `:`, escape `%` as `%25`, then `:` as `%3A`
@@ -47,10 +47,8 @@ and UUIDv5 algorithm:
   This is the first eight lowercase hex digits of a UUIDv5, not a commit hash,
   random suffix, or plain SHA digest. Keep it at the very end of the branch.
 
-For example, `github:github.com:penso/herdr-gpui:377` produces `97b1caca`.
-The upstream [key definition](https://github.com/penso/herdr-gpui/blob/main/crates/herdr-gpui/src/orchestrator/model.rs)
-and [branch naming and recognition](https://github.com/penso/herdr-gpui/blob/main/crates/herdr-gpui/src/orchestrator/naming.rs)
-define this identity. Herdr recognizes an `agent/` branch by its final `-<hash>`.
+For example, `github:github.com:chenwenxiaolive/plugins:12` produces `bbe2d84d`.
+The final `-<hash>` identifies the issue from the branch name.
 Continue an existing issue/MR on its current branch; this naming rule does not
 authorize renaming existing branches or moving stable worktree directories.
 
