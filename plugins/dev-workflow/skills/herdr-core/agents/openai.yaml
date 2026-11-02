@@ -1,3 +1,3 @@
 interface:
-  display_name: "herdr-core"
+  display_name: "Herdr Core (hc)"
   short_description: "Run persistent terminals and coordinate coding agents with hc"

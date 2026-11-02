@@ -18,8 +18,9 @@ The repository also retains the `chenwenxiaolive-plugins` packaging metadata.
 skills share relative links, so they ship together without duplicating the
 cluster procedures. The last three retain their explicit-invocation policy.
 
-`herdr-core` presents the maintained `hc --skill` manual as a discoverable skill
-for persistent terminals, agent delegation, remote commands, and remote files.
+`herdr-core` presents a copy of the `hc --skill` manual (hc 0.1.14) with local
+notes as a discoverable skill for persistent terminals, agent delegation, remote
+commands, and remote files. With a newer hc, agents read `hc --skill` itself.
 
 `preview` includes its preview server, Markdown renderer, theme assets, and
 start/stop/status commands. It needs Linux, Python 3.10+, and Node.js 18+; no
@@ -87,8 +88,9 @@ These are personal environment workflows. `gpu-cluster` expects the existing
 global instructions, SSH aliases, credentials, and cluster layout; `aliyun-pai`
 expects an Alibaba Cloud CLI profile with read access to the selected PAI region
 and workspace; `docker-build` expects the configured build host and registry
-access. Installing the plugins does not create that infrastructure or authorize
-jobs, cloud mutations, or publication.
+access; `herdr-core` expects `hc` (herdr-core) on `PATH`. Installing the plugins
+does not create that infrastructure or authorize jobs, cloud mutations, or
+publication.
 
 ## Preview behavior
 

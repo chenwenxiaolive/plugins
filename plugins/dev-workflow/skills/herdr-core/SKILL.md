@@ -3,12 +3,12 @@ name: herdr-core
 description: Run and coordinate persistent programs and coding agents with herdr-core's hc CLI. Use when the user mentions hc, herdr-core, persistent terminals, remote commands or files through hc, or delegating work to watchable background agents. Not for the older herdr terminal multiplexer.
 ---
 
-# hc manual (herdr-core)
-
-The current manual for herdr-core's CLI, `hc`. It is not `herdr`, the older
-terminal multiplexer.
-
 # hc: programs and agents that stay alive
+
+This is `hc --skill` from hc 0.1.14 with local changes: window control points
+to `herdr --skill` and Herdr UI, `--children` always names `all` or `any`,
+and local notes end the Status section. If `hc --version` is newer, read
+`hc --skill` for the current manual and keep the local notes.
 
 `hc` runs programs in persistent terminals. People can attach and take over.
 It does not arrange windows; use `herdr --skill` for Herdr terminal-manager
@@ -177,5 +177,6 @@ paths start at your current folder. Prefer explicit paths for remote work.
   execute outside hc.
 - Don't pass Codex `--worktree`. It ignores `-c` for its root, creates
   `~/.codex/worktrees/<hex>/<repo>` checkouts, and never cleans them up.
-  Create the checkout with the project's worktree workflow (such as Herdr's
-  New worktree…), then start Codex with `--cwd` there.
+  Create or reuse a checkout with the project's worktree workflow first (a
+  person may use Herdr's New worktree…), then start Codex in it with
+  `hc run --bg --cwd <checkout> codex --no-daemon ...`.
