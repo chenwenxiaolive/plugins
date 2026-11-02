@@ -14,13 +14,15 @@ The repository also retains the `chenwenxiaolive-plugins` packaging metadata.
 | [docker-build](plugins/docker-build/skills/docker-build/SKILL.md) | 0.1.0 | Build and publish container images through the existing dedicated build host. |
 
 `dev-workflow` contains `aliyun-pai`, `gpu-cluster`, `grilling`, `herdr-core`,
-`implement`, `improve-codebase-architecture`, `retro`, and `to-tickets`. These
-skills share relative links, so they ship together without duplicating the
-cluster procedures. The last three retain their explicit-invocation policy.
+`implement`, `improve-codebase-architecture`, `retro`, and `to-tickets`. Except
+`herdr-core`, these skills share relative links, so they ship together without
+duplicating the cluster procedures. The last three retain their
+explicit-invocation policy.
 
-`herdr-core` presents a copy of the `hc --skill` manual (hc 0.1.14) with local
-notes as a discoverable skill for persistent terminals, agent delegation, remote
-commands, and remote files. With a newer hc, agents read `hc --skill` itself.
+`herdr-core` presents a copy of the `hc --skill` manual with local changes as a
+discoverable skill for persistent terminals, agent delegation, remote commands,
+and remote files. Its header names the hc version it copies; with a newer hc,
+agents read `hc --skill` itself.
 
 `preview` includes its preview server, Markdown renderer, theme assets, and
 start/stop/status commands. It needs Linux, Python 3.10+, and Node.js 18+; no
@@ -43,8 +45,9 @@ The installer records each source in `~/.agents/.skill-lock.json`. Disabling
 telemetry also disables external skill-audit requests for this private source.
 
 Rerun the same command to refresh this repository's skills for both clients.
-To select a subset, replace `'*'` with skill names. Install all eight `dev-workflow`
-skills together because their relative references cross skill directories.
+To select a subset, replace `'*'` with skill names. Install the `dev-workflow`
+skills together because their relative references cross skill directories;
+only `herdr-core` also works alone.
 
 Start a new session and ask for the skill by name. In Claude Code, use `/preview`,
 `/implement`, or the corresponding skill name. The explicit-invocation policies
@@ -74,6 +77,7 @@ service or starting infrastructure jobs.
 The global skills were imported from `/root/.agents/skills` with their referenced
 documents, scripts, and client metadata. Only plugin manifests and marketplace
 entries were added around them; their operating procedures were preserved.
+`herdr-core` is not an import: it copies `hc --skill` and is re-synced from hc.
 
 The import excludes the third-party `find-skills` package from
 `vercel-labs/skills`, Herdr's automatically maintained `herdr-gpui-browser`, and

@@ -8,7 +8,7 @@ description: Run and coordinate persistent programs and coding agents with herdr
 This is `hc --skill` from hc 0.1.14 with local changes: window control points
 to `herdr --skill` and Herdr UI, `--children` always names `all` or `any`,
 and local notes end the Status section. If `hc --version` is newer, read
-`hc --skill` for the current manual and keep the local notes.
+`hc --skill` for the current manual and keep these local changes.
 
 `hc` runs programs in persistent terminals. People can attach and take over.
 It does not arrange windows; use `herdr --skill` for Herdr terminal-manager
@@ -156,7 +156,9 @@ paths start at your current folder. Prefer explicit paths for remote work.
   report none. Do not guess status from screen text.
 - Claude Code reports status from 2.1.295 and Codex from 0.163.0. Older
   versions act as plain programs: `reported: false`, no Herdr sidebar
-  entry, and `hc wait` waits for exit. Check versions before blaming hc.
+  entry, `hc wait` waits for exit, and `hc wait --children all` never ends
+  (a child that never reports counts as working). Check versions before
+  blaming hc.
 - `blocked` means a person is needed (permission or a question): read the
   screen and ask your user. `send` refuses unless `--force`; don't use it to
   bypass a permission decision. `error`: read why, then send or kill.
