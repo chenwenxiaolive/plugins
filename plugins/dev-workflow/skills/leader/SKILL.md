@@ -1,6 +1,6 @@
 ---
 name: leader
-description: "Lead a task as the coordinating agent: understand and plan it, delegate implementation and review to background Claude Code and Codex workers through herdr-desktop, integrate their work, and verify the result."
+description: "Lead a task as the coordinating agent: understand and plan it, delegate implementation and review to background Claude Code and Codex workers through herdr-core, integrate their work, and verify the result."
 disable-model-invocation: true
 ---
 
@@ -14,7 +14,7 @@ You are the leader.
   always, without breaking anything.
 - When a task needs substantial implementation, debugging, test fixes, or
   multi-file changes, delegate it to Claude Code through
-  [herdr-desktop](../herdr-desktop/SKILL.md). For frontend work, have it
+  [herdr-core](../herdr-core/SKILL.md). For frontend work, have it
   refine the layout, visual details, and actual interactions. Give it this
   rule: Do not design for rare or future cases nobody asked about.
 - Use Opus 5.5 (`claude-opus-5-5`) for Claude Code workers and Astra

@@ -14,16 +14,15 @@ The repository also retains the `chenwenxiaolive-plugins` packaging metadata.
 | [docker-build](plugins/docker-build/skills/docker-build/SKILL.md) | 0.1.0 | Build and publish container images through the existing dedicated build host. |
 
 `dev-workflow` contains `aliyun-pai`, `gpu-cluster`, `grilling`, `herdr-core`,
-`herdr-desktop`, `implement`, `improve-codebase-architecture`, `leader`, `retro`,
-and `to-tickets`. Several of these skills share relative links, so they ship
+`implement`, `improve-codebase-architecture`, `leader`, `retro`, and
+`to-tickets`. Several of these skills share relative links, so they ship
 together without duplicating the cluster procedures.
 `improve-codebase-architecture`, `leader`, `retro`, and `to-tickets` retain
 their explicit-invocation policy.
 
-`herdr-core` presents a copy of the `hc --skill` manual with local changes as a
-discoverable skill for persistent terminals, agent delegation, remote commands,
-and remote files. Its header names the hc version it copies and lists the local
-changes; with a different hc, agents read `hc --skill` and keep those changes.
+`herdr-core` coordinates background Claude Code and Codex workers through hc
+from the current session, with verified launch, wait, read-back and Herdr
+sidebar procedures; agents read `hc --skill` for the full hc manual.
 
 `preview` includes its preview server, Markdown renderer, theme assets, and
 start/stop/status commands. It needs Linux, Python 3.10+, and Node.js 18+; no
@@ -33,7 +32,7 @@ Documents, logs, and process state live outside the installed plugin.
 ## Install and update
 
 The repository is private. Use the GitHub authentication already configured on
-the machine. Install all twelve skills for both clients with one command:
+the machine. Install all eleven skills for both clients with one command:
 
 ```sh
 DISABLE_TELEMETRY=1 npx skills add chenwenxiaolive/plugins \
@@ -79,8 +78,8 @@ service or starting infrastructure jobs.
 The global skills were imported from `/root/.agents/skills` with their referenced
 documents, scripts, and client metadata. Only plugin manifests and marketplace
 entries were added around them; their operating procedures were preserved.
-`herdr-core` is not an import: it copies `hc --skill`; re-sync it from hc and
-keep the local changes its header lists.
+`herdr-core` is not an import: it was written from `hc --skill`,
+`herdr-app --skill` and checks on real workers.
 
 The import excludes the third-party `find-skills` package from
 `vercel-labs/skills`, Herdr's automatically maintained `herdr-gpui-browser`, and
@@ -95,10 +94,9 @@ These are personal environment workflows. `gpu-cluster` expects the existing
 global instructions, SSH aliases, credentials, and cluster layout; `aliyun-pai`
 expects an Alibaba Cloud CLI profile with read access to the selected PAI region
 and workspace; `docker-build` expects the configured build host and registry
-access; `herdr-core` expects `hc` (herdr-core) on `PATH`, and `herdr-desktop`
-also expects signed-in Claude Code and Codex CLIs. Installing the plugins does
-not create that infrastructure or authorize jobs, cloud mutations, or
-publication.
+access; `herdr-core` expects `hc` (herdr-core) on `PATH` and signed-in Claude
+Code and Codex CLIs. Installing the plugins does not create that infrastructure
+or authorize jobs, cloud mutations, or publication.
 
 ## Preview behavior
 

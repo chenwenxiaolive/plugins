@@ -1,3 +1,0 @@
-interface:
-  display_name: "Herdr Desktop"
-  short_description: "Run Claude Code and Codex workers with hc and show them in Herdr"
