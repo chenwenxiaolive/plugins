@@ -46,7 +46,7 @@ Goal: <objective and the context it needs>. Done when: <completion criteria>.
 Checkout: /volume/worktree/<repo>/dev-N on branch <branch>; issue <link> (or none).
 Use the implement skill and stop at ready-for-merge.
 The user requested remote testing for this worktree on <cluster>, and named <node> for GPU work: use only GPUs <list>. (Or: no remote or GPU work.)
-Do not design for rare or future cases nobody asked about. Don't start other agents.
+Do not design for rare or future cases nobody asked about. Start no other agents beyond the codex:review that implement requires.
 ```
 
 ## Follow through
