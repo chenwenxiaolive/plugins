@@ -10,10 +10,10 @@ The repository also retains the `chenwenxiaolive-plugins` packaging metadata.
 | Plugin | Version | Purpose |
 | --- | --- | --- |
 | [preview](plugins/preview/skills/preview/SKILL.md) | 0.4.1 | Preview HTML and Markdown locally or through an SSH tunnel, and manage the bundled service. |
-| [dev-workflow](plugins/dev-workflow/skills/implement/SKILL.md) | 0.1.1 | Discuss designs, create tickets, implement and review changes, operate the GPU cluster, and improve the development workflow. |
+| [dev-workflow](plugins/dev-workflow/skills/implement/SKILL.md) | 0.1.2 | Discuss designs, create tickets, implement and review changes, operate the GPU cluster, inspect Alibaba Cloud PAI, and improve the development workflow. |
 | [docker-build](plugins/docker-build/skills/docker-build/SKILL.md) | 0.1.0 | Build and publish container images through the existing dedicated build host. |
 
-`dev-workflow` contains `gpu-cluster`, `grilling`, `implement`,
+`dev-workflow` contains `aliyun-pai`, `gpu-cluster`, `grilling`, `implement`,
 `improve-codebase-architecture`, `retro`, and `to-tickets`. These skills share
 relative links, so they ship together without duplicating the cluster procedures.
 The last three retain their explicit-invocation policy.
@@ -26,7 +26,7 @@ Documents, logs, and process state live outside the installed plugin.
 ## Install and update
 
 The repository is private. Use the GitHub authentication already configured on
-the machine. Install all eight skills for both clients with one command:
+the machine. Install all nine skills for both clients with one command:
 
 ```sh
 DISABLE_TELEMETRY=1 npx skills add chenwenxiaolive/plugins \
@@ -39,7 +39,7 @@ The installer records each source in `~/.agents/.skill-lock.json`. Disabling
 telemetry also disables external skill-audit requests for this private source.
 
 Rerun the same command to refresh this repository's skills for both clients.
-To select a subset, replace `'*'` with skill names. Install all six `dev-workflow`
+To select a subset, replace `'*'` with skill names. Install all seven `dev-workflow`
 skills together because their relative references cross skill directories.
 
 Start a new session and ask for the skill by name. In Claude Code, use `/preview`,
@@ -81,9 +81,11 @@ and reconcile local edits into the repository. Update the shared files through
 `npx skills` after committing those changes; keep other skill sources unchanged.
 
 These are personal environment workflows. `gpu-cluster` expects the existing
-global instructions, SSH aliases, credentials, and cluster layout; `docker-build`
-expects the configured build host and registry access. Installing the plugins
-does not create that infrastructure or authorize jobs or publication.
+global instructions, SSH aliases, credentials, and cluster layout; `aliyun-pai`
+expects an Alibaba Cloud CLI profile with read access to the selected PAI region
+and workspace; `docker-build` expects the configured build host and registry
+access. Installing the plugins does not create that infrastructure or authorize
+jobs, cloud mutations, or publication.
 
 ## Preview behavior
 

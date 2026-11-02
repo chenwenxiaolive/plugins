@@ -1,0 +1,3 @@
+interface:
+  display_name: "Alibaba Cloud PAI"
+  short_description: "Inspect PAI jobs and mounted cloud storage"
