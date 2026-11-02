@@ -26,8 +26,8 @@ You are the leader.
   environment: a new counterpart's first environment build can be slow.
   Invoking this skill authorizes creating those worktrees, their branches
   and, for tasks that need remote checks, their remote counterparts. Each
-  worker follows [implement](../implement/SKILL.md): its own branch, MR and
-  coder-owned review loop (`codex:review`, at most three fix rounds).
+  worker follows [implement](../implement/SKILL.md) through its own branch,
+  MR and coder-owned review.
 - Split the work so that MRs don't change the same files. Start a task that
   builds on another one from that task's branch.
 - Briefly explain the division of work, then start independent tasks in
@@ -37,8 +37,9 @@ You are the leader.
   show in `free -m` yet: size each batch before starting it, at most
   (available MB − 500) / 500 workers, and check `free -m` again before the
   next batch.
-- If any task needs GPU validation, ask the user for the nodes once, at the
-  start. Give each worker its own GPUs, or a whole node when the project's
+- If any task needs GPU validation, reuse the user's active session allocation.
+  Ask only if the required allocation is missing or needs to change. Give each
+  worker its own GPUs, or a whole node when the project's
   validation needs one (mini-vllm's validation profile does). Never give two
   workers the same GPUs.
 
@@ -63,8 +64,8 @@ Name the target even when it is the default branch: project docs may say
 - You own the integration. Send follow-up feedback to the original worker
   whenever possible and continue its existing conversation. Don't start
   over every round.
-- When a worker stops with a question, answer it from the plan, or ask the
-  user.
+- Handle worker questions and blocked states using
+  [herdr-core's follow-up guidance](../herdr-core/SKILL.md#wait-read-follow-up).
 - After a worker finishes, inspect the actual changes and its MR's review
   status yourself.
 - You can't open a browser on this machine. For page changes, serve the page

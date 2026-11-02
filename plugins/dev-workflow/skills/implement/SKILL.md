@@ -8,9 +8,9 @@ description: "Implement an assigned issue or agreed development task in the sele
 Own the assigned task through its MR and review outcome. Work in the checkout the
 user selected. Read its project instructions and use
 [gpu-cluster](../gpu-cluster/SKILL.md), especially
-[remote-workflow.md](../gpu-cluster/remote-workflow.md) and
-[gitlab.md](../gpu-cluster/gitlab.md). These are authoritative for checkout reuse,
-remote execution, GitLab access and the bounded review loop.
+[remote-workflow.md](../gpu-cluster/remote-workflow.md), which is authoritative for
+checkout reuse, validation, remote execution and the bounded review loop. Read
+[gitlab.md](../gpu-cluster/gitlab.md) when accessing internal GitLab.
 
 On a GitHub repository, use `gh` for the same steps: a pull request is the MR,
 the execution record is an issue comment, and `gh pr merge --match-head-commit
@@ -20,7 +20,7 @@ the execution record is an issue comment, and `gh pr merge --match-head-commit
 
 - Read the issue, relevant discussions and any existing MR. Identify the intended result, acceptance criteria and prerequisites. Use an already agreed task directly; a separate issue is not a prerequisite to coding.
 - Continue an existing issue/MR on its development branch. For a new assignment, follow the worktree reuse checks before creating or switching branches. Keep the selected directory, including stable names such as `dev-1`.
-- Name a new issue implementation branch `K-<short-description>`, such as `42-fix-cache`, using the [issue branch identity rules](../gpu-cluster/remote-workflow.md#issue-branch-identity).
+- Name new issue branches using the [issue branch identity rules](../gpu-cluster/remote-workflow.md#issue-branch-identity).
 - When implementing an issue, read and maintain its [execution record](../gpu-cluster/remote-workflow.md#issue-execution-record). Confirm ownership before coding, reuse the same comment on resume, and record the actual worktree and branch. A task without an issue needs no extra issue or record.
 - If the MR was already merged, [reconcile its execution record](../gpu-cluster/merge-workflow.md#record-merge-completion) before resuming or reusing the checkout. Report the merged MR and any remaining issue scope; do not recreate a deleted source branch or resume implementation without a new assignment.
 - Resolve unmet dependencies before building on them. Use another unmerged task branch only for an explicitly intended dependency.
@@ -28,11 +28,11 @@ the execution record is an issue comment, and `gh pr merge --match-head-commit
 
 ## Implement and validate
 
-- Follow the existing docs/comments → minimal failing test → minimal implementation → consistency checks sequence for features and fixes. Choose a test that exercises the real behavior through an appropriate existing interface.
+- Follow the [development sequence](../gpu-cluster/remote-workflow.md#repository-and-development-principles) for features and fixes. Choose a test that exercises the real behavior through an appropriate existing interface.
 - Expected results must come from a specification, known example or independent reference. Prefer real internal behavior; isolate external dependencies or nondeterminism when needed. Routine test choices do not require a separate confirmation.
 - Prefer small interfaces and keep related behavior together. Add abstraction for current requirements rather than anticipated extensions. Follow the existing KISS, compatibility and migration rules.
 - For a hard bug, establish a useful reproduction, compare plausible causes and change one variable at a time. For a performance regression, measure a baseline with a controlled workload before claiming improvement. Recheck the original symptom after the fix.
-- Execute tests, builds and GPU work under the remote workflow, against committed code in a clean checkout at the same absolute path. Record the required commit, node, command and artifacts with the result.
+- Use [validation scope](../gpu-cluster/remote-workflow.md#validation-scope) to choose local checks or remote execution and record results.
 - GPU execution requires a user-designated node and free GPUs. If the node or another essential validation input is missing, continue independent local preparation and request the missing input. Preserve the failing-test-before-implementation sequence for dependent work. Do not claim an unrun check passed.
 - Run checks that establish the acceptance criteria and cover affected behavior. Remove temporary instrumentation and keep run artifacts outside the repository under the prescribed temporary directory.
 
@@ -44,18 +44,15 @@ validation evidence and material limitations. Use a closing reference only when
 the MR fulfills that issue. Add its link to the issue's execution record and keep
 that record's status current through review, blockers and the final outcome.
 
-Record the agreed criteria, their implementation and validation evidence in the
-MR's review-status section using the
+Use the MR's review-status section to record acceptance under the
 [requirement acceptance procedure](../gpu-cluster/remote-workflow.md#requirement-acceptance-within-each-review-pass).
-An issue-free task uses the agreed request as its source. A code review reporting
-no findings is not sufficient to establish requirement completion.
+That procedure defines when a short paragraph is enough and when to use a criterion
+table. An issue-free task uses the agreed request as its source.
 
 Continue into the
-[coder-owned review loop](../gpu-cluster/remote-workflow.md#coder-owned-review-after-opening-an-mr):
-Claude Code invokes `codex:review`; Codex reviews directly. The initial review is
-followed by at most three fix-and-re-review rounds, shared by requirement gaps and
-code-review findings. Refresh the acceptance assessment on each pass. Persist the
-round count and evidence in the MR, and resume the existing count after interruptions.
+[coder-owned review loop](../gpu-cluster/remote-workflow.md#coder-owned-review-after-opening-an-mr)
+for the client-specific review route, corrective-round limit and records to keep
+across interruptions.
 
 Finish with the MR link, source commit, validation outcome and review status. If
 the loop reaches its limit or a required review/check cannot run, report the
