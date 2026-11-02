@@ -31,8 +31,10 @@ You are the leader.
 - Briefly explain the division of work, then start independent tasks in
   parallel. Choose concurrency based on the task, machine load, and available
   allowance, up to 10 workers. You don't need to use all 10. A Claude Code
-  worker and its reviews take about 500 MB: check `free -m` before each
-  launch and start none while less than 500 MB is available.
+  worker and its reviews grow to about 500 MB, and one just started doesn't
+  show in `free -m` yet: size each batch before starting it, at most
+  (available MB − 500) / 500 workers, and check `free -m` again before the
+  next batch.
 - If any task needs GPU validation, ask the user for the node once, at the
   start, and give each worker on it its own GPUs.
 
@@ -64,10 +66,12 @@ Do not design for rare or future cases nobody asked about. Start no other agents
   user confirms it.
 - Don't treat a task as finished just because another agent says it is.
 - When the user asks to merge, merge the MRs in dependency order under the
-  [merge workflow](../gpu-cluster/merge-workflow.md): through each MR's
-  original worker while it runs (it owns that checkout and its review
-  rounds), otherwise yourself. Each merge moves the target, so the next MR
-  is rechecked against it. Run the necessary checks on the integrated result.
+  [merge workflow](../gpu-cluster/merge-workflow.md), each through a worker
+  in that MR's worktree: its original worker, or, if that one was closed, a
+  new worker told the MR link and that the user asked to merge it. Don't
+  merge from your own checkout: a re-review there would compare your branch,
+  not the MR's. Each merge moves the target, so the next MR is rechecked
+  against it. Run the necessary checks on the integrated result.
 - At the end, show the user the result, what was verified, and any
   unresolved issues. Release task resources that are no longer needed while
   preserving the work and records needed to continue.
