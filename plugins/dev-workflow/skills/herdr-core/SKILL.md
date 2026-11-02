@@ -5,10 +5,11 @@ description: Run and coordinate persistent programs and coding agents with herdr
 
 # hc: programs and agents that stay alive
 
-This is `hc --skill` from hc 0.1.14 with local changes: window control points
-to `herdr --skill` and Herdr UI, `--children` always names `all` or `any`,
-and local notes end the Status section. If `hc --version` is newer, read
-`hc --skill` for the current manual and keep these local changes.
+This is `hc --skill` from hc 0.1.14 with local changes: this note replaces
+its opening heading, window control points to `herdr --skill` and Herdr UI,
+`--children` always names `all` or `any`, and Status adds the agent-version
+bullet and the final Codex `--worktree` bullet. If `hc --version` differs,
+read `hc --skill` for the matching manual and keep these local changes.
 
 `hc` runs programs in persistent terminals. People can attach and take over.
 It does not arrange windows; use `herdr --skill` for Herdr terminal-manager
@@ -156,9 +157,10 @@ paths start at your current folder. Prefer explicit paths for remote work.
   report none. Do not guess status from screen text.
 - Claude Code reports status from 2.1.295 and Codex from 0.163.0. Older
   versions act as plain programs: `reported: false`, no Herdr sidebar
-  entry, `hc wait` waits for exit, and `hc wait --children all` never ends
-  (a child that never reports counts as working). Check versions before
-  blaming hc.
+  entry, and `hc wait` waits for exit. `hc wait --children all` keeps
+  timing out, because a child that never reports counts as working: check
+  `hc get <t>`, and for `reported: false` read it with `hc read <t>` instead
+  of waiting. Check versions before blaming hc.
 - `blocked` means a person is needed (permission or a question): read the
   screen and ask your user. `send` refuses unless `--force`; don't use it to
   bypass a permission decision. `error`: read why, then send or kill.
@@ -177,8 +179,10 @@ paths start at your current folder. Prefer explicit paths for remote work.
   3 not_found, 7 needs_target, 9 blocked, 10 status_mismatch, 11 finished.
 - Codex must run with `--no-daemon` (including templates), or its commands
   execute outside hc.
-- Don't pass Codex `--worktree`. It ignores `-c` for its root, creates
-  `~/.codex/worktrees/<hex>/<repo>` checkouts, and never cleans them up.
-  Create or reuse a checkout with the project's worktree workflow first (a
-  person may use Herdr's New worktree…), then start Codex in it with
-  `hc run --bg --cwd <checkout> codex --no-daemon ...`.
+- Don't pass Codex `--worktree`. It reads its root only from
+  `[desktop] git-worktree-root` in `~/.codex/config.toml`, never from `-c`,
+  creates `<root>/<hex>/<repo>` checkouts (default `~/.codex/worktrees`),
+  and never cleans them up. Create or reuse a checkout with the project's
+  worktree workflow first (a person may use Herdr's New worktree…), then
+  start Codex in it:
+  `hc run --bg --name <name> --cwd <checkout> codex --no-daemon "<task>"`.
