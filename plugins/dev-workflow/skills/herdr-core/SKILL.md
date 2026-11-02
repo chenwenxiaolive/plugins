@@ -55,23 +55,17 @@ hc run --bg --name <name> --cwd <dir> --label "herdr.space=$SPACE" \
   claude --model claude-opus-5-5 --effort xhigh "<task> $REPORT"
 ```
 
-Codex, read-only with network so it can reach hc:
+Codex, started the user's normal way (`--yolo`):
 
 ```sh
 hc run --bg --name <name> --cwd <dir> --label "herdr.space=$SPACE" \
-  codex --no-daemon -m gpt-6-astra -c 'model_reasoning_effort="xhigh"' \
-  -c 'permissions.hcread.extends=":read-only"' \
-  -c 'permissions.hcread.network.enabled=true' \
-  -c 'default_permissions="hcread"' -a never "<task> $REPORT"
+  codex --no-daemon --yolo -m gpt-6-astra -c 'model_reasoning_effort="xhigh"' "<task> $REPORT"
 ```
 
-- `--no-daemon` keeps Codex's commands inside hc. Codex's plain read-only
-  sandbox blocks hc (`Failed to connect to bus`); the profile above allows
-  network and still blocks writes. `-a never` makes a refused command fail
-  instead of waiting for an approval nobody sees.
-- A Codex worker that must edit files uses `-s workspace-write -c
-  sandbox_workspace_write.network_access=true` instead. Only the sandbox was
-  checked (`codex sandbox ... -- hc ls`), not a full worker.
+- `--no-daemon` keeps Codex's commands inside hc. `--yolo` runs without
+  Codex's sandbox or approval prompts, so the worker reaches hc and never
+  waits for an approval nobody sees; a read-only task is read-only only
+  because the task says so.
 - Don't pass Codex `--worktree`: it reads its root only from
   `[desktop] git-worktree-root` in `~/.codex/config.toml`, never from `-c`,
   and leaves `<root>/<hex>/<repo>` checkouts behind. Create or reuse the
