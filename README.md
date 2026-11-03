@@ -1,9 +1,7 @@
 # Personal skills
 
-Personal skills for Codex and Claude Code, maintained in
-[chenwenxiaolive/plugins](https://github.com/chenwenxiaolive/plugins).
-Use `npx skills` to install and update one shared copy for both clients. The
-repository has no plugin or marketplace packaging.
+Personal skills for Codex and Claude Code, installed with `npx skills` as one
+shared copy for both clients. There is no plugin or marketplace packaging.
 
 ## Skills
 
@@ -11,135 +9,43 @@ Each skill lives in `plugins/<group>/skills/<name>/`:
 
 | Group | Skills | Purpose |
 | --- | --- | --- |
-| `preview` | [preview](plugins/preview/skills/preview/SKILL.md) | Preview HTML and Markdown at the configured browser URL, and manage the bundled service. |
-| `dev-workflow` | [implement](plugins/dev-workflow/skills/implement/SKILL.md), `aliyun-pai`, `gpu-cluster`, `grilling`, `herdr-core`, `improve-codebase-architecture`, `leader`, `retro`, `to-tickets` | Discuss designs, create tickets, implement and review changes, operate the GPU cluster, inspect Alibaba Cloud PAI, manage persistent agent terminals, lead background workers, and improve the development workflow. |
-| `docker-build` | [docker-build](plugins/docker-build/skills/docker-build/SKILL.md) | Build and publish container images through the existing dedicated build host. |
+| `preview` | [preview](plugins/preview/skills/preview/SKILL.md) | Publish HTML and Markdown pages through the bundled preview server. |
+| `dev-workflow` | [implement](plugins/dev-workflow/skills/implement/SKILL.md), `gpu-cluster`, `grilling`, `to-tickets`, `leader`, `herdr-core`, `retro`, `improve-codebase-architecture`, `aliyun-pai` | Discuss designs, write issues, implement and review changes, run the GPU clusters, lead background workers, improve the workflow, inspect Alibaba Cloud PAI. |
+| `docker-build` | [docker-build](plugins/docker-build/skills/docker-build/SKILL.md) | Build and publish images on the shared build host. |
 
-The `dev-workflow` skills share relative links, so they ship together without
-duplicating the cluster procedures. `improve-codebase-architecture`, `leader`,
-`retro`, and `to-tickets` run only when invoked explicitly:
-`disable-model-invocation` in their `SKILL.md` for Claude Code and
-`allow_implicit_invocation: false` in their `agents/openai.yaml` for Codex.
+- The `dev-workflow` skills link to each other, so install them together.
+- `improve-codebase-architecture`, `leader`, `retro` and `to-tickets` run only when invoked: `disable-model-invocation` in `SKILL.md` for Claude Code, `allow_implicit_invocation: false` in `agents/openai.yaml` for Codex.
+- They expect this environment: `gpu-cluster` the global instructions, SSH aliases and cluster layout; `aliyun-pai` authenticated `pai` and `aliyun` CLIs; `docker-build` the build host and registry access; `herdr-core` `hc` on `PATH` and signed-in Claude Code and Codex. Installing them creates no infrastructure and authorizes no jobs, cloud changes or publication.
+- The workflow skills state rules and facts; the agent runs `git`, `glab`, `ssh`, `nvidia-smi`, `pai` and `aliyun` itself. The only scripts are the preview server's helper and `docker-build`'s `run-build.sh`.
+- `preview` needs Linux, Python 3.10+ and Node.js 18+. This machine's settings are in [service.md](plugins/preview/skills/preview/references/service.md), the server's features and tests in [its README](plugins/preview/skills/preview/server/README.md).
 
-`herdr-core` coordinates background Claude Code and Codex workers through hc
-from the current session, with verified launch, wait, read-back and Herdr
-sidebar procedures; agents read `hc --skill` for the full hc manual.
+## Install
 
-These are personal environment workflows. `gpu-cluster` expects the existing
-global instructions, SSH aliases, credentials, and cluster layout; `aliyun-pai`
-expects authenticated `pai` and `aliyun` CLIs with read access to the selected PAI
-region and workspace; `docker-build` expects the configured build host and registry
-access; `herdr-core` expects `hc` (herdr-core) on `PATH` and signed-in Claude
-Code and Codex CLIs. Installing the skills does not create that infrastructure
-or authorize jobs, cloud mutations, or publication.
-
-`preview` includes its preview server, Markdown renderer, theme assets, and
-start/stop/status commands. It needs Linux, Python 3.10+, and Node.js 18+; no
-dependency installation is required. Installation does not start a service.
-Documents, logs, and process state live outside the installed skill. The
-current machine's address and restart command are in
-[the service reference](plugins/preview/skills/preview/references/service.md);
-the server's source, features and tests are in
-[its README](plugins/preview/skills/preview/server/README.md).
-
-## Install and update
-
-The repository is private. Use the GitHub authentication already configured on
-the machine. Install all skills for both clients with one command:
-
-```sh
-DISABLE_TELEMETRY=1 npx skills add chenwenxiaolive/plugins \
-  --skill '*' --global --agent codex claude-code --yes
-```
-
-The shared files live in `~/.agents/skills/<name>`. Codex reads that directory;
-Claude Code uses links under `~/.claude/skills/`. Keep the default symlink mode.
-The installer records each source in `~/.agents/.skill-lock.json`. Disabling
-telemetry also disables external skill-audit requests for this private source.
-
-Rerun the same command to refresh this repository's skills for both clients.
-To select a subset, replace `'*'` with skill names. Install the `dev-workflow`
-skills together because some of their relative references cross skill
-directories.
-
-Start a new session and ask for the skill by name. In Claude Code, use `/preview`,
-`/implement`, or the corresponding skill name. Use this shared installation as
-the only active source of these skills.
-
-### Current control machine
-
-The selected source is the real checkout at `/volume/repo/plugins`. After
-committing the intended changes there, install or update all its skills with:
+From the committed checkout (this machine: `/volume/repo/plugins`), or from
+`chenwenxiaolive/plugins` with GitHub authentication:
 
 ```sh
 DISABLE_TELEMETRY=1 npx skills add /volume/repo/plugins \
   --skill '*' --global --agent codex claude-code --yes
 ```
 
-Local installations record the checkout as their source. `skills update` skips
-local sources; rerun this `skills add` command to refresh them. This updates the
-shared skill content and client links without changing the deployed preview
-service or starting infrastructure jobs.
+The files land in `~/.agents/skills/<name>` (read by Codex), linked from
+`~/.claude/skills/` (Claude Code). `skills update` skips local sources, so rerun
+`skills add` to refresh. `python3 scripts/check_installation.py [--source-ref <sha>]`
+compares the installation with a commit (contents, modes, links and the recorded
+source) and never writes anything.
 
-Use the read-only installation check before editing and after installation:
+## Checks
 
 ```sh
-python3 scripts/check_installation.py
-python3 scripts/check_installation.py --source-ref <previously-installed-commit>
+python3 scripts/validate.py [group...]   # Markdown links and anchors, `claude plugin validate --strict`
+python3 -B -m unittest discover -s tests/docker-build -v
+python3 -B -m unittest discover -s tests/preview -v
+python3 -B -m unittest discover -s tests/repository -v
+python3 -B -m unittest discover -s plugins/preview/skills/preview/server/tests -v
 ```
 
-It compares all skills in the selected Git commit (default: `HEAD`) with
-`~/.agents/skills`, checking file contents and modes, missing or extra files
-(Python bytecode caches excepted), Claude Code symlinks, and the local source recorded in the Skills CLI lock file.
-The output names the full source SHA. It reads committed source, so uncommitted
-repository edits are excluded. If source work is already underway, use the known
-previously installed commit to distinguish installed edits from intended updates.
-Resolve unexpected differences and preserve installed edits before replacing the
-installation. A missing initial installation is reported as a difference.
-
-The check returns nonzero for differences or errors and never writes files,
-installs skills or changes client registrations. It checks this repository's
-skills only; it does not audit unrelated skills or client plugins.
-
-## Maintenance
-
-Instructions are shared between both clients. Preserve skill-relative
-references and explicit-invocation settings when moving or editing skills, and
-install changes with the shared `npx skills` workflow above.
-
-Run the repository's static checks with Python 3 and the installed Claude Code
-CLI; no dependency installation is needed:
-
-```bash
-python3 scripts/validate.py                 # all groups
-python3 scripts/validate.py dev-workflow    # selected group(s)
-```
-
-The entry point checks relative inline Markdown file links and heading anchors
-in the selected groups and this README, and runs `claude plugin validate
---strict` on each selected group's `skills` directory to check skill
-frontmatter. Skill schemas belong to the installed client: a generic
-frontmatter helper may reject supported fields such as
-`disable-model-invocation`. Do not remove those fields to satisfy that helper.
-
-These checks do not exercise infrastructure workflows or fetch external links.
-The bundled scripts have tests against fake external commands, so they build
-no container and touch no node:
-
-```bash
-python3 -B -m unittest discover -s tests/docker-build -v   # run-build.sh: fake sudo and docker
-python3 -B -m unittest discover -s tests/repository -v     # check_installation.py on a copied skill
-```
-
-The development workflow skills ship no scripts: they state rules and facts, and
-the agent runs `git`, `glab`, `ssh`, `nvidia-smi`, `pai` and `aliyun` itself.
-
-Editing cluster instructions does not require running a GPU job. Exercise changed
-workflow behavior separately; for installation updates, compare installed file
-contents and modes with their committed source. Report what was actually checked.
-
-Use a development branch and pull request for changes. Merge only on the owner's
-request.
-
-The shared installer is documented in the
-[Skills CLI reference](https://github.com/vercel-labs/skills/blob/main/docs/commands.md).
+The tests use fake external commands and temporary directories; they never touch a node, the registry or the deployed preview service.
+Don't remove client-supported frontmatter such as `disable-model-invocation` to
+satisfy a generic validator. Work on a branch with a pull request; merge only on
+the owner's request.
