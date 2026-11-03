@@ -61,7 +61,13 @@ class LifecycleTests(unittest.TestCase):
         token.chmod(0o644)
         self.assertNotEqual(self.command('start', '--token-file', str(token), check=False).returncode, 0)
         token.chmod(0o600)
+        open_service = self.command('start')
+        self.assertNotEqual(self.command('start', '--token-file', str(token), check=False).returncode, 0)
+        self.assertNotEqual(self.command('start', '--token-file', str(token), state=self.base / 'other-state',
+                                         check=False).returncode, 0)
+        self.assertEqual(self.command('stop')['status'], 'stopped')
         started = self.command('start', '--token-file', str(token))
+        self.assertNotEqual(started['pid'], open_service['pid'])
         self.assertEqual(started['status'], 'running')
         self.assertEqual(self.command('status', '--token-file', str(token))['pid'], started['pid'])
         self.assertNotEqual(self.command('status', check=False).returncode, 0)

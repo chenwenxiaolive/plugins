@@ -14,7 +14,7 @@ import subprocess
 import sys
 import tempfile
 import time
-from urllib.error import URLError
+from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
 from urllib.request import ProxyHandler, Request, build_opener
 import uuid
@@ -131,13 +131,20 @@ def healthy(args):
         probe.write('# ' + marker + '\n')
         probe.flush()
         client = build_opener(ProxyHandler({}))
+        url = args.local_url + '/' + Path(probe.name).name
         headers = {}
-        if args.token_file:
-            token = args.token_file.read_text(encoding='utf-8').rstrip('\r\n')
-            headers['Authorization'] = 'Basic ' + base64.b64encode(f'preview:{token}'.encode()).decode()
         try:
-            request = Request(args.local_url + '/' + Path(probe.name).name, headers=headers)
-            with client.open(request, timeout=2) as response:
+            if args.token_file:
+                # A server that answers without the token is not protected, whatever it does with one.
+                try:
+                    client.open(url, timeout=2).close()
+                    return False
+                except HTTPError as error:
+                    if error.code != 401:
+                        return False
+                token = args.token_file.read_text(encoding='utf-8').rstrip('\r\n')
+                headers['Authorization'] = 'Basic ' + base64.b64encode(f'preview:{token}'.encode()).decode()
+            with client.open(Request(url, headers=headers), timeout=2) as response:
                 return (response.headers.get_content_type() == 'text/html'
                         and f'<h1 id="{marker}">{marker}</h1>'.encode() in response.read(65536))
         except (URLError, TimeoutError, ConnectionError):
