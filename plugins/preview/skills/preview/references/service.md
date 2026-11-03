@@ -1,6 +1,6 @@
 # Preview service
 
-The plugin contains the preview service source, including the Markdown
+The skill contains the preview service source, including the Markdown
 renderer and theme assets. It requires Linux, Python 3.10+ and Node.js 18+ on PATH;
 no package installation, build, or browser CDN is required.
 
@@ -19,7 +19,7 @@ the command. Explicit flags override the corresponding environment variables.
 | `--state-dir` | `PREVIEW_STATE_DIR` | `~/.local/state/preview/<hostname>/<port>` |
 
 The document directory must already exist. State and logs must be outside both
-the document root and the plugin directory. The helper supports IPv4 addresses
+the document root and the skill directory. The helper supports IPv4 addresses
 and hostnames. Keep the loopback bind for local viewing or SSH forwarding.
 `0.0.0.0` exposes the service on all IPv4 interfaces and requires an explicit
 request for network access. Set a browser base URL explicitly when the user's
@@ -43,11 +43,11 @@ errors are English messages on stderr.
 
 `stop` stops only the process recorded by this helper, verifying its host, boot,
 PID identity, and command before signaling through a Linux pidfd. It does not
-stop an externally started service. Use the same state directory across plugin
-upgrades; stop uses the saved process record even if the plugin path changed.
+stop an externally started service. Use the same state directory across skill
+upgrades; stop uses the saved process record even if the skill path changed.
 To change a managed service's root, bind, or port, stop it with its original
-configuration and start it with the new settings. Stop before removing the old
-plugin version's files. This helper starts a detached process; it does not install
+configuration and start it with the new settings. Stop it before removing an old
+copy of the skill. This helper starts a detached process; it does not install
 a system service or arrange startup after reboot.
 
 ## Existing control-machine service
@@ -106,9 +106,9 @@ descending order. Directories remain first; sizes use bytes and modification
 times use their full precision. Sorting works without JavaScript and is retained
 in the page URL when refreshed.
 
-The plugin repository is the source of truth for the service. Edit the files
+This repository is the source of truth for the service. Edit the files
 under `plugins/preview/skills/preview/server/` directly and release changes with
-the plugin; no separate service checkout or import command is needed.
+the skill; no separate service checkout or import command is needed.
 
 - `server.py`: HTTP routes, directory listing, sorting, and file handling.
 - `renderer.cjs`: Markdown rendering through the existing Node executable.
@@ -119,13 +119,13 @@ the plugin; no separate service checkout or import command is needed.
 The third-party markdown-it renderer is pinned to 14.1.0 and Mermaid to 12.2.0.
 Their source URLs and SHA-256 hashes are in `server/assets/sources.json`, with
 their MIT licenses alongside the bundles. Update these records when updating those
-third-party assets. They do not pin the plugin's own service code.
+third-party assets. They do not pin the skill's own service code.
 
 Restart a managed service with the helper after changing service code or the
 renderer. Document and stylesheet edits appear on refresh. Keep launch scripts,
 logs, PIDs, and run records outside the checkout.
 
-Run the service and lifecycle suites from the plugin repository:
+Run the service and lifecycle suites from the repository root:
 
 ```sh
 python3 -B -m unittest discover -s plugins/preview/skills/preview/server/tests -v

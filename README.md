@@ -2,23 +2,24 @@
 
 Personal skills for Codex and Claude Code, maintained in
 [chenwenxiaolive/plugins](https://github.com/chenwenxiaolive/plugins).
-Use `npx skills` to install and update one shared copy for both clients.
-The repository also retains the `chenwenxiaolive-plugins` packaging metadata.
+Use `npx skills` to install and update one shared copy for both clients. The
+repository has no plugin or marketplace packaging.
 
-## Plugins
+## Skills
 
-| Plugin | Version | Purpose |
+Each skill lives in `plugins/<group>/skills/<name>/`:
+
+| Group | Skills | Purpose |
 | --- | --- | --- |
-| [preview](plugins/preview/skills/preview/SKILL.md) | 0.4.1 | Preview HTML and Markdown locally or through an SSH tunnel, and manage the bundled service. |
-| [dev-workflow](plugins/dev-workflow/skills/implement/SKILL.md) | 0.1.14 | Discuss designs, create tickets, implement and review changes, operate the GPU cluster, inspect Alibaba Cloud PAI, manage persistent agent terminals, lead background workers, and improve the development workflow. |
-| [docker-build](plugins/docker-build/skills/docker-build/SKILL.md) | 0.2.0 | Build and publish container images through the existing dedicated build host. |
+| `preview` | [preview](plugins/preview/skills/preview/SKILL.md) | Preview HTML and Markdown locally or through an SSH tunnel, and manage the bundled service. |
+| `dev-workflow` | [implement](plugins/dev-workflow/skills/implement/SKILL.md), `aliyun-pai`, `gpu-cluster`, `grilling`, `herdr-core`, `improve-codebase-architecture`, `leader`, `retro`, `to-tickets` | Discuss designs, create tickets, implement and review changes, operate the GPU cluster, inspect Alibaba Cloud PAI, manage persistent agent terminals, lead background workers, and improve the development workflow. |
+| `docker-build` | [docker-build](plugins/docker-build/skills/docker-build/SKILL.md) | Build and publish container images through the existing dedicated build host. |
 
-`dev-workflow` contains `aliyun-pai`, `gpu-cluster`, `grilling`, `herdr-core`,
-`implement`, `improve-codebase-architecture`, `leader`, `retro`, and
-`to-tickets`. Several of these skills share relative links, so they ship
-together without duplicating the cluster procedures.
-`improve-codebase-architecture`, `leader`, `retro`, and `to-tickets` retain
-their explicit-invocation policy.
+The `dev-workflow` skills share relative links, so they ship together without
+duplicating the cluster procedures. `improve-codebase-architecture`, `leader`,
+`retro`, and `to-tickets` run only when invoked explicitly:
+`disable-model-invocation` in their `SKILL.md` for Claude Code and
+`allow_implicit_invocation: false` in their `agents/openai.yaml` for Codex.
 
 `herdr-core` coordinates background Claude Code and Codex workers through hc
 from the current session, with verified launch, wait, read-back and Herdr
@@ -29,13 +30,13 @@ global instructions, SSH aliases, credentials, and cluster layout; `aliyun-pai`
 expects an Alibaba Cloud CLI profile with read access to the selected PAI region
 and workspace; `docker-build` expects the configured build host and registry
 access; `herdr-core` expects `hc` (herdr-core) on `PATH` and signed-in Claude
-Code and Codex CLIs. Installing the plugins does not create that infrastructure
+Code and Codex CLIs. Installing the skills does not create that infrastructure
 or authorize jobs, cloud mutations, or publication.
 
 `preview` includes its preview server, Markdown renderer, theme assets, and
 start/stop/status commands. It needs Linux, Python 3.10+, and Node.js 18+; no
 dependency installation is required. Installation does not start a service.
-Documents, logs, and process state live outside the installed plugin. Its
+Documents, logs, and process state live outside the installed skill. Its
 behavior, configuration, tests and the current machine's address are in
 [the service reference](plugins/preview/skills/preview/references/service.md);
 the service source is maintained in `plugins/preview/skills/preview/server/`.
@@ -61,13 +62,8 @@ skills together because some of their relative references cross skill
 directories.
 
 Start a new session and ask for the skill by name. In Claude Code, use `/preview`,
-`/implement`, or the corresponding skill name. The explicit-invocation policies
-of `improve-codebase-architecture`, `leader`, `retro`, and `to-tickets` are
-preserved.
-
-Use this shared installation as the active source. If a repository plugin is
-already enabled in either client, verify the shared skills first, then remove
-that duplicate plugin registration. Keep unrelated plugins installed normally.
+`/implement`, or the corresponding skill name. Use this shared installation as
+the only active source of these skills.
 
 ### Current control machine
 
@@ -102,34 +98,27 @@ installation. A missing initial installation is reported as a difference.
 
 The check returns nonzero for differences or errors and never writes files,
 installs skills or changes client registrations. It checks this repository's
-skills only; it does not audit unrelated skills or marketplace registrations.
+skills only; it does not audit unrelated skills or client plugins.
 
 ## Maintenance
 
-Each plugin lives in `plugins/<name>/`. Register it in both marketplace catalogs:
-
-- `.agents/plugins/marketplace.json` for Codex.
-- `.claude-plugin/marketplace.json` for Claude Code.
-
-Instructions are shared between both clients. Each portable `plugin.json` and
-Claude manifest carry the same name and version. Increment both versions when
-publishing an update and update the table above. Preserve skill-relative
-references and explicit-invocation settings when moving or editing skills.
-Use the shared `npx skills` installation workflow for this repository's skills.
+Instructions are shared between both clients. Preserve skill-relative
+references and explicit-invocation settings when moving or editing skills, and
+install changes with the shared `npx skills` workflow above.
 
 Run the repository's static checks with Python 3 and the installed Claude Code
 CLI; no dependency installation is needed:
 
 ```bash
-python3 scripts/validate.py                 # all plugins
-python3 scripts/validate.py dev-workflow    # selected plugin(s)
+python3 scripts/validate.py                 # all groups
+python3 scripts/validate.py dev-workflow    # selected group(s)
 ```
 
-The entry point checks both catalogs, manifest names and versions, the version
-table above, and relative inline Markdown file links and heading anchors in the
-selected plugins and this README. It runs `claude plugin validate --strict` on
-the marketplace, each selected plugin and its `skills` component directory. Skill schemas belong to the installed
-client: a generic frontmatter helper may reject supported fields such as
+The entry point checks relative inline Markdown file links and heading anchors
+in the selected groups and this README, and runs `claude plugin validate
+--strict` on each selected group's `skills` directory to check skill
+frontmatter. Skill schemas belong to the installed client: a generic
+frontmatter helper may reject supported fields such as
 `disable-model-invocation`. Do not remove those fields to satisfy that helper.
 
 These checks do not exercise infrastructure workflows or fetch external links.
@@ -150,6 +139,3 @@ request.
 
 The shared installer is documented in the
 [Skills CLI reference](https://github.com/vercel-labs/skills/blob/main/docs/commands.md).
-Package formats follow the official
-[OpenAI plugin documentation](https://developers.openai.com/plugins/build/plugins)
-and [Claude Code marketplace documentation](https://code.claude.com/docs/en/plugin-marketplaces).

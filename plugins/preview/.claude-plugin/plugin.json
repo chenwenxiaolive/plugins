@@ -1,9 +1,0 @@
-{
-  "name": "preview",
-  "version": "0.4.1",
-  "description": "Preview HTML and Markdown locally or through an SSH tunnel, and manage the bundled service.",
-  "author": {
-    "name": "chenwenxiaolive"
-  },
-  "repository": "https://github.com/chenwenxiaolive/plugins"
-}

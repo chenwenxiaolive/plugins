@@ -7,7 +7,7 @@ description: Create or update standalone HTML and Markdown artifacts in the loca
 
 Publish the requested artifact through a verified preview service. For service
 management, read [the service reference](references/service.md) and use
-`scripts/preview.py start|status|stop`. Installing the plugin alone starts nothing.
+`scripts/preview.py start|status|stop`. Installing the skill alone starts nothing.
 Reuse an available service. A request to set up or start preview authorizes using
 the bundled helper; a document-only request does not authorize changing shared
 services or network configuration.
