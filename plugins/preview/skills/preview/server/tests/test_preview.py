@@ -1,5 +1,6 @@
 """Exercise rendering and file serving through the real HTTP handler."""
 
+import base64
 from functools import partial
 from html.parser import HTMLParser
 from http.server import ThreadingHTTPServer
@@ -309,6 +310,56 @@ class PreviewHTTPTests(unittest.TestCase):
         self.assertEqual(headers["Cache-Control"], "no-store")
         self.assertIn(b"Updated version", body)
         self.assertNotIn(b"First version", body)
+
+
+class TokenAccessTests(unittest.TestCase):
+    TOKEN = "test token: with spaces."
+
+    @classmethod
+    def setUpClass(cls):
+        cls.scratch = tempfile.TemporaryDirectory(prefix="preview-token-", dir=os.environ.get("PREVIEW_TEST_TMPDIR"))
+        cls.root = Path(cls.scratch.name)
+        (cls.root / "secret.md").write_text("# Secret marker\n", encoding="utf-8")
+        handler = partial(module.PreviewHandler, directory=str(cls.root), token=cls.TOKEN)
+        cls.httpd = ThreadingHTTPServer(("127.0.0.1", 0), handler)
+        cls.httpd.node = shutil.which("node")
+        cls.worker = threading.Thread(target=cls.httpd.serve_forever, daemon=True)
+        cls.worker.start()
+        cls.base = f"http://127.0.0.1:{cls.httpd.server_port}"
+        cls.client = build_opener(ProxyHandler({}))
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.httpd.shutdown()
+        cls.httpd.server_close()
+        cls.worker.join()
+        cls.scratch.cleanup()
+
+    def fetch(self, path, credentials=None, method="GET"):
+        headers = {}
+        if credentials is not None:
+            headers["Authorization"] = "Basic " + base64.b64encode(credentials.encode()).decode()
+        return self.client.open(Request(self.base + path, method=method, headers=headers), timeout=10)
+
+    def test_requests_without_the_token_are_refused(self):
+        for path in ["/secret.md", "/", "/secret.md?raw=1", "/_preview_assets/style.css"]:
+            for credentials in [None, "user:wrong", "test token: with spaces.:", "garbage"]:
+                with self.subTest(path=path, credentials=credentials), self.assertRaises(HTTPError) as error:
+                    self.fetch(path, credentials)
+                self.assertEqual(error.exception.code, 401)
+                self.assertTrue(error.exception.headers["WWW-Authenticate"].startswith("Basic "))
+                self.assertNotIn(b"Secret marker", error.exception.read())
+        with self.assertRaises(HTTPError) as error:
+            self.fetch("/secret.md", method="HEAD")
+        self.assertEqual(error.exception.code, 401)
+
+    def test_the_token_as_password_opens_every_page(self):
+        for username in ["", "anyone"]:
+            with self.subTest(username=username), self.fetch("/secret.md", username + ":" + self.TOKEN) as response:
+                self.assertEqual(response.headers.get_content_type(), "text/html")
+                self.assertIn(b"Secret marker", response.read())
+        with self.fetch("/secret.md?raw=1", "x:" + self.TOKEN) as response:
+            self.assertEqual(response.read(), b"# Secret marker\n")
 
 
 if __name__ == "__main__":
