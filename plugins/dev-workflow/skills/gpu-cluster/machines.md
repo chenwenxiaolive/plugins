@@ -3,7 +3,7 @@
 ## Control machine (this one)
 
 - Ubuntu 22.04, root, UTC, 4 vCPU / 4 GiB RAM / about 80 GB disk, no GPU. Edit, commit and push the selected checkout here; keep work light ([validation scope](remote-workflow.md#validation-scope)). Its `/volume` is local disk, not the nodes' storage.
-- Tools: Python 3.10 without `pip`, `ensurepip`, `uv` or `gcc`; `git`, `curl`, `jq`, `rsync`, Docker CLI, `gh`, `glab`. Use gate's `rclone`. Docker builds go to the build host (docker-build skill). `glab` came from GitLab's release `.deb`: update it by installing a newer `.deb` checked against `checksums.txt`.
+- Tools: Python 3.10 without `pip`, `ensurepip` or `gcc`; `uv` in `~/.local/bin`; `git`, `curl`, `jq`, `rsync`, Docker CLI, `gh`, `glab`. Use gate's `rclone`. Docker builds go to the build host (docker-build skill). `glab` came from GitLab's release `.deb`: update it by installing a newer `.deb` checked against `checksums.txt`.
 - Its `/volume/.bashrc`, `/volume/.ssh` and `/volume/.config` are saved gate deployment inputs (gate.md), not this machine's configuration; don't source them here.
 
 ## GPU nodes and gates

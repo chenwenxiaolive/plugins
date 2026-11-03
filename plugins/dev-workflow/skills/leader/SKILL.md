@@ -26,7 +26,7 @@ A worker reads its task, not this skill, so the launch carries everything
 Goal: <objective and the context it needs>. Done when: <completion criteria>.
 Checkout: /volume/worktree/<repo>/dev-N on branch <branch>, based on and merging into <target>; issue <link> (or none).
 Use the implement skill and stop at ready-for-merge.
-The user requested remote testing for this worktree on <cluster>, and named <node> for GPU work: use only <GPUs, or the whole node>. (Or: no remote or GPU work.)
+The user requested remote testing for this worktree on <cluster>, and named <node> for GPU work: use only <GPUs, or the whole node>. (Or: no GPU work; CPU-only checks run on <cluster>'s -0 node with CUDA_VISIBLE_DEVICES= empty.)
 Do not design for rare or future cases nobody asked about. Start no other agents; the `codex review` that implement runs is part of the task.
 ```
 

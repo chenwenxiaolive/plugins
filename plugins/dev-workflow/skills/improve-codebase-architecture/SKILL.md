@@ -13,4 +13,4 @@ remote access; inspection needs no GPU job.
 
 - Trace real callers and data flow. Look for changes that ripple through unrelated modules, leaky interfaces, duplicate sources of truth, hidden state, and behavior that can't be tested through a useful interface. For GPU code, account for data movement, allocation and synchronization; performance gains are hypotheses until measured.
 - For each of the few strongest candidates give the evidence (files, callers, a concrete example), the change, what stays the same, how to validate it, and its tradeoffs. Say so when the current structure is adequate; new layers, wrappers or extension points need a concrete benefit.
-- Report in chat by default; a standalone report goes under `/preview`. Issues go through [to-tickets](../to-tickets/SKILL.md), implementation through [implement](../implement/SKILL.md), when the user asks.
+- Report in chat by default; a standalone report goes under `/preview`. Issues follow [to-tickets](../to-tickets/SKILL.md) (read its file; only the user can invoke it as a skill), implementation through [implement](../implement/SKILL.md), when the user asks.

@@ -40,8 +40,21 @@ JSON on success and an English message on stderr on failure.
 - `assets/sources.json`: source URLs and SHA-256 of the pinned markdown-it 14.1.0 and Mermaid 12.2.0 bundles, whose MIT licenses sit beside them. Update it with those bundles.
 - `tests/`: HTTP integration and theme tests.
 
-Restart a managed server after changing `server.py` or the renderer; stylesheet
-and document edits show on refresh.
+## Deploying a change
+
+The deployed service runs a release copy of the skill, recorded as `release` and
+`helper` in its state directory's `deployment.json`; editing this checkout changes
+nothing there. After merging a server change:
+
+```sh
+release=~/.local/share/preview/releases/<commit>
+mkdir -p "$release" && git archive <commit> plugins/preview/skills | tar -x -C "$release" --strip-components=2
+```
+
+Then stop the service with the old helper, start it with
+`$release/skills/preview/scripts/preview.py` and the same settings, and update
+`release` and `helper` in `deployment.json`. Keep the old release until the new
+one is verified.
 
 ## Tests
 
