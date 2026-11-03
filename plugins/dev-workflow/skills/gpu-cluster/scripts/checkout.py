@@ -9,8 +9,9 @@ Run in the selected local checkout; the remote counterpart has the same physical
                                 read-only: same origin and branch, HEAD at SHA (default:
                                 local HEAD), clean, idle on the cluster; print the uv lock check
   checkout.py sync NODE [--sha SHA]
-                                the same preconditions, then fetch and fast-forward to SHA,
-                                verify, and print the uv lock check
+                                the same preconditions, then fetch and fast-forward to SHA
+                                (a detached HEAD moves to any pushed SHA once its own commit
+                                is on origin), verify, and print the uv lock check
 
 Exit codes: 0 ok or idle, 1 a check failed or the checkout is busy, 2 a command failed.
 Nothing here resets, cleans, stashes or switches branches.
@@ -45,10 +46,15 @@ class Failure(Exception):
     """A command could not run; the state is unknown."""
 
 
+def redact(text):
+    """Drop userinfo from URLs so messages never carry credentials."""
+    return re.sub(r"(\w+://)[^/@\s'\"]+@", r"\1", text)
+
+
 def run(command, cwd=None):
     result = subprocess.run(command, cwd=cwd, capture_output=True, text=True)
     if result.returncode:
-        raise Failure(f"{shlex.join(command[:4])}: {result.stderr.strip() or result.stdout.strip()}")
+        raise Failure(redact(f"{shlex.join(command[:4])}: {result.stderr.strip() or result.stdout.strip()}"))
     return result.stdout
 
 
@@ -128,9 +134,9 @@ def environment(node, checkout):
     )
     result = subprocess.run(["ssh", "-o", "BatchMode=yes", node, script], capture_output=True, text=True)
     if result.returncode == 255:
-        raise Failure(f"ssh {node}: {result.stderr.strip()}")
+        raise Failure(redact(f"ssh {node}: {result.stderr.strip()}"))
     print("environment (uv sync --locked --dry-run; dependency changes mean the environment does not match the lock):")
-    print("  " + (result.stdout + result.stderr).strip().replace("\n", "\n  "))
+    print("  " + redact(result.stdout + result.stderr).strip().replace("\n", "\n  "))
     if result.returncode:
         print(f"FAIL: the environment check exited with {result.returncode}")
         return False
@@ -146,7 +152,7 @@ def preconditions(node, checkout, sha, local_branch, allow_behind):
     elif state["root"] != checkout:
         problems.append(f"remote Git root is {state['root']}, not {checkout}; the path is inside another checkout")
     if normalize(state["origin"]) != normalize(git(checkout, "remote", "get-url", "origin")):
-        problems.append(f"remote origin {state['origin']} differs from the local origin")
+        problems.append(f"remote origin {redact(state['origin'])} differs from the local origin")
     if state["branch"] != local_branch:
         problems.append(f"remote is on {state['branch']}, local on {local_branch}; switch under the worktree reuse rules")
     if state["dirty"]:
@@ -187,17 +193,23 @@ def main():
             q = shlex.quote
             # The target must be reachable from what origin serves, not merely present on the node.
             if branch == "(detached)":
-                fetch, move = "git fetch --quiet origin", f"git checkout --quiet --detach {sha}"
-                pushed = f'test -n "$(git branch -r --contains {sha} 2>/dev/null)"'
+                fetch, move = "git fetch --quiet --prune origin", f"git checkout --quiet --detach {sha}"
+                pushed = f'test -n "$(git for-each-ref --contains {sha} refs/remotes/origin/ 2>/dev/null)"'
                 unpushed = f"{sha} is on no origin branch; push it first"
+                # A detached checkout (a reused review worktree) may move to any pushed commit,
+                # as long as its current commit is on origin too and nothing local is orphaned.
+                safe = 'test -n "$(git for-each-ref --contains HEAD refs/remotes/origin/ 2>/dev/null)"'
+                unsafe = "remote HEAD is on no origin branch; investigate before moving it"
             else:
                 fetch, move = f"git fetch --quiet origin {q(branch)}", f"git merge --quiet --ff-only {sha}"
                 pushed = f"git merge-base --is-ancestor {sha} FETCH_HEAD 2>/dev/null"
                 unpushed = f"{sha} is not on origin/{branch}; push it first"
+                safe = f"git merge-base --is-ancestor HEAD {sha}"
+                unsafe = "remote HEAD is not an ancestor; investigate the divergence"
             script = (
                 f"cd -- {q(checkout)} && {fetch} && "
                 f"{{ {pushed} || {{ echo {q(unpushed)} >&2; exit 1; }}; }} && "
-                f"{{ git merge-base --is-ancestor HEAD {sha} || {{ echo 'remote HEAD is not an ancestor; investigate the divergence' >&2; exit 1; }}; }} && "
+                f"{{ {safe} || {{ echo {q(unsafe)} >&2; exit 1; }}; }} && "
                 f"{move}"
             )
             try:

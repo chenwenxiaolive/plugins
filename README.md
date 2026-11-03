@@ -88,8 +88,8 @@ python3 scripts/check_installation.py --source-ref <previously-installed-commit>
 ```
 
 It compares all skills in the selected Git commit (default: `HEAD`) with
-`~/.agents/skills`, checking file contents and modes, missing or extra files,
-Claude Code symlinks, and the local source recorded in the Skills CLI lock file.
+`~/.agents/skills`, checking file contents and modes, missing or extra files
+(Python bytecode caches excepted), Claude Code symlinks, and the local source recorded in the Skills CLI lock file.
 The output names the full source SHA. It reads committed source, so uncommitted
 repository edits are excluded. If source work is already underway, use the known
 previously installed commit to distinguish installed edits from intended updates.
@@ -128,6 +128,7 @@ no container, touch no node and write no GitLab comment:
 ```bash
 python3 -B -m unittest discover -s tests/docker-build -v   # run-build.sh: fake sudo and docker
 python3 -B -m unittest discover -s tests/dev-workflow -v   # checkout.py and issue_record.py: fake ssh and glab
+python3 -B -m unittest discover -s tests/repository -v     # check_installation.py on a copied skill
 ```
 
 Editing cluster instructions does not require running a GPU job. Exercise changed
