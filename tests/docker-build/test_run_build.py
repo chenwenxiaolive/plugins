@@ -83,7 +83,7 @@ class RunBuildTest(unittest.TestCase):
         self.assertEqual(self.status(), "0")
         self.assertIn(f"Verified {IMAGE}@{DIGEST}", out)
         build = self.docker_calls()[0]
-        for flag in ["--builder", "xqing-nvme1", "--provenance=false", "--sbom=false", "--push"]:
+        for flag in ["--builder", "default", "--provenance=false", "--sbom=false", "--push"]:
             self.assertIn(flag, build)
         self.assertEqual(build[-3:], ["--build-arg", "PIP_INDEX_URL=https://example.invalid/simple", "ctx"])
         for name in ["build-metadata.json", "image-inspect.txt", "image-inspect.json", "image-manifest.json"]:
