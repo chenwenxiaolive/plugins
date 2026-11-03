@@ -27,8 +27,8 @@ sidebar procedures; agents read `hc --skill` for the full hc manual.
 
 These are personal environment workflows. `gpu-cluster` expects the existing
 global instructions, SSH aliases, credentials, and cluster layout; `aliyun-pai`
-expects an Alibaba Cloud CLI profile with read access to the selected PAI region
-and workspace; `docker-build` expects the configured build host and registry
+expects authenticated `pai` and `aliyun` CLIs with read access to the selected PAI
+region and workspace; `docker-build` expects the configured build host and registry
 access; `herdr-core` expects `hc` (herdr-core) on `PATH` and signed-in Claude
 Code and Codex CLIs. Installing the skills does not create that infrastructure
 or authorize jobs, cloud mutations, or publication.
@@ -36,10 +36,11 @@ or authorize jobs, cloud mutations, or publication.
 `preview` includes its preview server, Markdown renderer, theme assets, and
 start/stop/status commands. It needs Linux, Python 3.10+, and Node.js 18+; no
 dependency installation is required. Installation does not start a service.
-Documents, logs, and process state live outside the installed skill. Its
-behavior, configuration, tests and the current machine's address are in
+Documents, logs, and process state live outside the installed skill. The
+current machine's address and restart command are in
 [the service reference](plugins/preview/skills/preview/references/service.md);
-the service source is maintained in `plugins/preview/skills/preview/server/`.
+the server's source, features and tests are in
+[its README](plugins/preview/skills/preview/server/README.md).
 
 ## Install and update
 
@@ -130,8 +131,8 @@ python3 -B -m unittest discover -s tests/docker-build -v   # run-build.sh: fake 
 python3 -B -m unittest discover -s tests/repository -v     # check_installation.py on a copied skill
 ```
 
-The development workflow (`implement`, `gpu-cluster`) ships no scripts: it states
-rules and facts, and the agent runs `git`, `glab`, `ssh` and `nvidia-smi` itself.
+The development workflow skills ship no scripts: they state rules and facts, and
+the agent runs `git`, `glab`, `ssh`, `nvidia-smi`, `pai` and `aliyun` itself.
 
 Editing cluster instructions does not require running a GPU job. Exercise changed
 workflow behavior separately; for installation updates, compare installed file
