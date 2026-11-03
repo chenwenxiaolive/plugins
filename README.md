@@ -10,7 +10,7 @@ The repository also retains the `chenwenxiaolive-plugins` packaging metadata.
 | Plugin | Version | Purpose |
 | --- | --- | --- |
 | [preview](plugins/preview/skills/preview/SKILL.md) | 0.4.1 | Preview HTML and Markdown locally or through an SSH tunnel, and manage the bundled service. |
-| [dev-workflow](plugins/dev-workflow/skills/implement/SKILL.md) | 0.1.10 | Discuss designs, create tickets, implement and review changes, operate the GPU cluster, inspect Alibaba Cloud PAI, manage persistent agent terminals, lead background workers, and improve the development workflow. |
+| [dev-workflow](plugins/dev-workflow/skills/implement/SKILL.md) | 0.1.11 | Discuss designs, create tickets, implement and review changes, operate the GPU cluster, inspect Alibaba Cloud PAI, manage persistent agent terminals, lead background workers, and improve the development workflow. |
 | [docker-build](plugins/docker-build/skills/docker-build/SKILL.md) | 0.1.0 | Build and publish container images through the existing dedicated build host. |
 
 `dev-workflow` contains `aliyun-pai`, `gpu-cluster`, `grilling`, `herdr-core`,
@@ -72,6 +72,26 @@ Local installations record the checkout as their source. `skills update` skips
 local sources; rerun this `skills add` command to refresh them. This updates the
 shared skill content and client links without changing the deployed preview
 service or starting infrastructure jobs.
+
+Use the read-only installation check before editing and after installation:
+
+```sh
+python3 scripts/check_installation.py
+python3 scripts/check_installation.py --source-ref <previously-installed-commit>
+```
+
+It compares all skills in the selected Git commit (default: `HEAD`) with
+`~/.agents/skills`, checking file contents and modes, missing or extra files,
+Claude Code symlinks, and the local source recorded in the Skills CLI lock file.
+The output names the full source SHA. It reads committed source, so uncommitted
+repository edits are excluded. If source work is already underway, use the known
+previously installed commit to distinguish installed edits from intended updates.
+Resolve unexpected differences and preserve installed edits before replacing the
+installation. A missing initial installation is reported as a difference.
+
+The check returns nonzero for differences or errors and never writes files,
+installs skills or changes client registrations. It checks this repository's
+skills only; it does not audit unrelated skills or marketplace registrations.
 
 ## Imported personal skills
 

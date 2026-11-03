@@ -14,8 +14,11 @@ You are the leader.
   always, without breaking anything.
 - There is one leader, and it stays in the project's original checkout.
   Workers run in worktrees.
-- When a task needs substantial implementation, debugging, test fixes, or
-  multi-file changes, delegate it to a Claude Code worker through
+- Decide whether to delegate by the amount of work, task independence and
+  benefit from parallel execution. Handle small, straightforward changes
+  directly in the selected checkout under [implement](../implement/SKILL.md),
+  even when they touch several files. Delegate substantial implementation,
+  investigation or independent parallel tasks to a Claude Code worker through
   [herdr-core](../herdr-core/SKILL.md), which has the launch command (Opus
   5.5 at xhigh). For frontend work, have it refine the layout, visual
   details, and actual interactions.
@@ -68,17 +71,22 @@ Name the target even when it is the default branch: project docs may say
   [herdr-core's follow-up guidance](../herdr-core/SKILL.md#wait-read-follow-up).
 - After a worker finishes, inspect the actual changes and its MR's review
   status yourself.
-- You can't open a browser on this machine. For page changes, serve the page
-  and give the user its URL to check through their SSH tunnel (the preview
-  service for standalone files). A page change stays unverified until the
-  user confirms it.
+- For page changes, report functional checks and visual acceptance separately,
+  with the evidence and remaining gaps for each. Use available browser tooling
+  when appropriate; when user inspection is needed, serve the page and give
+  its URL through their SSH tunnel (the preview service for standalone files).
+  Without visual evidence, report "functional checks passed; visual acceptance
+  pending" only if those checks actually passed. Do not present functional
+  checks as visual acceptance. A pending visual check does not invalidate
+  completed functional checks; required acceptance criteria still apply.
 - Don't treat a task as finished just because another agent says it is.
 - When the user asks to merge, merge the MRs in dependency order under the
-  [merge workflow](../gpu-cluster/merge-workflow.md), each through a worker
-  in that MR's worktree: its original worker, or, if that one was closed, a
-  new worker told the MR link and that the user asked to merge it. Don't
-  merge from your own checkout: a re-review there would compare your branch,
-  not the MR's. Each merge moves the target, so the next MR is rechecked
+  [merge workflow](../gpu-cluster/merge-workflow.md). For work you implemented
+  directly, use its selected checkout and reviewed branch. For delegated work,
+  merge through a worker in that MR's worktree: its original worker, or, if
+  that one was closed, a new worker told the MR link and that the user asked
+  to merge it. Don't review a delegated MR from your own branch. Each merge
+  moves the target, so the next MR is rechecked
   against it. Run the necessary checks on the integrated result. Work merged
   into a feature branch is not on the default branch yet: open that
   branch's MR into it, and merge it when the user asks.

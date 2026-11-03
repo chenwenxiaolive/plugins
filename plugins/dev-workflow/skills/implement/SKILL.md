@@ -41,8 +41,8 @@ the execution record is an issue comment, and `gh pr merge --match-head-commit
 Commit only this task's changes, push its development branch and create or update
 the MR. Use the project template; describe the resulting behavior, issue links,
 validation evidence and material limitations. Use a closing reference only when
-the MR fulfills that issue. Add its link to the issue's execution record and keep
-that record's status current through review, blockers and the final outcome.
+the MR fulfills that issue. Add its link to the issue's execution record and update
+that record at its defined milestones. Keep review details in the MR.
 
 Use the MR's review-status section to record acceptance under the
 [requirement acceptance procedure](../gpu-cluster/remote-workflow.md#requirement-acceptance-within-each-review-pass).
