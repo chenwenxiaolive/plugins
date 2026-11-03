@@ -33,7 +33,7 @@ import time
 KEEPALIVE = re.compile(r"keepalive\.py\b.*--occupy")
 
 # Capture the process query before parsing so its failure is not hidden behind the loop.
-GPU_QUERY = r"""nvidia-smi --query-gpu=index,uuid,memory.used,memory.total --format=csv,noheader,nounits && echo -- &&
+GPU_QUERY = r"""nvidia-smi --query-gpu=index,uuid,memory.total,memory.free --format=csv,noheader,nounits && echo -- &&
 apps=$(nvidia-smi --query-compute-apps=gpu_uuid,pid,used_memory --format=csv,noheader,nounits) &&
 printf '%s\n' "$apps" | while IFS=', ' read -r uuid pid mem; do
   printf '%s\t%s\t%s\t%s\t%s\n' "$uuid" "$pid" "$mem" "$(readlink "/proc/$pid/cwd" 2>/dev/null)" \
@@ -77,12 +77,13 @@ def ssh(node, script, stdin=None, timeout=120):
 
 
 def gpu_state(node):
-    """Return [{index, uuid, total, free, others}] with keepalive workers' memory counted as free."""
+    """Return [{index, uuid, total, free, others}]; free is the driver's free memory plus keepalive workers'."""
     gpu_lines, _, app_lines = ssh(node, GPU_QUERY).partition("--\n")
     gpus = {}
     for line in gpu_lines.splitlines():
-        index, uuid, used, total = [field.strip() for field in line.split(",")]
-        gpus[uuid] = {"index": index, "uuid": uuid, "total": int(total), "free": int(total) - int(used), "others": []}
+        # memory.free already excludes memory the driver reserves; total - used would not.
+        index, uuid, total, free = [field.strip() for field in line.split(",")]
+        gpus[uuid] = {"index": index, "uuid": uuid, "total": int(total), "free": int(free), "others": []}
     for line in app_lines.splitlines():
         fields = line.split("\t")
         if len(fields) != 5 or fields[0] not in gpus:

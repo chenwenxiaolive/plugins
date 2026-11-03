@@ -60,7 +60,7 @@ class JobTest(unittest.TestCase):
             (bin_dir / name).chmod(0o755)
         self.env = {**os.environ, "PATH": f"{bin_dir}:{os.environ['PATH']}",
                     "FAKE_SSH_MAP": f"/volume/tmp={self.volume_tmp}", "FAKE_SSH_KEEP": str(self.tmp),
-                    "FAKE_GPUS": "0, GPU-a, 700, 1000\n1, GPU-b, 100, 1000", "FAKE_APPS": ""}
+                    "FAKE_GPUS": "0, GPU-a, 1000, 250\n1, GPU-b, 1000, 850", "FAKE_APPS": ""}
 
     def job(self, *args, **env):
         result = subprocess.run(["python3", "-B", str(SCRIPT), *args], cwd=self.work,
@@ -86,11 +86,12 @@ class JobTest(unittest.TestCase):
         apps = f"GPU-a, {keepalive.pid}, 600\nGPU-b, {other.pid}, 50"
         code, out = self.job("gpus", "sh-0", "--gpus", "0", FAKE_APPS=apps)
         self.assertEqual(code, 0, out)
-        self.assertIn("* GPU 0 free: 900 of 1000 MiB free", out)
+        self.assertIn("* GPU 0 free: 850 of 1000 MiB free", out)  # 250 free + 600 keepalive; 50 reserved
         self.assertIn(f"pid {other.pid} (50 MiB) in {self.work}:", out)
         self.assertNotIn(f"pid {keepalive.pid}", out)
         self.assertEqual(self.job("gpus", "sh-0", FAKE_APPS=apps)[0], 1)
-        self.assertEqual(self.job("gpus", "sh-0", "--gpus", "0", "--min-free-mib", "950", FAKE_APPS=apps)[0], 1)
+        self.assertEqual(self.job("gpus", "sh-0", "--gpus", "0", "--min-free-mib", "850", FAKE_APPS=apps)[0], 0)
+        self.assertEqual(self.job("gpus", "sh-0", "--gpus", "0", "--min-free-mib", "900", FAKE_APPS=apps)[0], 1)
         code, out = self.job("gpus", "sh-0", "--gpus", "0,7")
         self.assertEqual(code, 2, out)
         self.assertIn("has no GPU 7", out)
