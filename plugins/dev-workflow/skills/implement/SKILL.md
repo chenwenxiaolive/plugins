@@ -53,7 +53,7 @@ Use a closing reference only when the MR completes the issue.
 Then review it yourself:
 
 1. Round 0: in the clean checkout at the MR source commit, run `codex review --base <target-sha> > <run_dir>/review-0.md 2> <run_dir>/review-0.log` (minutes; run it in the background). Separately check the change against the issue's requirements, which `codex review` does not see.
-2. A pass means the requirements are met with evidence, no actionable finding is left and the checks pass on the current commit. Explain any finding you reject.
+2. A pass means the requirements are met with evidence, no actionable finding is left and the checks pass on the current commit. Weigh each finding against KISS: fix real defects in scope with the smallest change, and reject findings about rare or hypothetical cases nobody asked for, with a one-line reason in the MR.
 3. Otherwise fix, push, rerun affected checks and review again: at most three corrective rounds. If round 3 still fails, stop, set `needs-human` and report what remains.
 4. Record each round's commit, checks and outcome in the MR's review-status section, so that the count survives interruptions. A later merge recheck uses the remaining rounds and never resets them.
 
@@ -66,4 +66,4 @@ discussion); post it to the MR only when asked.
 - Recheck the MR, its source SHA and the current target. If either moved since the passing review, reassess what changed, using a remaining round if a new review is needed.
 - Merge with the reviewed SHA as a guard: `glab mr merge <iid> --sha <sha>` or `gh pr merge <n> --merge --match-head-commit <sha>`. After an error or timeout, read the MR and target back before retrying, since the merge may have landed.
 - If the forge's rebase leaves a checkout diverged only by that rebase, rename its old branch to an archive name with `git branch -m` and recreate the branch at the new SHA. Never reset or force-push.
-- Confirm the merge commit, then set the execution record to `merged`.
+- Confirm the merge commit, then set the execution record to `merged` and delete the merged source branch on the forge.
