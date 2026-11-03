@@ -123,6 +123,42 @@ class CheckoutTest(unittest.TestCase):
         self.assertIn("investigate the divergence", out)
         self.assertEqual(git(self.node, "rev-parse", "HEAD"), diverged)
 
+    def test_sync_refuses_a_commit_missing_from_the_fetched_branch(self):
+        sha = self.commit(self.work, "b")
+        git(self.work, "push", "-q", "origin", "HEAD:refs/heads/other")
+        git(self.node, "fetch", "-q", "origin", "other")
+        before = git(self.node, "rev-parse", "HEAD")
+        code, out = self.checkout("sync", "sh-0")
+        self.assertEqual(code, 1, out)
+        self.assertIn(f"{sha} is not on origin/main", out)
+        self.assertEqual(git(self.node, "rev-parse", "HEAD"), before)
+
+    def test_sync_keeps_a_detached_head_detached(self):
+        sha = self.commit(self.work, "b")
+        git(self.work, "push", "-q", "origin", "main")
+        git(self.work, "switch", "-q", "--detach", sha)
+        git(self.node, "switch", "-q", "--detach", "HEAD")
+        code, out = self.checkout("sync", "sh-0")
+        self.assertEqual(code, 0, out)
+        self.assertEqual(git(self.node, "rev-parse", "HEAD"), sha)
+        self.assertNotEqual(subprocess.run(["git", "symbolic-ref", "-q", "HEAD"], cwd=self.node).returncode, 0)
+        self.commit(self.work, "c")
+        code, out = self.checkout("sync", "sh-0")
+        self.assertEqual(code, 1, out)
+        self.assertIn("is on no origin branch", out)
+        self.assertEqual(git(self.node, "rev-parse", "HEAD"), sha)
+
+    def test_a_directory_inside_another_checkout_is_not_the_counterpart(self):
+        self.commit(self.work, "b")
+        git(self.work, "push", "-q", "origin", "main")
+        (self.node / "sub").mkdir()
+        before = git(self.node, "rev-parse", "HEAD")
+        for command in ("check", "sync"):
+            code, out = self.checkout(command, "sh-0", FAKE_SSH_MAP=f"{self.work}={self.node / 'sub'}")
+            self.assertEqual(code, 1, out)
+            self.assertIn(f"Git root is {self.node}", out)
+        self.assertEqual(git(self.node, "rev-parse", "HEAD"), before)
+
     def test_a_job_in_the_remote_checkout_blocks_sync(self):
         self.commit(self.work, "b")
         git(self.work, "push", "-q", "origin", "main")

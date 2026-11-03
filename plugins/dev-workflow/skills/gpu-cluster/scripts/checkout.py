@@ -110,13 +110,13 @@ def report_busy(found):
 
 def remote_state(node, checkout):
     script = (
-        f"cd -- {shlex.quote(checkout)} && pwd -P && git remote get-url origin && "
-        "(git symbolic-ref --short -q HEAD || echo '(detached)') && git rev-parse HEAD && "
-        "git status --porcelain --untracked-files=all"
+        f"cd -- {shlex.quote(checkout)} && pwd -P && (cd -- \"$(git rev-parse --show-toplevel)\" && pwd -P) && "
+        "git remote get-url origin && (git symbolic-ref --short -q HEAD || echo '(detached)') && "
+        "git rev-parse HEAD && git status --porcelain --untracked-files=all"
     )
     lines = ssh(node, script).split("\n")
-    return {"path": lines[0], "origin": lines[1], "branch": lines[2], "head": lines[3],
-            "dirty": [line for line in lines[4:] if line.strip()]}
+    return {"path": lines[0], "root": lines[1], "origin": lines[2], "branch": lines[3], "head": lines[4],
+            "dirty": [line for line in lines[5:] if line.strip()]}
 
 
 def environment(node, checkout):
@@ -143,6 +143,8 @@ def preconditions(node, checkout, sha, local_branch, allow_behind):
     problems = []
     if state["path"] != checkout:
         problems.append(f"remote physical path is {state['path']}, not {checkout}")
+    elif state["root"] != checkout:
+        problems.append(f"remote Git root is {state['root']}, not {checkout}; the path is inside another checkout")
     if normalize(state["origin"]) != normalize(git(checkout, "remote", "get-url", "origin")):
         problems.append(f"remote origin {state['origin']} differs from the local origin")
     if state["branch"] != local_branch:
@@ -183,11 +185,18 @@ def main():
             return 1
         if args.command == "sync" and state["head"] != sha:
             q = shlex.quote
-            fetch = "git fetch --quiet origin" + ("" if branch == "(detached)" else f" {q(branch)}")
-            move = f"git checkout --quiet --detach {sha}" if branch == "(detached)" else f"git merge --quiet --ff-only {sha}"
+            # The target must be reachable from what origin serves, not merely present on the node.
+            if branch == "(detached)":
+                fetch, move = "git fetch --quiet origin", f"git checkout --quiet --detach {sha}"
+                pushed = f'test -n "$(git branch -r --contains {sha} 2>/dev/null)"'
+                unpushed = f"{sha} is on no origin branch; push it first"
+            else:
+                fetch, move = f"git fetch --quiet origin {q(branch)}", f"git merge --quiet --ff-only {sha}"
+                pushed = f"git merge-base --is-ancestor {sha} FETCH_HEAD 2>/dev/null"
+                unpushed = f"{sha} is not on origin/{branch}; push it first"
             script = (
                 f"cd -- {q(checkout)} && {fetch} && "
-                f"{{ git cat-file -e {sha}^{{commit}} 2>/dev/null || {{ echo 'not on origin; push it first' >&2; exit 1; }}; }} && "
+                f"{{ {pushed} || {{ echo {q(unpushed)} >&2; exit 1; }}; }} && "
                 f"{{ git merge-base --is-ancestor HEAD {sha} || {{ echo 'remote HEAD is not an ancestor; investigate the divergence' >&2; exit 1; }}; }} && "
                 f"{move}"
             )
