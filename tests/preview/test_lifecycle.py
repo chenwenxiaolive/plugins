@@ -128,7 +128,7 @@ class LifecycleTests(unittest.TestCase):
             httpd.server_close()
             worker.join()
 
-    def test_state_inside_plugin_is_rejected(self):
+    def test_state_inside_skill_is_rejected(self):
         result = self.command('start', state=SCRIPT.parent / 'runtime', check=False)
         self.assertNotEqual(result.returncode, 0)
         self.assertFalse((SCRIPT.parent / 'runtime').exists())

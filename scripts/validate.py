@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
-"""Validate repository metadata and local Markdown file links with installed tools."""
+"""Validate local Markdown links and skill frontmatter with the installed Claude Code CLI."""
 
 import argparse
-import json
 from pathlib import Path
 import re
 import shlex
@@ -18,50 +17,6 @@ ROOT = Path(__file__).resolve().parent.parent
 def require(condition, message):
     if not condition:
         raise ValueError(message)
-
-
-def read_json(path):
-    return json.loads(path.read_text(encoding="utf-8"))
-
-
-def check_metadata(root, names):
-    catalogs = [
-        read_json(root / ".agents/plugins/marketplace.json"),
-        read_json(root / ".claude-plugin/marketplace.json"),
-    ]
-    require(catalogs[0]["name"] == catalogs[1]["name"], "Marketplace names differ")
-    for catalog in catalogs:
-        entries = catalog["plugins"]
-        require(
-            len(entries) == len(names) and {p["name"] for p in entries} == set(names),
-            "Each catalog must list every plugin exactly once",
-        )
-        for entry in entries:
-            source = entry["source"]
-            if isinstance(source, dict):
-                require(source["source"] == "local", "Expected a local plugin source")
-                source = source["path"]
-            require(
-                source == f"./plugins/{entry['name']}",
-                f"Incorrect catalog source for {entry['name']}",
-            )
-
-    readme = (root / "README.md").read_text(encoding="utf-8")
-    for name in names:
-        plugin = root / "plugins" / name
-        portable = read_json(plugin / "plugin.json")
-        claude = read_json(plugin / ".claude-plugin/plugin.json")
-        require(portable["name"] == claude["name"] == name, f"{name}: manifest names differ")
-        require(
-            portable["version"] == claude["version"], f"{name}: manifest versions differ"
-        )
-        versions = re.findall(
-            rf"^\| \[{re.escape(name)}\]\([^\n)]+\) \| ([^|]+) \|", readme, re.MULTILINE
-        )
-        require(
-            [v.strip() for v in versions] == [portable["version"]],
-            f"{name}: README version differs or its row is missing/duplicated",
-        )
 
 
 def markdown_source(path):
@@ -116,29 +71,24 @@ def check_links(root, names):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("plugins", nargs="*", help="Plugin names; defaults to all plugins")
+    parser.add_argument("groups", nargs="*", help="Skill groups under plugins/; defaults to all")
     args = parser.parse_args()
     try:
-        names = sorted(p.name for p in (ROOT / "plugins").iterdir() if p.is_dir())
-        selected = sorted(set(args.plugins)) if args.plugins else names
-        require(bool(names), "No plugins found")
+        names = sorted(p.name for p in (ROOT / "plugins").iterdir() if (p / "skills").is_dir())
+        selected = sorted(set(args.groups)) if args.groups else names
+        require(bool(names), "No skill groups found")
         unknown = sorted(set(selected) - set(names))
-        require(not unknown, f"Unknown plugin(s): {', '.join(unknown)}")
+        require(not unknown, f"Unknown group(s): {', '.join(unknown)}")
         client = shutil.which("claude")
         require(client is not None, "Claude Code CLI is required: claude plugin validate --strict")
-        check_metadata(ROOT, names)
-        print("Catalog, manifest and README consistency passed", flush=True)
         check_links(ROOT, selected)
-        paths = ["."]
-        for name in selected:
-            paths.extend([f"plugins/{name}", f"plugins/{name}/skills"])
-        for path in paths:
+        for path in [f"plugins/{name}/skills" for name in selected]:
             command = [client, "plugin", "validate", "--strict", path]
             print(f"+ {shlex.join(command)}", flush=True)
             subprocess.run(command, cwd=ROOT, check=True)
         print(f"Static validation passed: {', '.join(selected)}", flush=True)
         return 0
-    except (OSError, ValueError, KeyError, TypeError, subprocess.CalledProcessError) as error:
+    except (OSError, ValueError, subprocess.CalledProcessError) as error:
         print(f"Validation failed: {error}", file=sys.stderr)
         return 1
 

@@ -19,7 +19,6 @@ from urllib.request import ProxyHandler, build_opener
 import uuid
 
 SKILL = Path(__file__).resolve().parents[1]
-PLUGIN = SKILL.parents[1]
 SERVER = SKILL / 'server/server.py'
 BOOT_ID = Path('/proc/sys/kernel/random/boot_id')
 
@@ -54,10 +53,10 @@ def configuration():
     args.state_dir = Path(args.state_dir).expanduser().resolve() if args.state_dir else (
         Path.home() / '.local/state/preview' / socket.gethostname() / str(args.port)
     ).resolve()
-    if overlap(args.state_dir, args.directory) or overlap(args.state_dir, PLUGIN):
-        parser.error('State directory must be outside the document root and plugin directory')
-    if overlap(args.directory, PLUGIN):
-        parser.error('Document root must be outside the plugin directory')
+    if overlap(args.state_dir, args.directory) or overlap(args.state_dir, SKILL):
+        parser.error('State directory must be outside the document root and skill directory')
+    if overlap(args.directory, SKILL):
+        parser.error('Document root must be outside the skill directory')
     args.local_url = f'http://{"127.0.0.1" if args.bind == "0.0.0.0" else args.bind}:{args.port}'
     args.base_url = (args.base_url or args.local_url).rstrip('/')
     try:
@@ -219,7 +218,7 @@ def start(args):
 
 def main():
     args = configuration()
-    # The stable directory and advisory lock also serialize commands from different plugin versions.
+    # The stable directory and advisory lock also serialize commands from different skill versions.
     args.state_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
     with (args.state_dir / 'service.lock').open('a') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
