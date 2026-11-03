@@ -17,6 +17,7 @@ variables:
 | `--port` | `PREVIEW_PORT` | `8000` |
 | `--base-url` | `PREVIEW_BASE_URL` | Local URL for the bind address and port |
 | `--state-dir` | `PREVIEW_STATE_DIR` | `~/.local/state/preview/<hostname>/<port>` |
+| `--token-file` | `PREVIEW_TOKEN_FILE` | none: no access control |
 
 State and logs live outside the document root and the skill. `start` reuses a
 running server only when a temporary Markdown probe shows it serves the selected
@@ -27,6 +28,7 @@ JSON on success and an English message on stderr on failure.
 
 ## Features
 
+- With a token file, every request needs HTTP Basic credentials whose password is the token (any username); the browser asks once. The file holds only the token, must be mode `0600` and outside the document root; commands pass its path, never the token. Plain HTTP sends the credentials unencrypted.
 - HTML is served as is; `.md` and `.markdown` (UTF-8, up to 8 MiB) render as HTML at the same URL. `?raw=1` returns the source, `?download=1` the original bytes.
 - Pages have persistent System, Light and Dark themes.
 - `mermaid` fences render in the browser with the bundled Mermaid 12.2.0 in strict mode, with no external requests, following the theme and keeping a collapsible source view. An invalid diagram shows its error and source while the others still render. It needs Safari 17.4+, Chromium 121+ or Firefox 123+; without JavaScript the code blocks stay readable.

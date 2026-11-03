@@ -1,12 +1,14 @@
 """Preview a directory: render Markdown, serve HTML, and download originals."""
 
 import argparse
+import base64
 from datetime import datetime
 from functools import partial
 from html import escape
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from io import BytesIO
 from pathlib import Path
+import hmac
 import shutil
 import subprocess
 from urllib.parse import parse_qs, quote, unquote, urlsplit
@@ -39,9 +41,21 @@ def button(label, url):
 
 
 class PreviewHandler(SimpleHTTPRequestHandler):
-    def __init__(self, *args, directory, **kwargs):
+    def __init__(self, *args, directory, token=None, **kwargs):
         self.root = Path(directory).resolve()
+        self.token = token
         super().__init__(*args, directory=str(self.root), **kwargs)
+
+    def authorized(self):
+        """With a token, require HTTP Basic credentials whose password is the token."""
+        if self.token is None:
+            return True
+        scheme, _, value = self.headers.get("Authorization", "").partition(" ")
+        try:
+            password = base64.b64decode(value, validate=True).decode("utf-8").partition(":")[2]
+        except ValueError:
+            return False
+        return scheme.lower() == "basic" and hmac.compare_digest(password.encode(), self.token.encode())
 
     def end_headers(self):
         self.send_header("Cache-Control", "no-store")
@@ -66,6 +80,12 @@ class PreviewHandler(SimpleHTTPRequestHandler):
         return BytesIO(body)
 
     def send_head(self):
+        if not self.authorized():
+            self.send_response(401)
+            self.send_header("WWW-Authenticate", 'Basic realm="preview", charset="UTF-8"')
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+            return None
         request = urlsplit(self.path)
         if request.path == "/_preview_assets/style.css":
             return self.response_bytes((SERVICE_DIR / "assets/style.css").read_bytes(), "text/css; charset=utf-8")
@@ -217,6 +237,7 @@ def main():
     parser.add_argument("--directory", default="/preview")
     parser.add_argument("--bind", default="0.0.0.0")
     parser.add_argument("--port", type=int, default=8000)
+    parser.add_argument("--token-file", help="File holding the access token; omit for no access control")
     args = parser.parse_args()
     node = shutil.which("node")
     if not node:
@@ -224,7 +245,17 @@ def main():
     root = Path(args.directory).resolve()
     if not root.is_dir():
         parser.error("The preview directory does not exist")
-    handler = partial(PreviewHandler, directory=str(root))
+    token = None
+    if args.token_file:
+        token_file = Path(args.token_file).resolve()
+        if token_file.is_relative_to(root):
+            parser.error("The token file must be outside the preview directory")
+        if token_file.stat().st_mode & 0o077:
+            parser.error("The token file must not be readable by group or others (chmod 600)")
+        token = token_file.read_text(encoding="utf-8").rstrip("\r\n")
+        if not token:
+            parser.error("The token file is empty")
+    handler = partial(PreviewHandler, directory=str(root), token=token)
     with ThreadingHTTPServer((args.bind, args.port), handler) as server:
         server.node = node
         print(f"Serving Markdown and HTML from {root} on {args.bind}:{args.port}", flush=True)

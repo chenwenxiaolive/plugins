@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Start, inspect, or stop the bundled Linux preview service."""
 import argparse
+import base64
 import fcntl
 import json
 import os
@@ -15,7 +16,7 @@ import tempfile
 import time
 from urllib.error import URLError
 from urllib.parse import urlsplit
-from urllib.request import ProxyHandler, build_opener
+from urllib.request import ProxyHandler, Request, build_opener
 import uuid
 
 SKILL = Path(__file__).resolve().parents[1]
@@ -36,6 +37,7 @@ def configuration():
         ('port', 'PREVIEW_PORT', '8000'),
         ('base-url', 'PREVIEW_BASE_URL', None),
         ('state-dir', 'PREVIEW_STATE_DIR', None),
+        ('token-file', 'PREVIEW_TOKEN_FILE', None),
     ):
         parser.add_argument('--' + flag, default=os.environ.get(variable, default))
     args = parser.parse_args()
@@ -50,6 +52,7 @@ def configuration():
     except socket.gaierror:
         parser.error('Bind must be an IPv4 address or a resolvable IPv4 hostname')
     args.directory = Path(args.directory).expanduser().resolve()
+    args.token_file = Path(args.token_file).expanduser().resolve() if args.token_file else None
     args.state_dir = Path(args.state_dir).expanduser().resolve() if args.state_dir else (
         Path.home() / '.local/state/preview' / socket.gethostname() / str(args.port)
     ).resolve()
@@ -128,8 +131,13 @@ def healthy(args):
         probe.write('# ' + marker + '\n')
         probe.flush()
         client = build_opener(ProxyHandler({}))
+        headers = {}
+        if args.token_file:
+            token = args.token_file.read_text(encoding='utf-8').rstrip('\r\n')
+            headers['Authorization'] = 'Basic ' + base64.b64encode(f'preview:{token}'.encode()).decode()
         try:
-            with client.open(args.local_url + '/' + Path(probe.name).name, timeout=2) as response:
+            request = Request(args.local_url + '/' + Path(probe.name).name, headers=headers)
+            with client.open(request, timeout=2) as response:
                 return (response.headers.get_content_type() == 'text/html'
                         and f'<h1 id="{marker}">{marker}</h1>'.encode() in response.read(65536))
         except (URLError, TimeoutError, ConnectionError):
@@ -182,6 +190,8 @@ def start(args):
     log_path = run / 'server.log'
     argv = [sys.executable, '-B', '-u', str(SERVER), '--directory', str(args.directory),
             '--bind', args.bind, '--port', str(args.port)]
+    if args.token_file:
+        argv += ['--token-file', str(args.token_file)]
     process = None
     try:
         with log_path.open('ab') as log:
