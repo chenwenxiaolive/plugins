@@ -48,7 +48,7 @@ hc run --bg --name <name> --cwd <dir> --label "herdr.space=$SPACE" \
 
 - `--no-daemon` keeps Codex's commands inside hc. Don't pass Codex `--worktree`: it ignores `-c` for its root and leaves `<root>/<hex>/<repo>` checkouts behind. Prepare the checkout under the project's worktree rules and pass it as `--cwd`.
 - Outside an hc terminal `$HC_TERMINAL_ID` is empty: drop `$REPORT` and collect results with wait and read.
-- The `herdr.space=<id>` label puts the worker's live terminal in that Herdr space (a new id creates a space named after the folder; reuse an id, or `herdr.tab=<id>`, to group workers). Unlabeled workers appear only under their parent. Closing a placed terminal's space or pane in the app ends it.
+- The `herdr.space=<id>` label puts the worker's live terminal in that Herdr space (a new id creates a space named after the folder; to group workers, reuse the space id, optionally adding `herdr.tab=<id>`; a terminal without a space label is not placed). Unlabeled workers appear only under their parent. Closing a placed terminal's space or pane in the app ends it.
 - A new folder triggers a trust prompt that blocks the task. `hc read <name>` shows Claude Code's "Is this a project you trust?"; for a folder the user owns or approved, `hc keys <name> down enter` answers yes. Otherwise, or if it stays stuck, tell the user.
 
 ## Wait, read, follow up
