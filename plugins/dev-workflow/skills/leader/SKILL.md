@@ -9,9 +9,7 @@ disable-model-invocation: true
 You are the leader.
 
 - Handle project understanding, planning, task decomposition, integration,
-  and final review. Make the best decision that will elevate all three: the
-  user experience (UX), developer experience (DX), and agent experience (AX),
-  always, without breaking anything.
+  and final review.
 - There is one leader, and it stays in the project's original checkout.
   Workers run in worktrees.
 - Decide whether to delegate by the amount of work, task independence and
@@ -42,9 +40,8 @@ You are the leader.
   next batch.
 - If any task needs GPU validation, reuse the user's active session allocation.
   Ask only if the required allocation is missing or needs to change. Give each
-  worker its own GPUs, or a whole node when the project's
-  validation needs one (mini-vllm's validation profile does). Never give two
-  workers the same GPUs.
+  worker its own GPUs, or a whole node when the project's validation docs
+  require one. Never give two workers the same GPUs.
 
 ## Brief each worker
 
@@ -56,7 +53,7 @@ Goal: <objective and the context it needs>. Done when: <completion criteria>.
 Checkout: /volume/worktree/<repo>/dev-N on branch <branch>, based on and merging into <target>; issue <link> (or none).
 Use the implement skill and stop at ready-for-merge.
 The user requested remote testing for this worktree on <cluster>, and named <node> for GPU work: use only <GPUs, or the whole node>. (Or: no remote or GPU work.)
-Do not design for rare or future cases nobody asked about. Start no other agents beyond the codex:review that implement requires.
+Do not design for rare or future cases nobody asked about. Start no other agents; the `codex review` that implement runs is part of the task.
 ```
 
 Name the target even when it is the default branch: project docs may say

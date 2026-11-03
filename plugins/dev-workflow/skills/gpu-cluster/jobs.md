@@ -1,7 +1,5 @@
 # /volume, temporary files, background jobs and GPUs
 
-<!-- Moved from ~/.claude/CLAUDE.md on 2026-10-16; the always-loaded rules there still apply. -->
-
 ## /volume directory rules
 These rules govern each cluster's shared `/volume`; the control machine has independent local storage at the same paths.
 
@@ -11,8 +9,8 @@ These rules govern each cluster's shared `/volume`; the control machine has inde
 | `/volume/workspace/<project>/...` | Project code (a project may have multiple checkouts, e.g. `vllm-open-mr/vllm-official`) | Only the checkout I specify |
 | `/volume/worktree/<repo>/<worktree-name>` | Reusable development/review worktrees and their remote counterparts; names such as `dev-1` or `review` stay fixed across tasks | Only the selected checkout; reuse it and create its missing remote counterpart for requested remote testing as described in remote-workflow.md |
 | `/volume/tmp/<topic>-<YYYYMMDD>-<random suffix>/` | All temporary artifacts | Only create your own directories |
-| `/volume/models` | Model weights | Read-only |
-| `/volume/.cache/huggingface` | i.e. `HF_HOME`, the shared HF cache | HF writes to it automatically when downloading models; do not modify or delete it manually |
+| `/volume/model` (sh, th) | Model weights | Read-only |
+| `/volume/.cache` on sh and th | i.e. `HF_HOME`, the shared HF cache | HF writes to it automatically when downloading models; do not modify or delete it manually |
 | `/volume/cluster-ops` | Deployed ops scripts (`free-gpus.sh`, `gate-proxy.sh`, etc.), one copy per cluster; primary Git checkout on the control machine | Read-only during ordinary project work; ops development happens in the selected local checkout, deployment only for an authorized ops task |
 | `/volume/.bashrc`, `.config`, `.ssh`, `.gate_proxy_addr`, `.claude*`, `.codex*`, `.gate-proxy/remote-hosts`, and other hidden files and directories | Shared configuration and credentials; independent saved deployment inputs on the control machine | Do not modify unless the task explicitly requests configuration/ops changes |
 
@@ -31,7 +29,7 @@ These rules govern each cluster's shared `/volume`; the control machine has inde
 
 ### TMPDIR
 - Two kinds of temporary files, two places:
-  - **Programs** (library temp files, Unix sockets, pytest base directories): the default `TMPDIR=/tmp`, node-local, which both clusters' `/volume/.bashrc` export. A CPFS `/volume` cannot host Unix sockets (`bind` fails with `EOPNOTSUPP`), so do not point `TMPDIR` at `/volume`
+  - **Programs** (library temp files, Unix sockets, pytest base directories): the default `TMPDIR=/tmp`, node-local, which every cluster's `/volume/.bashrc` exports. A CPFS `/volume` cannot host Unix sockets (`bind` fails with `EOPNOTSUPP`), so do not point `TMPDIR` at `/volume`
   - **Your own files** (scripts, logs, PIDs, exit statuses, probes, evidence): the run's `/volume/tmp/<topic>-<YYYYMMDD>-<random suffix>/` directory, as above
 - A value explicitly set by the caller takes precedence over the default. To keep a job's program temp files apart, a short directory under `/tmp` may be used (`mktemp -d /tmp/<topic>-XXXXXX`); remove it when the job ends:
   - Python caches the temp directory, so set it before the process starts and make sure child processes inherit it too
@@ -73,12 +71,12 @@ These rules govern each cluster's shared `/volume`; the control machine has inde
 ## GPU usage
 - Nodes are shared by multiple people: only stop processes that belong to this job or that I have explicitly said may be stopped; do not kill in bulk by process name; do not occupy nodes I have not specified
 - Free GPU memory with `/volume/cluster-ops/free-gpus.sh`; do a dry run first, and only after confirming every candidate process may be stopped, run it again without `DRY_RUN=1`
-  - This script ssh-es to the target nodes itself, and **nodes cannot ssh to each other**, so it must **run on this machine**: read the script contents from `sh-0` or `zg-0` in the target cluster and pipe them into local bash
+  - This script ssh-es to the target nodes itself, and **nodes cannot ssh to each other**, so it must **run on this machine**: read the script contents from the target cluster's `sh-0`, `zg-0` or `th-0` and pipe them into local bash
   - If run on a node, it silently does nothing and still returns 0
   - Example:
 
   ```bash
-  node=sh-0    # Use zg-0 for a checkout in the zg cluster.
+  node=sh-0    # zg-0 or th-0 for a checkout on those clusters.
   owner=$(ssh "$node" "cd -- $(printf %q "$(pwd -P)") && pwd -P")    # physical path of the project
   ssh "$node" 'cat /volume/cluster-ops/free-gpus.sh' | DRY_RUN=1 OWNER_CWD="$owner" bash -s -- <node...>
   ```

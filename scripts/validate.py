@@ -64,30 +64,54 @@ def check_metadata(root, names):
         )
 
 
+def markdown_source(path):
+    # Repository documentation uses inline Markdown links. Ignore fenced examples.
+    return re.sub(
+        r"^```[^\n]*\n.*?^```[^\n]*$",
+        "",
+        path.read_text(encoding="utf-8"),
+        flags=re.MULTILINE | re.DOTALL,
+    )
+
+
+def heading_anchors(path):
+    """GitHub-style heading slugs, with -1, -2 suffixes for repeated headings."""
+    anchors = set()
+    for match in re.finditer(r"^#{1,6}[ \t]+(.+?)[ \t#]*$", markdown_source(path), re.MULTILINE):
+        text = re.sub(r"\[([^\]]*)\]\([^)]*\)", r"\1", match[1])
+        base = re.sub(r"[^\w\- ]", "", text.lower()).replace(" ", "-")
+        slug, n = base, 0
+        while slug in anchors:
+            n += 1
+            slug = f"{base}-{n}"
+        anchors.add(slug)
+    return anchors
+
+
 def check_links(root, names):
     files = [root / "README.md"]
     for name in names:
         files.extend(sorted((root / "plugins" / name).rglob("*.md")))
-    checked = 0
+    checked = anchored = 0
     for path in files:
-        source = path.read_text(encoding="utf-8")
-        # Repository documentation uses inline Markdown links. Ignore fenced examples.
-        source = re.sub(
-            r"^```[^\n]*\n.*?^```[^\n]*$", "", source, flags=re.MULTILINE | re.DOTALL
-        )
         for match in re.finditer(
-            r"\[[^\]\n]+\]\((<[^>\n]+>|[^\s)]+)(?:\s+\"[^\"]*\")?\)", source
+            r"\[[^\]\n]+\]\((<[^>\n]+>|[^\s)]+)(?:\s+\"[^\"]*\")?\)", markdown_source(path)
         ):
             target = match[1].strip("<>")
             url = urlsplit(target)
-            if url.scheme or url.netloc or not url.path or url.path.startswith(("/", "~")):
+            if url.scheme or url.netloc or url.path.startswith(("/", "~")):
                 continue
-            require(
-                (path.parent / unquote(url.path)).exists(),
-                f"{path.relative_to(root)}: missing link target {target}",
-            )
-            checked += 1
-    print(f"Local Markdown file links passed ({checked} links)", flush=True)
+            linked = path.parent / unquote(url.path) if url.path else path
+            if url.path:
+                require(linked.exists(), f"{path.relative_to(root)}: missing link target {target}")
+                checked += 1
+            if url.fragment and linked.suffix == ".md":
+                require(
+                    unquote(url.fragment) in heading_anchors(linked),
+                    f"{path.relative_to(root)}: missing heading anchor {target}",
+                )
+                anchored += 1
+    print(f"Local Markdown links passed ({checked} files, {anchored} anchors)", flush=True)
 
 
 def main():

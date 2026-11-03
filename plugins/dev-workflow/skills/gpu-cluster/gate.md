@@ -1,7 +1,5 @@
 # Gate operations and deployment configuration
 
-<!-- Moved from ~/.claude/CLAUDE.md on 2026-10-16; the always-loaded rules there still apply. -->
-
 - Gate aliases are `sh-gate` for the sh cluster and `zg-gate` for the zg cluster. Each gate shares its cluster's `/volume`; use the intended cluster's alias in deployment commands. The control machine's GitLab proxy tunnel targets `sh-gate` (see gitlab.md).
 - Maintain cluster-ops in the real local Git checkout **`/volume/cluster-ops`**, origin `https://gitlab.iquest-inner.com/xqing/cluster-ops.git`. Gates use the same absolute deployment path. This is the selected exception to the usual `/volume/workspace/<project>` layout.
 - The control machine's `/volume/.ssh`, `/volume/.bashrc`, and entire `/volume/.config` directory are the saved configuration for future gate deployments. GitHub, GitLab, Git, rclone and OSS account files are under `.config/gh`, `.config/glab-cli`, `.config/git`, `.config/rclone` and `.config/oss`. These private files stay outside Git and Docker images. Changes here reach a gate only when deployed; independent clusters do not share these local files.
