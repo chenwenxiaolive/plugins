@@ -17,18 +17,19 @@ machine's region, workspace, profile and file system.
 ## Commands
 
 ```bash
-pai --region <region> dlc job list --workspace-id <id> --all-users --with-metadata [--status Running] [--page N] -o json 2>/dev/null \
+pai --region <region> dlc job list --workspace-id <id> --all-users --with-metadata [--status Running] [--page N] -o json \
   | jq '{pagination, jobs: [.items[] | {job_id, display_name, status, username, request_gpu, resource_name}]}'
-pai --region <region> dlc job get <job-id> -o json 2>/dev/null \
+pai --region <region> dlc job get <job-id> -o json \
   | jq '{status, reason_message, data_sources, pods: [.pods[] | {pod_id, status, node_name}], specs: [.job_specs[] | {type, pod_count, ecs_spec, image}]}'
-pai --region <region> dsw instance list -o json 2>/dev/null | jq '[.[] | {instance_id, instance_name, status, ecs_spec}]'
+pai --region <region> dsw instance list --workspace-id <id> --page-size 100 [--page N] -o json | jq '[.[] | {instance_id, instance_name, status, ecs_spec}]'
 aliyun nas DescribeFileSystems --profile <profile> --region <region> --cli-query 'FileSystems.FileSystem[]'
 pai --region <region> dlc job exec <running-job-id> [--pod <pod>] -- "df -h /cpfs01; ls -la /cpfs01/<dir>"
 pai --region <region> dsw instance exec <running-instance-id> -- "df -h /cpfs01"
 ```
 
 - Always project PAI JSON onto named fields as above: jobs carry environment variables, user commands, image credentials and credential configs (`envs`, `custom_envs`, `role_system_envs`, `user_command`, `image_config`, `credential_config`).
-- Job lists come 20 per page: follow `pagination.next_page` while `has_more`, or say the result is partial.
+- Run these with `set -o pipefail`: `pai` reports errors on stderr, and `jq` alone would hide a failed call.
+- Lists are paged: follow a job list's `pagination.next_page` while `has_more`, and fetch the next DSW `--page` while a page is full, or say the result is partial.
 - Directory entries and live capacity come only from a running DLC pod or DSW instance; the APIs list file systems and filesets, and an empty fileset list doesn't mean an empty file system. Run only read-only commands there, and never create, restart or stop a task to browse storage.
 - CloudMonitor returns `403` for this profile; `df` through a running target gives live capacity instead.
 
