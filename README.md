@@ -10,7 +10,7 @@ The repository also retains the `chenwenxiaolive-plugins` packaging metadata.
 | Plugin | Version | Purpose |
 | --- | --- | --- |
 | [preview](plugins/preview/skills/preview/SKILL.md) | 0.4.1 | Preview HTML and Markdown locally or through an SSH tunnel, and manage the bundled service. |
-| [dev-workflow](plugins/dev-workflow/skills/implement/SKILL.md) | 0.1.13 | Discuss designs, create tickets, implement and review changes, operate the GPU cluster, inspect Alibaba Cloud PAI, manage persistent agent terminals, lead background workers, and improve the development workflow. |
+| [dev-workflow](plugins/dev-workflow/skills/implement/SKILL.md) | 0.1.14 | Discuss designs, create tickets, implement and review changes, operate the GPU cluster, inspect Alibaba Cloud PAI, manage persistent agent terminals, lead background workers, and improve the development workflow. |
 | [docker-build](plugins/docker-build/skills/docker-build/SKILL.md) | 0.2.0 | Build and publish container images through the existing dedicated build host. |
 
 `dev-workflow` contains `aliyun-pai`, `gpu-cluster`, `grilling`, `herdr-core`,
@@ -133,10 +133,15 @@ client: a generic frontmatter helper may reject supported fields such as
 `disable-model-invocation`. Do not remove those fields to satisfy that helper.
 
 These checks do not exercise infrastructure workflows or fetch external links.
-`docker-build`'s `run-build.sh` has tests against fake `sudo` and `docker`
-commands (`python3 -B -m unittest discover -s tests/docker-build -v`); they are
-not a container build, and editing cluster instructions does not require
-running a GPU job. Exercise changed
+The bundled scripts have tests against fake external commands, so they build
+no container, touch no node and write no GitLab comment:
+
+```bash
+python3 -B -m unittest discover -s tests/docker-build -v   # run-build.sh: fake sudo and docker
+python3 -B -m unittest discover -s tests/dev-workflow -v   # checkout.py and issue_record.py: fake ssh and glab
+```
+
+Editing cluster instructions does not require running a GPU job. Exercise changed
 workflow behavior separately; for installation updates, compare installed file
 contents and modes with their committed source. Report what was actually checked.
 
