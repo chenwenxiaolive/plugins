@@ -16,9 +16,9 @@
 ## Development and Git synchronization
 
 - Edit locally and execute remotely. Commit a testable batch, push the development branch, update the remote checkout, verify its exact SHA, then run.
-- Update a remote checkout with `git fetch` and `git merge --ff-only <sha>`, or `git switch --detach <sha>` for a detached review checkout. First make sure it is clean, on the expected branch, and idle: no process on any machine sharing that `/volume` has its working directory in it (`/proc/*/cwd`). Investigate divergence or dirt; never reset, clean or stash.
+- Update a remote checkout with `git fetch` and `git merge --ff-only <sha>`, or `git switch --detach <sha>` for a detached review checkout. First make sure it is clean, on the expected branch, holds no unpushed commit (a detached HEAD must be in a freshly fetched origin branch: `git branch -r --contains HEAD`), and is idle: no process on any machine sharing that `/volume` has its working directory in it (`/proc/*/cwd`). Investigate divergence or dirt; never reset, clean or stash.
 - Each cluster's `/volume` is shared, so update a checkout once per cluster; other clusters have their own copies.
-- Before validating, the remote checkout must be clean, at the committed SHA, and match the lock: `uv sync --locked --dry-run` shows no dependency changes. Sync the environment only while no job uses it.
+- Before validating, the remote checkout must be clean, at the committed SHA, and match its lock: for a uv project, `uv sync --locked --dry-run` shows no dependency changes. Sync the environment only while no job uses it.
 - Verify the push remote and authentication before the first push; a clone does not prove push access.
 
 ## Operating remotely
