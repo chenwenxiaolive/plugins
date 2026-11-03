@@ -9,7 +9,7 @@ These rules govern each cluster's shared `/volume`; the control machine has inde
 | `/volume/workspace/<project>/...` | Project code (a project may have multiple checkouts, e.g. `vllm-open-mr/vllm-official`) | Only the checkout I specify |
 | `/volume/worktree/<repo>/<worktree-name>` | Reusable development/review worktrees and their remote counterparts; names such as `dev-1` or `review` stay fixed across tasks | Only the selected checkout; reuse it as described in [worktrees.md](../implement/worktrees.md) and create its missing remote counterpart for requested remote testing as described in [remote-workflow.md](remote-workflow.md) |
 | `/volume/tmp/<topic>-<YYYYMMDD>-<random suffix>/` | All temporary artifacts | Only create your own directories |
-| `/volume/model` (sh, th) | Model weights | Read-only |
+| `/volume/model` | Model checkpoints, on every cluster | Read-only |
 | `/volume/.cache` on sh and th | i.e. `HF_HOME`, the shared HF cache | HF writes to it automatically when downloading models; do not modify or delete it manually |
 | `/volume/cluster-ops` | Deployed ops scripts (`free-gpus.sh`, `gate-proxy.sh`, etc.), one copy per cluster; primary Git checkout on the control machine | Read-only during ordinary project work; ops development happens in the selected local checkout, deployment only for an authorized ops task |
 | `/volume/.bashrc`, `.config`, `.ssh`, `.gate_proxy_addr`, `.claude*`, `.codex*`, `.gate-proxy/remote-hosts`, and other hidden files and directories | Shared configuration and credentials; independent saved deployment inputs on the control machine | Do not modify unless the task explicitly requests configuration/ops changes |
