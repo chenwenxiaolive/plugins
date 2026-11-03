@@ -11,7 +11,7 @@ Each skill lives in `plugins/<group>/skills/<name>/`:
 
 | Group | Skills | Purpose |
 | --- | --- | --- |
-| `preview` | [preview](plugins/preview/skills/preview/SKILL.md) | Preview HTML and Markdown locally or through an SSH tunnel, and manage the bundled service. |
+| `preview` | [preview](plugins/preview/skills/preview/SKILL.md) | Preview HTML and Markdown at the configured browser URL, and manage the bundled service. |
 | `dev-workflow` | [implement](plugins/dev-workflow/skills/implement/SKILL.md), `aliyun-pai`, `gpu-cluster`, `grilling`, `herdr-core`, `improve-codebase-architecture`, `leader`, `retro`, `to-tickets` | Discuss designs, create tickets, implement and review changes, operate the GPU cluster, inspect Alibaba Cloud PAI, manage persistent agent terminals, lead background workers, and improve the development workflow. |
 | `docker-build` | [docker-build](plugins/docker-build/skills/docker-build/SKILL.md) | Build and publish container images through the existing dedicated build host. |
 

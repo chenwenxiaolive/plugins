@@ -20,12 +20,14 @@ the command. Explicit flags override the corresponding environment variables.
 
 The document directory must already exist. State and logs must be outside both
 the document root and the skill directory. The helper supports IPv4 addresses
-and hostnames. Keep the loopback bind for local viewing or SSH forwarding.
-`0.0.0.0` exposes the service on all IPv4 interfaces and requires an explicit
-request for network access. Set a browser base URL explicitly when the user's
-forwarded address differs from the server's local endpoint. A listening port
+and hostnames. Use loopback for local viewing or SSH forwarding; preserve an
+existing deployment's explicitly authorized network access. `0.0.0.0` exposes the
+service on all IPv4 interfaces. Set a browser base URL explicitly when the browser
+address differs from the server's local endpoint. A listening port
 alone does not establish a browser URL. The helper checks locally; for SSH
 access, verify artifacts locally and make the tunnel prerequisite clear.
+
+Portable loopback example; use the saved settings for an existing deployment:
 
 ```sh
 python3 -B scripts/preview.py start --directory /preview
@@ -57,35 +59,28 @@ These are mappings for the existing control machine only, not portable defaults:
 | Setting | Existing value |
 | --- | --- |
 | Filesystem root | `/preview` |
-| Server bind | `127.0.0.1:8000` |
-| Browser base URL | `http://127.0.0.1:8000` through an SSH local forward |
+| Server bind | `0.0.0.0:8000` |
+| Browser base URL | `http://74.82.197.96:8000` |
 | Local diagnostic URL | `http://127.0.0.1:8000` |
-| Remote access | SSH only; no public HTTP listener |
+| Remote access | Direct HTTP; no SSH tunnel required |
 
 Reuse the managed service for document publication. The active state directory
 and deployed helper path are local deployment settings: obtain them from the
-current machine instructions and ownership record. Pass the existing state
-directory explicitly and preserve the deployed release when changing only
-service settings. Do not use the retired public port-8000 URL or reopen public
-access unless explicitly requested. On a different machine, use its explicit
-settings or the portable defaults above.
+current machine instructions and the state directory's `deployment.json`.
+For every start, status check, or restart, use that saved helper and explicitly
+pass its `directory`, `bind`, `port`, and `base_url` values as `--directory`,
+`--bind`, `--port`, and `--base-url`, together with the existing `--state-dir`.
+Preserve the deployed release when changing only service settings. If a running
+process differs from the saved configuration, stop it with the actual settings
+in `service.json`, then start with the intended settings from `deployment.json`.
 
-Run this command on the user's computer and keep the terminal open:
-
-```sh
-ssh -NT \
-  -L 127.0.0.1:8000:127.0.0.1:8000 \
-  -o ExitOnForwardFailure=yes \
-  -o ServerAliveInterval=30 \
-  root@74.82.197.96
-```
-
-Use the user's usual SSH alias or login account if different. Then open
-`http://127.0.0.1:8000/`; artifact paths remain relative to that base. If local
-port 8000 is occupied, choose another client-side port and use that port in
-browser links while keeping the server endpoint at `127.0.0.1:8000`.
-The agent's local HTTP check verifies the server, not the tunnel on the user's
-computer. Do not claim the client tunnel is connected without checking it there.
+Direct access is the owner's standing choice for this machine. Keep
+`0.0.0.0:8000` across starts and restarts; do not replace it with the helper's
+loopback default or re-enable the retired `preview-local-only.service` unless
+the owner explicitly changes that choice. Open `http://74.82.197.96:8000/`
+directly and construct artifact links relative to that base. A local diagnostic
+check does not establish reachability from the user's computer. On a different
+machine, use its explicit settings or the portable defaults above.
 
 ## Files and maintenance
 
