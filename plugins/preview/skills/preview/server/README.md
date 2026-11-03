@@ -44,19 +44,18 @@ JSON on success and an English message on stderr on failure.
 
 ## Deploying a change
 
-The deployed service runs a release copy of the skill, recorded as `release` and
-`helper` in its state directory's `deployment.json`; editing this checkout changes
-nothing there. After merging a server change:
+A deployed service runs a release copy of the skill, so editing this checkout
+changes nothing there. After merging a server change, create the copy:
 
 ```sh
 release=~/.local/share/preview/releases/<commit>
 mkdir -p "$release" && git archive <commit> plugins/preview/skills | tar -x -C "$release" --strip-components=2
 ```
 
-Then stop the service with the old helper, start it with
-`$release/skills/preview/scripts/preview.py` and the same settings, and update
-`release` and `helper` in `deployment.json`. Keep the old release until the new
-one is verified.
+Then point the running service at `$release/skills/preview/server/server.py` (on
+the control machine, the `preview.service` unit; see
+[service.md](../references/service.md)), restart it and check a page. Keep the old
+release until the new one is verified.
 
 ## Tests
 
