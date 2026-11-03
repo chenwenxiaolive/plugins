@@ -1,16 +1,24 @@
 ---
 name: implement
-description: "Implement an assigned issue or agreed development task in the selected checkout, through validation, MR or PR creation and coder-owned review."
+description: "Implement an assigned issue or agreed development task in the selected checkout, through validation, MR or PR creation, coder-owned review and a requested merge. Also use before reusing a worktree for another issue/MR, proposing an issue as next work, or reviewing an MR."
 ---
 
 # Implement
 
 Own the assigned task through its MR and review outcome. Work in the checkout the
-user selected. Read its project instructions and use
-[gpu-cluster](../gpu-cluster/SKILL.md), especially
-[remote-workflow.md](../gpu-cluster/remote-workflow.md), which is authoritative for
-checkout reuse, validation, remote execution and the bounded review loop. Read
-[gitlab.md](../gpu-cluster/gitlab.md) when accessing internal GitLab.
+user selected and read its project instructions. This skill's references hold the
+development process; read the one for what the task does next:
+
+| Doing | Read |
+|---|---|
+| starting, resuming or switching a worktree to another issue/MR; naming a branch; the issue's execution record; saying whether an issue is free | [worktrees.md](worktrees.md) |
+| reviewing an MR you opened, recording acceptance, or a standalone review | [review.md](review.md) |
+| a requested merge, synchronizing after a server-side rebase, or recording an observed merge | [merge.md](merge.md) |
+
+Use [gpu-cluster](../gpu-cluster/SKILL.md) for the nodes and GitLab:
+[remote-workflow.md](../gpu-cluster/remote-workflow.md) for checkout paths,
+synchronization, remote execution and where validation runs, and
+[gitlab.md](../gpu-cluster/gitlab.md) for GitLab access.
 
 On a GitHub repository, use `gh` for the same steps: a pull request is the MR,
 the execution record is an issue comment, and `gh pr merge --match-head-commit
@@ -19,18 +27,18 @@ the execution record is an issue comment, and `gh pr merge --match-head-commit
 ## Establish or resume the task
 
 - Read the issue, relevant discussions and any existing MR. Identify the intended result, acceptance criteria and prerequisites. Use an already agreed task directly; a separate issue is not a prerequisite to coding.
-- Continue an existing issue/MR on its development branch. For a new assignment, follow the worktree reuse checks before creating or switching branches. Keep the selected directory, including stable names such as `dev-1`.
-- Name new issue branches using the [issue branch identity rules](../gpu-cluster/remote-workflow.md#issue-branch-identity).
-- When implementing an issue, read and maintain its [execution record](../gpu-cluster/remote-workflow.md#issue-execution-record). Confirm ownership before coding, reuse the same comment on resume, and record the actual worktree and branch. A task without an issue needs no extra issue or record.
-- If the MR was already merged, [reconcile its execution record](../gpu-cluster/merge-workflow.md#record-merge-completion) before resuming or reusing the checkout. Report the merged MR and any remaining issue scope; do not recreate a deleted source branch or resume implementation without a new assignment.
+- Continue an existing issue/MR on its development branch. For a new assignment, follow the [worktree reuse checks](worktrees.md#reusing-worktrees-for-issues-and-mr-review) before creating or switching branches. Keep the selected directory, including stable names such as `dev-1`.
+- Name new issue branches using the [issue branch identity rules](worktrees.md#issue-branch-identity).
+- When implementing an issue, read and maintain its [execution record](worktrees.md#issue-execution-record). Confirm ownership before coding, reuse the same comment on resume, and record the actual worktree and branch. A task without an issue needs no extra issue or record.
+- If the MR was already merged, [reconcile its execution record](merge.md#record-merge-completion) before resuming or reusing the checkout. Report the merged MR and any remaining issue scope; do not recreate a deleted source branch or resume implementation without a new assignment.
 - Resolve unmet dependencies before building on them. Use another unmerged task branch only for an explicitly intended dependency.
 - On resume, inspect the actual branch, worktree, MR source commit, review findings and persisted round count. Preserve existing work and running jobs; handle unclear ownership or divergence before switching or synchronizing.
 
 ## Implement and validate
 
-- Follow the [development sequence](../gpu-cluster/remote-workflow.md#repository-and-development-principles) for features and fixes. Choose a test that exercises the real behavior through an appropriate existing interface.
+- For new features and bug fixes, follow this order: update docs and comments first → write a minimal test that currently fails → write the minimal implementation → finally check that tests, code, and docs are consistent. When the test runs remotely, push and validate the failing-test phase before implementing the fix locally. Choose a test that exercises the real behavior through an appropriate existing interface.
 - Expected results must come from a specification, known example or independent reference. Prefer real internal behavior; isolate external dependencies or nondeterminism when needed. Routine test choices do not require a separate confirmation.
-- Prefer small interfaces and keep related behavior together. Add abstraction for current requirements rather than anticipated extensions. Follow the existing KISS, compatibility and migration rules.
+- Projects are internal and still under development: use KISS design, keep no backward-compatibility layers, and write no data migrations. Prefer small interfaces and keep related behavior together. Add abstraction for current requirements rather than anticipated extensions.
 - For a hard bug, establish a useful reproduction, compare plausible causes and change one variable at a time. For a performance regression, measure a baseline with a controlled workload before claiming improvement. Recheck the original symptom after the fix.
 - Use [validation scope](../gpu-cluster/remote-workflow.md#validation-scope) to choose local checks or remote execution and record results.
 - GPU execution requires a user-designated node and free GPUs. If the node or another essential validation input is missing, continue independent local preparation and request the missing input. Preserve the failing-test-before-implementation sequence for dependent work. Do not claim an unrun check passed.
@@ -44,22 +52,13 @@ validation evidence and material limitations. Use a closing reference only when
 the MR fulfills that issue. Add its link to the issue's execution record and update
 that record at its defined milestones. Keep review details in the MR.
 
-Use the MR's review-status section to record acceptance under the
-[requirement acceptance procedure](../gpu-cluster/remote-workflow.md#requirement-acceptance-within-each-review-pass).
-That procedure defines when a short paragraph is enough and when to use a criterion
-table. An issue-free task uses the agreed request as its source.
-
-Continue into the
-[coder-owned review loop](../gpu-cluster/remote-workflow.md#coder-owned-review-after-opening-an-mr)
-for the review command, corrective-round limit and records to keep
-across interruptions.
+Continue into the [coder-owned review loop](review.md#coder-owned-review-after-opening-an-mr)
+for the review command, the acceptance record, the corrective-round limit and
+the records to keep across interruptions. An issue-free task uses the agreed
+request as its source.
 
 Finish with the MR link, source commit, validation outcome and review status. If
 the loop reaches its limit or a required review/check cannot run, report the
 remaining findings or blocker for human handling. A successful review leaves the
-MR ready for the user's merge decision; merge only when requested.
-
-When the user requests merging, follow the shared
-[merge workflow](../gpu-cluster/merge-workflow.md), including rechecking the current
-source and target, preserving the review-round count, and updating the issue's
-execution record after the merge is confirmed.
+MR ready for the user's merge decision; merge only when requested, following
+[merge.md](merge.md).

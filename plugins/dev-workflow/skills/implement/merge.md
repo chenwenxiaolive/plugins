@@ -3,8 +3,10 @@
 Use this procedure for an explicitly requested merge, synchronization after its
 authorized server-side rebase, or reconciling a merge already performed by the
 user. Ordinary implementation ends at `ready-for-merge`. Read
-[gitlab.md](gitlab.md) for access and [remote-workflow.md](remote-workflow.md) for
-checkout ownership, remote validation and the review-round limit.
+[gitlab.md](../gpu-cluster/gitlab.md) for access,
+[worktrees.md](worktrees.md) for checkout ownership and the execution record,
+[review.md](review.md) for the review-round limit and
+[remote-workflow.md](../gpu-cluster/remote-workflow.md) for remote validation.
 
 ## Recheck before merging
 

@@ -7,7 +7,7 @@ These rules govern each cluster's shared `/volume`; the control machine has inde
 | Path | Purpose | May modify? |
 |---|---|---|
 | `/volume/workspace/<project>/...` | Project code (a project may have multiple checkouts, e.g. `vllm-open-mr/vllm-official`) | Only the checkout I specify |
-| `/volume/worktree/<repo>/<worktree-name>` | Reusable development/review worktrees and their remote counterparts; names such as `dev-1` or `review` stay fixed across tasks | Only the selected checkout; reuse it and create its missing remote counterpart for requested remote testing as described in remote-workflow.md |
+| `/volume/worktree/<repo>/<worktree-name>` | Reusable development/review worktrees and their remote counterparts; names such as `dev-1` or `review` stay fixed across tasks | Only the selected checkout; reuse it as described in [worktrees.md](../implement/worktrees.md) and create its missing remote counterpart for requested remote testing as described in [remote-workflow.md](remote-workflow.md) |
 | `/volume/tmp/<topic>-<YYYYMMDD>-<random suffix>/` | All temporary artifacts | Only create your own directories |
 | `/volume/model` (sh, th) | Model weights | Read-only |
 | `/volume/.cache` on sh and th | i.e. `HF_HOME`, the shared HF cache | HF writes to it automatically when downloading models; do not modify or delete it manually |

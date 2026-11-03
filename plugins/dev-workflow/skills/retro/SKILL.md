@@ -36,9 +36,9 @@ For each worthwhile finding, state:
 - How a later task could show whether the change helped.
 
 Use project tests or existing automated checks for deterministic project errors.
-Use project instructions for project conventions, the shared workflow for rules
-that apply across projects, and `gpu-cluster` references for infrastructure
-procedures. Change the authoritative location once rather than copying a rule
+Use project instructions for project conventions, `implement` and its references
+for the development process across projects, and `gpu-cluster` references for
+infrastructure procedures. Change the authoritative location once rather than copying a rule
 into several skills.
 
 Keep the report short and prioritize by likely benefit. There is no quota of
