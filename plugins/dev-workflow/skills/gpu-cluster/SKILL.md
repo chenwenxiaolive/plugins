@@ -6,12 +6,12 @@ description: Operating this setup's GPU nodes, gates and internal GitLab. Use be
 # GPU cluster operations
 
 The rules in `~/.claude/CLAUDE.md` apply to every task; these references hold the
-procedures and facts behind them. Read the one for what the task does next, not all:
+facts behind them. Read the one for what the task does next, not all:
 
 | Doing | Read |
 |---|---|
 | ssh to a node or gate; node hardware, storage, network or tools; a node that stops answering | [machines.md](machines.md) |
-| checkout paths and project instructions, syncing a checkout, creating a remote counterpart, commands in a remote checkout, formatting a local file with a node's tools, or where validation runs and what it records | [remote-workflow.md](remote-workflow.md) |
+| checkout paths, syncing a remote checkout, creating a remote counterpart, remote commands, formatting with a node's tools, where validation runs | [remote-workflow.md](remote-workflow.md) |
 | `/volume` paths, temporary files, `TMPDIR`, checking whether GPUs are free, a background job, freeing GPU memory | [jobs.md](jobs.md) |
 | GitLab issues, MRs, API calls or pushes; a dependency fetched from GitLab; OSS credentials for jobs | [gitlab.md](gitlab.md) |
 | gate deployment, its saved configuration, the proxy and tunnel | [gate.md](gate.md) |

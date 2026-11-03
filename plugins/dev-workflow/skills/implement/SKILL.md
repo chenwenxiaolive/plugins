@@ -5,60 +5,65 @@ description: "Implement an assigned issue or agreed development task in the sele
 
 # Implement
 
-Own the assigned task through its MR and review outcome. Work in the checkout the
-user selected and read its project instructions. This skill's references hold the
-development process; read the one for what the task does next:
+Own the assigned task through its MR and review outcome, in the checkout the user
+selected. Read its project instructions. Use [gpu-cluster](../gpu-cluster/SKILL.md)
+for remote checkouts, validation and GitLab access. On GitHub, `gh` does the same
+steps: a pull request is the MR. The project's own rules come first.
 
-| Doing | Read |
+## Start or resume
+
+- Read the issue, its discussions and any existing MR. An agreed task needs no issue.
+- Continue an existing issue/MR on its branch. Name a new issue branch `issue-<iid>-<2-4 words>`, e.g. `issue-42-fix-cache`, created from the fetched target branch; base it on another unmerged branch only for an intended dependency.
+- Worktrees such as `/volume/worktree/<repo>/dev-1` serve one task at a time and keep their names across tasks. Create one with `git worktree add --no-track -b <branch> <path> origin/<target>`. Before switching it to another task, its work must be committed and pushed, and no process may be working in it, here or on the nodes sharing its remote counterpart. Never remove a worktree unless the user asks.
+- If the MR was already merged, update the execution record and report; don't recreate its branch.
+
+## Execution record
+
+An implemented issue carries one editable comment that says who works on it:
+
+```markdown
+<!-- coder-execution-record -->
+### Execution record
+
+| Field | Value |
 |---|---|
-| starting, resuming or switching a worktree to another issue/MR; naming a branch; the issue's execution record; saying whether an issue is free | [worktrees.md](worktrees.md) |
-| reviewing an MR you opened, recording acceptance, or a standalone review | [review.md](review.md) |
-| a requested merge, synchronizing after a server-side rebase, or recording an observed merge | [merge.md](merge.md) |
+| Worktree | <absolute checkout path, or Released (last used: <path>)> |
+| Branch | <development branch> |
+| MR | <MR URL, or Not opened> |
+| Status | active / blocked / needs-human / ready-for-merge / merged / paused, with context |
+| Updated | <UTC timestamp> |
+```
 
-Use [gpu-cluster](../gpu-cluster/SKILL.md) for the nodes and GitLab:
-[remote-workflow.md](../gpu-cluster/remote-workflow.md) for checkout paths,
-synchronization, remote execution and where validation runs, and
-[gitlab.md](../gpu-cluster/gitlab.md) for GitLab access.
-
-On a GitHub repository, use `gh` for the same steps: a pull request is the MR,
-the execution record is an issue comment, and `gh pr merge --match-head-commit
-<sha>` is the merge API's `sha` guard. The project's own merge rules come first.
-
-## Establish or resume the task
-
-- Read the issue, relevant discussions and any existing MR. Identify the intended result, acceptance criteria and prerequisites. Use an already agreed task directly; a separate issue is not a prerequisite to coding.
-- Continue an existing issue/MR on its development branch. For a new assignment, follow the [worktree reuse checks](worktrees.md#reusing-worktrees-for-issues-and-mr-review) before creating or switching branches. Keep the selected directory, including stable names such as `dev-1`.
-- Name new issue branches using the [issue branch identity rules](worktrees.md#issue-branch-identity).
-- When implementing an issue, read and maintain its [execution record](worktrees.md#issue-execution-record). Confirm ownership before coding, reuse the same comment on resume, and record the actual worktree and branch. A task without an issue needs no extra issue or record.
-- If the MR was already merged, [reconcile its execution record](merge.md#record-merge-completion) before resuming or reusing the checkout. Report the merged MR and any remaining issue scope; do not recreate a deleted source branch or resume implementation without a new assignment.
-- Resolve unmet dependencies before building on them. Use another unmerged task branch only for an explicitly intended dependency.
-- On resume, inspect the actual branch, worktree, MR source commit, review findings and persisted round count. Preserve existing work and running jobs; handle unclear ownership or divergence before switching or synchronizing.
+- Read it before starting an issue and before calling an issue free or proposing it as next work. Another active worktree owns the issue until it is released or the user reassigns it.
+- Create or edit it with `glab api` (or `gh`) when you claim the task, open the MR, get blocked, reach `ready-for-merge` or `merged`, or release the worktree. Keep one record per issue and never overwrite another coder's.
 
 ## Implement and validate
 
-- For new features and bug fixes, follow this order: update docs and comments first → write a minimal test that currently fails → write the minimal implementation → finally check that tests, code, and docs are consistent. When the test runs remotely, push and validate the failing-test phase before implementing the fix locally. Choose a test that exercises the real behavior through an appropriate existing interface.
-- Expected results must come from a specification, known example or independent reference. Prefer real internal behavior; isolate external dependencies or nondeterminism when needed. Routine test choices do not require a separate confirmation.
-- Projects are internal and still under development: use KISS design, keep no backward-compatibility layers, and write no data migrations. Prefer small interfaces and keep related behavior together. Add abstraction for current requirements rather than anticipated extensions.
-- For a hard bug, establish a useful reproduction, compare plausible causes and change one variable at a time. For a performance regression, measure a baseline with a controlled workload before claiming improvement. Recheck the original symptom after the fix.
-- Use [validation scope](../gpu-cluster/remote-workflow.md#validation-scope) to choose local checks or remote execution and record results.
-- GPU execution requires a user-designated node and free GPUs. If the node or another essential validation input is missing, continue independent local preparation and request the missing input. Preserve the failing-test-before-implementation sequence for dependent work. Do not claim an unrun check passed.
-- Run checks that establish the acceptance criteria and cover affected behavior. Remove temporary instrumentation and keep run artifacts outside the repository under the prescribed temporary directory.
+- For features and fixes: update docs → write a minimal failing test → implement → check that tests, code and docs agree. When tests run remotely, validate the failing test there before the fix.
+- Expected results come from a specification, known example or independent reference.
+- KISS: no backward-compatibility layers, no data migrations, no abstraction for anticipated needs.
+- Validate committed code under gpu-cluster's [validation scope](../gpu-cluster/remote-workflow.md#validation-scope). GPU work needs a node the user named and free GPUs. Never claim an unrun check passed.
 
 ## Deliver and review
 
-Commit only this task's changes, push its development branch and create or update
-the MR. Use the project template; describe the resulting behavior, issue links,
-validation evidence and material limitations. Use a closing reference only when
-the MR fulfills that issue. Add its link to the issue's execution record and update
-that record at its defined milestones. Keep review details in the MR.
+Commit only this task's changes, push the branch and open the MR with the
+project's template: behavior, issue links, validation evidence and limitations.
+Use a closing reference only when the MR completes the issue.
 
-Continue into the [coder-owned review loop](review.md#coder-owned-review-after-opening-an-mr)
-for the review command, the acceptance record, the corrective-round limit and
-the records to keep across interruptions. An issue-free task uses the agreed
-request as its source.
+Then review it yourself:
 
-Finish with the MR link, source commit, validation outcome and review status. If
-the loop reaches its limit or a required review/check cannot run, report the
-remaining findings or blocker for human handling. A successful review leaves the
-MR ready for the user's merge decision; merge only when requested, following
-[merge.md](merge.md).
+1. Round 0: in the clean checkout at the MR source commit, run `codex review --base <target-sha> > <run_dir>/review-0.md 2> <run_dir>/review-0.log` (minutes; run it in the background). Separately check the change against the issue's requirements, which `codex review` does not see.
+2. A pass means the requirements are met with evidence, no actionable finding is left and the checks pass on the current commit. Explain any finding you reject.
+3. Otherwise fix, push, rerun affected checks and review again: at most three corrective rounds. If round 3 still fails, stop, set `needs-human` and report what remains.
+4. Record each round's commit, checks and outcome in the MR's review-status section, so that the count survives interruptions. A later merge recheck uses the remaining rounds and never resets them.
+
+A standalone review the user requests uses a detached checkout at the MR's source
+commit, the same command, and a verdict in chat (approve, changes needed, needs
+discussion); post it to the MR only when asked.
+
+## Merge, only when the user asks
+
+- Recheck the MR, its source SHA and the current target. If either moved since the passing review, reassess what changed, using a remaining round if a new review is needed.
+- Merge with the reviewed SHA as a guard: `glab mr merge <iid> --sha <sha>` or `gh pr merge <n> --merge --match-head-commit <sha>`. After an error or timeout, read the MR and target back before retrying, since the merge may have landed.
+- If the forge's rebase leaves a checkout diverged only by that rebase, rename its old branch to an archive name with `git branch -m` and recreate the branch at the new SHA. Never reset or force-push.
+- Confirm the merge commit, then set the execution record to `merged`.

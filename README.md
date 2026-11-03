@@ -123,13 +123,15 @@ frontmatter helper may reject supported fields such as
 
 These checks do not exercise infrastructure workflows or fetch external links.
 The bundled scripts have tests against fake external commands, so they build
-no container, touch no node and write no GitLab comment:
+no container and touch no node:
 
 ```bash
 python3 -B -m unittest discover -s tests/docker-build -v   # run-build.sh: fake sudo and docker
-python3 -B -m unittest discover -s tests/dev-workflow -v   # checkout.py and issue_record.py: fake ssh and glab
 python3 -B -m unittest discover -s tests/repository -v     # check_installation.py on a copied skill
 ```
+
+The development workflow (`implement`, `gpu-cluster`) ships no scripts: it states
+rules and facts, and the agent runs `git`, `glab`, `ssh` and `nvidia-smi` itself.
 
 Editing cluster instructions does not require running a GPU job. Exercise changed
 workflow behavior separately; for installation updates, compare installed file
