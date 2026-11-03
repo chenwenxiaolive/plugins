@@ -20,6 +20,9 @@ args = sys.argv[1:]
 while args[0] == "-o":
     args = args[2:]
 node, script = args
+if os.environ.get("FAKE_SSH_HANG") and "exit.status" in script:
+    import time
+    time.sleep(60)
 local, remote = os.environ["FAKE_SSH_MAP"].split("=", 1)
 keep = os.environ["FAKE_SSH_KEEP"]  # the test tree itself may live under /volume/tmp
 remap = lambda text: text.replace(keep, "\0").replace(local, remote).replace("\0", keep)
@@ -110,14 +113,14 @@ class JobTest(unittest.TestCase):
 
     def test_a_job_runs_in_the_checkout_and_records_its_inputs(self):
         code, out = self.job("start", "sh-0", "--topic", "smoke", "--gpus", "0", "--",
-                             "bash", "-c", 'echo "cwd=$PWD gpus=$CUDA_VISIBLE_DEVICES"')
+                             "bash", "-c", 'echo "cwd=$PWD gpus=$CUDA_VISIBLE_DEVICES order=$CUDA_DEVICE_ORDER"')
         self.assertEqual(code, 0, out)
         run_dir = self.started(out)
         self.assertRegex(run_dir, r"^/volume/tmp/smoke-\d{8}-\w{6}$")
         code, out = self.job("wait", "sh-0", run_dir, "--interval", "1")
         self.assertEqual(code, 0, out)
         self.assertIn(f"succeeded: {run_dir}", out)
-        self.assertIn(f"cwd={self.work} gpus=0", out)
+        self.assertIn(f"cwd={self.work} gpus=0 order=PCI_BUS_ID", out)
         record = (self.local(run_dir) / "record.txt").read_text()
         for line in (f"checkout: {self.work}", "node: sh-0", "branch: main",
                      f"commit: {git(self.work, 'rev-parse', 'HEAD')}", "working tree: 0 changed paths", "gpus: 0"):
@@ -143,12 +146,17 @@ class JobTest(unittest.TestCase):
         self.assertIn("gone without exit.status", out)
 
     def test_running_jobs_time_out_and_need_the_launch_node(self):
-        code, out = self.job("start", "sh-0", "--topic", "long", "--", "bash", "-c", "echo step-1; sleep 4")
+        code, out = self.job("start", "sh-0", "--topic", "long", "--", "bash", "-c", "echo step-1; sleep 20")
         run_dir = self.started(out)
         time.sleep(0.5)
+        (self.local(run_dir) / "run.pid").unlink()
         code, out = self.job("status", "sh-0", run_dir)
         self.assertEqual(code, 3, out)
         self.assertIn("step-1", out)
+        (self.local(run_dir) / "exit.status").write_text("")
+        code, out = self.job("status", "sh-0", run_dir)
+        self.assertEqual(code, 3, out)
+        self.assertNotIn("Traceback", out)
         began = time.monotonic()
         code, out = self.job("wait", "sh-0", run_dir, "--timeout", "1")
         self.assertEqual(code, 3, out)
@@ -157,7 +165,14 @@ class JobTest(unittest.TestCase):
         code, out = self.job("status", "sh-1", run_dir)
         self.assertEqual(code, 2, out)
         self.assertIn("launched on sh-0", out)
-        self.assertEqual(self.job("wait", "sh-0", run_dir, "--interval", "1")[0], 0)
+        began = time.monotonic()
+        code, out = self.job("wait", "sh-0", run_dir, "--timeout", "1", FAKE_SSH_HANG="1")
+        self.assertEqual(code, 2, out)
+        self.assertIn("no answer", out)
+        self.assertLess(time.monotonic() - began, 30)
+        code, out = self.job("wait", "sh-0", run_dir, "--interval", "1")
+        self.assertEqual(code, 0, out)
+        self.assertEqual((self.local(run_dir) / "exit.status").read_text().strip(), "0")
 
     def test_start_validates_its_arguments(self):
         self.assertIn("--topic must be", self.job("start", "sh-0", "--topic", "a/b", "--", "true")[1])

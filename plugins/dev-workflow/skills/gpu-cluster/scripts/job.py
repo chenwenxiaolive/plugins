@@ -9,7 +9,7 @@ Run in the selected local checkout; the job runs in its remote counterpart (same
         Exit 0 when the selected GPUs (default: all) are free.
   job.py start NODE --topic NAME [--gpus LIST|all] -- COMMAND [ARG...]
         refuse busy GPUs; create /volume/tmp/NAME-<node date>-XXXXXX with run.sh (exit-status
-        traps, cd to the checkout, CUDA_VISIBLE_DEVICES for a list) and record.txt (checkout,
+        traps, cd to the checkout, PCI-ordered CUDA_VISIBLE_DEVICES for a list) and record.txt (checkout,
         node, branch, commit, tree state, GPUs, command); launch it with nohup from the
         checkout and print the run directory. Use `bash -c '...'` for shell syntax.
   job.py status NODE RUN_DIR
@@ -40,13 +40,22 @@ printf '%s\n' "$apps" | while IFS=', ' read -r uuid pid mem; do
     "$(tr '\0\n\t' '   ' < "/proc/$pid/cmdline" 2>/dev/null | cut -c1-160)"
 done"""
 
+# The job is found by its unique run.sh path, so a missing run.pid does not make it look gone.
 STATUS = r"""cd -- %s || exit 1
 sed -n 's/^node: //p' record.txt
-pid=$(cat run.pid 2>/dev/null)
-if test -f exit.status; then echo "status $(cat exit.status)"
-elif test -n "$pid" && tr '\0' ' ' < "/proc/$pid/cmdline" 2>/dev/null | grep -qF "$PWD/run.sh"; then echo running
-else echo gone
-fi
+code=$(cat exit.status 2>/dev/null)
+case $code in
+  [0-9]*) echo "status $code" ;;
+  *) state=gone
+     for p in /proc/[0-9]*; do
+       c=$(tr '\0' ' ' < "$p/cmdline" 2>/dev/null) || continue
+       case $c in *"$PWD/run.sh"*) state=running; break ;; esac
+     done
+     # The trap writes exit.status before the job exits, so reread it if the job ended mid-scan.
+     code=$(cat exit.status 2>/dev/null)
+     case $state:$code in gone:[0-9]*) state="status $code" ;; esac
+     echo "$state" ;;
+esac
 tail -n 20 run.log 2>/dev/null"""
 
 
@@ -54,10 +63,14 @@ class Failure(Exception):
     """A command could not run; the state is unknown."""
 
 
-def ssh(node, script, stdin=None):
+def ssh(node, script, stdin=None, timeout=120):
     # Without input, give ssh /dev/null so it never reads (or waits on) the caller's stdin.
-    result = subprocess.run(["ssh", "-o", "BatchMode=yes", node, script], capture_output=True, text=True,
-                            **({"input": stdin} if stdin is not None else {"stdin": subprocess.DEVNULL}))
+    try:
+        result = subprocess.run(["ssh", "-o", "BatchMode=yes", node, script], capture_output=True, text=True,
+                                timeout=timeout,
+                                **({"input": stdin} if stdin is not None else {"stdin": subprocess.DEVNULL}))
+    except subprocess.TimeoutExpired:
+        raise Failure(f"ssh {node}: no answer within {timeout:.0f} s") from None
     if result.returncode:
         raise Failure(f"ssh {node}: {result.stderr.strip() or result.stdout.strip() or f'exit {result.returncode}'}")
     return result.stdout
@@ -113,10 +126,13 @@ def start(args, checkout):
         return 1
     q, command = shlex.quote, shlex.join(args.command)
     run_dir = ssh(args.node, f'mktemp -d "/volume/tmp/{args.topic}-$(date +%Y%m%d)-XXXXXX"').strip()
-    visible = f"export CUDA_VISIBLE_DEVICES={q(args.gpus)}\n" if args.gpus and args.gpus != "all" else ""
+    # PCI bus order makes CUDA number the GPUs as nvidia-smi does, so the checked GPUs are the ones used.
+    visible = (f"export CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES={q(args.gpus)}\n"
+               if args.gpus and args.gpus != "all" else "")
+    status_file = q(run_dir + "/exit.status")
     run_sh = (
         "#!/usr/bin/env bash\n"
-        f"trap 'echo $? > {q(run_dir)}/exit.status' EXIT\n"
+        f"trap 'echo $? > {status_file}.tmp && mv {status_file}.tmp {status_file}' EXIT\n"
         "trap 'exit 143' TERM; trap 'exit 130' INT; trap 'exit 129' HUP\n"
         f"cd -- {q(checkout)} || exit 1\n{visible}{command}\n"
     )
@@ -144,9 +160,9 @@ def start(args, checkout):
     return 0
 
 
-def status(node, run_dir, quiet=False):
+def status(node, run_dir, quiet=False, timeout=120):
     """Return 0 succeeded, 1 failed, 3 running; print the outcome and log tail."""
-    lines = ssh(node, STATUS % shlex.quote(run_dir)).split("\n")
+    lines = ssh(node, STATUS % shlex.quote(run_dir), timeout=timeout).split("\n")
     launch_node, state, log = lines[0], lines[1], "\n".join(lines[2:]).rstrip()
     if (state == "running" or state == "gone") and launch_node != node:
         raise Failure(f"{run_dir} was launched on {launch_node}; query that node")
@@ -156,11 +172,11 @@ def status(node, run_dir, quiet=False):
     if state == "running":
         print(f"running: {run_dir}")
         return 3
-    if state == "status 0":
+    finished = re.fullmatch(r"status (\d+)", state)
+    if finished and finished[1] == "0":
         print(f"succeeded: {run_dir}")
         return 0
-    print(f"failed: {run_dir} " + (f"exited with {state.split()[1]}" if state.startswith("status")
-                                   else "is gone without exit.status"))
+    print(f"failed: {run_dir} " + (f"exited with {finished[1]}" if finished else "is gone without exit.status"))
     return 1
 
 
@@ -199,7 +215,8 @@ def main():
         if args.command_name == "status":
             return status(args.node, args.run_dir)
         deadline = time.monotonic() + args.timeout
-        while (code := status(args.node, args.run_dir, quiet=True)) == 3:
+        while (code := status(args.node, args.run_dir, quiet=True,
+                              timeout=max(10, deadline - time.monotonic()))) == 3:
             remaining = deadline - time.monotonic()
             if remaining <= 0:
                 break
