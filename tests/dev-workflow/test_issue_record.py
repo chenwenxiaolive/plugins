@@ -94,10 +94,14 @@ class IssueRecordTest(unittest.TestCase):
         notes += [{"id": 90 + i, "body": b, "system": True} for i, b in enumerate(system)]
         self.save({"42": notes})
 
-    def run_script(self, *args, **env):
-        result = subprocess.run(["python3", "-B", str(SCRIPT), *args], cwd=self.work,
+    def run_script(self, *args, cwd=None, **env):
+        result = subprocess.run(["python3", "-B", str(SCRIPT), *args], cwd=cwd or self.dev1,
                                 env={**self.env, **env}, capture_output=True, text=True, timeout=60)
         return result.returncode, result.stdout, result.stderr
+
+    @property
+    def dev1(self):
+        return self.tmp / "dev-1"
 
     def current_fields(self):
         code, out, err = self.run_script("show", "42")
@@ -106,7 +110,7 @@ class IssueRecordTest(unittest.TestCase):
 
     def test_show_lists_records_branches_and_worktrees_only_for_this_issue(self):
         self.seed("plain comment", record("/w/dev-1", branch="custom-name"), system=[MARKER])
-        code, out, err = self.run_script("show", "42")
+        code, out, err = self.run_script("show", "42", cwd=self.work)
         self.assertEqual(code, 0, err)
         result = json.loads(out)
         self.assertEqual(result["comments"], 2)
@@ -118,68 +122,81 @@ class IssueRecordTest(unittest.TestCase):
             {"path": str(self.tmp / "dev-2"), "branch": "issue-42-not-pushed"},
         ])
 
-    def test_set_creates_a_record_and_requires_its_fields(self):
-        code, _, err = self.run_script("set", "42", "--worktree", "/w/dev-1")
+    def test_set_creates_a_record_for_the_current_checkout(self):
+        code, _, err = self.run_script("set", "42")
         self.assertEqual(code, 1)
-        self.assertIn("--branch, --status", err)
+        self.assertIn("needs --status", err)
         self.assertEqual(self.notes(), [])
-        code, out, err = self.run_script("set", "42", "--worktree", "/w/dev-1", "--branch", "issue-42-fix-cache",
-                                         "--status", "active | waiting on sh-0")
+        code, out, err = self.run_script("set", "42", "--status", "active | waiting on sh-0")
         self.assertEqual(code, 0, err)
         self.assertEqual(json.loads(out)["action"], "created")
         [note] = self.notes()
         self.assertTrue(note["body"].startswith(MARKER + "\n### Execution record\n"))
         self.assertIn("| Status | active \\| waiting on sh-0 |", note["body"])
         fields = self.current_fields()
+        self.assertEqual((fields["Worktree"], fields["Branch"]), (str(self.dev1), "issue-42-fix-cache"))
         self.assertEqual(fields["Status"], "active | waiting on sh-0")
         self.assertEqual(fields["MR"], "Not opened")
         self.assertRegex(fields["Updated"], r"^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$")
 
-    def test_set_updates_in_place_and_keeps_other_fields(self):
-        self.seed("plain comment", record("/w/dev-1"))
+    def test_set_updates_its_own_record_in_place_and_keeps_other_fields(self):
+        link = self.tmp / "linked-dev-1"
+        link.symlink_to(self.dev1)
+        self.seed("plain comment", record(str(link)))
         code, out, err = self.run_script("set", "42", "--mr", "!12", "--status", "ready-for-merge")
         self.assertEqual(code, 0, err)
         self.assertEqual(json.loads(out)["action"], "updated")
         self.assertEqual(len(self.notes()), 2)
         fields = self.current_fields()
         self.assertEqual((fields["Worktree"], fields["Branch"], fields["MR"], fields["Status"]),
-                         ("/w/dev-1", "issue-42-fix-cache", "!12", "ready-for-merge"))
+                         (str(self.dev1), "issue-42-fix-cache", "!12", "ready-for-merge"))
 
-    def test_set_protects_another_active_owner(self):
-        self.seed(record("/w/dev-1"))
-        code, _, err = self.run_script("set", "42", "--worktree", "/w/dev-2", "--status", "active")
-        self.assertEqual(code, 1)
-        self.assertIn("recorded for /w/dev-1", err)
-        self.assertEqual(self.current_fields()["Worktree"], "/w/dev-1")
-        code, _, err = self.run_script("set", "42", "--worktree", "/w/dev-2", "--status", "active", "--takeover")
+    def test_every_update_protects_another_active_owner(self):
+        self.seed(record("/w/other", branch="issue-42-elsewhere"))
+        for args in (["--status", "ready-for-merge"], ["--mr", "!12"], ["--release"]):
+            code, _, err = self.run_script("set", "42", *args)
+            self.assertEqual(code, 1, args)
+            self.assertIn("recorded for /w/other", err)
+        self.assertEqual(self.current_fields()["Status"], "active")
+        code, _, err = self.run_script("set", "42", "--for-owner", "--status", "merged: !12 as abc123")
         self.assertEqual(code, 0, err)
-        self.assertEqual(self.current_fields()["Worktree"], "/w/dev-2")
+        fields = self.current_fields()
+        self.assertEqual((fields["Worktree"], fields["Branch"], fields["Status"]),
+                         ("/w/other", "issue-42-elsewhere", "merged: !12 as abc123"))
+        code, _, err = self.run_script("set", "42", "--takeover", "--status", "active")
+        self.assertEqual(code, 0, err)
+        fields = self.current_fields()
+        self.assertEqual((fields["Worktree"], fields["Branch"]), (str(self.dev1), "issue-42-fix-cache"))
 
     def test_release_then_reclaim(self):
-        self.seed(record("/w/dev-1"))
+        self.seed(record(str(self.dev1)))
         code, _, err = self.run_script("set", "42", "--release", "--status", "paused: tests remain")
         self.assertEqual(code, 0, err)
-        self.assertEqual(self.current_fields()["Worktree"], "Released (last used: /w/dev-1)")
-        self.assertEqual(self.run_script("set", "42", "--release")[0], 1)
-        code, _, err = self.run_script("set", "42", "--worktree", "/w/dev-3", "--status", "active")
+        fields = self.current_fields()
+        self.assertEqual(fields["Worktree"], f"Released (last used: {self.dev1})")
+        self.assertEqual(fields["Branch"], "issue-42-fix-cache")
+        code, _, err = self.run_script("set", "42", "--release")
+        self.assertEqual(code, 1)
+        self.assertIn("no active worktree", err)
+        code, _, err = self.run_script("set", "42", "--status", "active", cwd=self.tmp / "dev-2")
         self.assertEqual(code, 0, err)
-        self.assertEqual(self.current_fields()["Worktree"], "/w/dev-3")
+        fields = self.current_fields()
+        self.assertEqual((fields["Worktree"], fields["Branch"]), (str(self.tmp / "dev-2"), "issue-42-not-pushed"))
 
     def test_set_refuses_duplicates_concurrent_edits_and_failed_writes(self):
-        self.seed(record("/w/dev-1"), record("/w/dev-2"))
+        self.seed(record(str(self.dev1)), record("/w/other"))
         code, _, err = self.run_script("set", "42", "--status", "active")
         self.assertEqual(code, 1)
         self.assertIn("2 execution records", err)
-        self.seed(record("/w/dev-1"))
+        self.seed(record(str(self.dev1)))
         code, _, err = self.run_script("set", "42", "--status", "active", FAKE_GLAB_EDIT_ON_GET="1")
         self.assertEqual(code, 1)
         self.assertIn("changed while editing", err)
-        self.seed(record("/w/dev-1"))
+        self.seed(record(str(self.dev1)))
         code, _, err = self.run_script("set", "42", "--status", "blocked", FAKE_GLAB_FAIL="PUT")
         self.assertEqual(code, 1)
         self.assertIn("504", err)
         self.assertEqual(self.current_fields()["Status"], "active")
-
 
 if __name__ == "__main__":
     unittest.main()

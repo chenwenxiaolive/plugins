@@ -2,20 +2,24 @@
 """Read or update a GitLab issue's coder execution record from the selected checkout.
 
   issue_record.py show <iid>
-  issue_record.py set <iid> [--worktree PATH] [--branch NAME] [--mr URL] [--status TEXT]
-                            [--release] [--takeover]
+  issue_record.py set <iid> [--mr URL] [--status TEXT] [--release | --takeover | --for-owner]
 
 `show` prints the issue's execution records, its comment count, remote branches named
-issue-<iid>-* and local worktrees on them, and changes nothing. `set` creates the record
-when none exists or updates the single existing one in place, keeping fields it is not
-given, stamping Updated, and reading the saved note back. It refuses when several records
-exist, when another active worktree owns the record (unless --takeover), or when the note
-changed while it was being edited. glab infers the project from the checkout.
+issue-<iid>-* (plus any branch a record names) and local worktrees on such branches, and
+changes nothing. `set` records the checkout it runs in and that checkout's branch: it
+creates the record when none exists or updates the single existing one in place, keeping
+the MR and Status it is not given, stamping Updated, and reading the saved note back.
+`--release` marks this checkout's record released. Another active worktree's record is
+changed only with `--takeover` (an explicit reassignment to this checkout) or
+`--for-owner` (update MR/Status and keep its worktree and branch, e.g. after a merge).
+It refuses when several records exist or the note changed while it was being edited.
+glab infers the project from the checkout.
 """
 
 import argparse
 from datetime import datetime, timezone
 import json
+import os
 import re
 import subprocess
 import sys
@@ -114,24 +118,36 @@ def set_record(iid, args):
         raise Refusal(f"{len(found)} execution records on #{iid} (notes {[n['id'] for n in found]}); resolve ownership first")
     current = parse_fields(found[0]["body"]) if found else {}
     owner = current.get("Worktree", "")
-    if args.release:
-        if not owner or owner.startswith(RELEASED):
+    active = bool(owner) and not owner.startswith(RELEASED)
+    checkout = os.path.realpath(run("git", "rev-parse", "--show-toplevel").strip())
+    mine = active and os.path.realpath(owner) == checkout  # records may name a linked path
+    if args.for_owner:
+        if not found:
+            raise Refusal(f"#{iid} has no record to update")
+        worktree, branch = owner, current.get("Branch", "")
+    elif args.release:
+        if not active:
             raise Refusal(f"#{iid} has no active worktree to release")
-        worktree = f"{RELEASED}{owner})"
+        if not mine:
+            raise Refusal(f"#{iid} is recorded for {owner}; release it from that checkout")
+        worktree, branch = f"{RELEASED}{checkout})", current.get("Branch", "")
     else:
-        worktree = args.worktree or owner
-        if args.worktree and owner and not owner.startswith(RELEASED) and owner != args.worktree and not args.takeover:
-            raise Refusal(f"#{iid} is recorded for {owner}; pass --takeover only for an explicit reassignment")
+        if active and not mine and not args.takeover:
+            raise Refusal(f"#{iid} is recorded for {owner}; pass --takeover only for an explicit reassignment, "
+                          "or --for-owner to update that record without taking it")
+        branch = subprocess.run(["git", "symbolic-ref", "--short", "-q", "HEAD"], capture_output=True, text=True).stdout.strip()
+        if not branch:
+            raise Refusal("detached HEAD; check out the issue's branch first")
+        worktree = checkout
     fields = {
         "Worktree": worktree,
-        "Branch": args.branch or current.get("Branch", ""),
+        "Branch": branch,
         "MR": args.mr or current.get("MR", "Not opened"),
         "Status": args.status or current.get("Status", ""),
         "Updated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
     }
-    missing = [name for name in ("Worktree", "Branch", "Status") if not fields[name]]
-    if missing:
-        raise Refusal(f"a new record needs {', '.join('--' + name.lower() for name in missing)}")
+    if not fields["Status"]:
+        raise Refusal("a new record needs --status")
     body = render(fields)
     if found:
         note_id = found[0]["id"]
@@ -151,15 +167,13 @@ def main():
     commands.add_parser("show").add_argument("iid", type=int)
     setter = commands.add_parser("set")
     setter.add_argument("iid", type=int)
-    setter.add_argument("--worktree")
-    setter.add_argument("--branch")
     setter.add_argument("--mr")
     setter.add_argument("--status")
-    setter.add_argument("--release", action="store_true", help="mark the recorded worktree as released")
-    setter.add_argument("--takeover", action="store_true", help="replace another active worktree's record")
+    mode = setter.add_mutually_exclusive_group()
+    mode.add_argument("--release", action="store_true", help="mark this checkout's record released")
+    mode.add_argument("--takeover", action="store_true", help="reassign another active worktree's record to this checkout")
+    mode.add_argument("--for-owner", action="store_true", help="update MR/Status of another worktree's record without taking it")
     args = parser.parse_args()
-    if args.command == "set" and args.release and args.worktree:
-        parser.error("--release keeps the recorded worktree; do not pass --worktree")
     try:
         result = show(args.iid) if args.command == "show" else set_record(args.iid, args)
     except Refusal as error:
