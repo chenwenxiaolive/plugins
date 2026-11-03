@@ -1,13 +1,14 @@
 ---
 name: preview
-description: Create or update standalone HTML and Markdown artifacts in the local /preview service, verify them, and return browser links for local or SSH tunnel access. Use for requested document previews, reports, existing /preview artifacts, or managing the bundled service. Keep tracked repository documentation in its established location.
+description: Create or update standalone HTML and Markdown artifacts in the local /preview service, verify them, and return links at its configured browser URL. Use for requested document previews, reports, existing /preview artifacts, or managing the bundled service. Keep tracked repository documentation in its established location.
 ---
 
 # Preview
 
 Publish the requested artifact through a verified preview service. For service
 management, read [the service reference](references/service.md) and use
-`scripts/preview.py start|status|stop`. Installing the skill alone starts nothing.
+`scripts/preview.py start|status|stop` with the deployment's saved configuration.
+Installing the skill alone starts nothing.
 Reuse an available service. A request to set up or start preview authorizes using
 the bundled helper; a document-only request does not authorize changing shared
 services or network configuration.
@@ -23,9 +24,10 @@ Confirm that the preview directory exists. If the service mapping is unknown,
 inspect the relevant local configuration or ask for the missing address. A
 listener on port 8000 alone does not establish a browser URL.
 
-For SSH access, distinguish the server's local endpoint from the browser-side
-forwarded address. Use the configured browser base URL for links. Keep the
-service bound to loopback unless network exposure is explicitly requested.
+Use the configured browser base URL for links and preserve the deployment's
+authorized access mode across restarts. For a new deployment without an explicit
+network-access choice, use loopback. For SSH access, distinguish the server's
+local endpoint from the browser-side forwarded address.
 
 ## Write the artifact
 
@@ -66,8 +68,8 @@ layout or interactions when the artifact depends on them; otherwise state any
 material verification limit.
 
 Return a descriptive Markdown link to the artifact's browser URL. For SSH access,
-state that the user needs an active local forward and provide the service
-reference's tunnel command when setup is needed. Include source
+state that the user needs an active local forward and provide a forwarding
+command for the configured endpoints when setup is needed. Include source
 or download links when useful, using the service's documented query parameters.
 
 If the service is unavailable, retain the artifact, report its local path and the
