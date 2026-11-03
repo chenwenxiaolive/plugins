@@ -2,55 +2,38 @@
 
 ## Validation scope
 
-- Lightweight static checks may run on the control machine with existing tools: syntax, metadata, documentation links and Git ref checks. Do not install project dependencies or start project services for these checks.
-- Project tests, builds, benchmarks, training and GPU work run on the remote nodes, including small unit tests. Project formatters and linters use the node checkout's environment as described below. Follow [Git synchronization](#development-and-git-synchronization) for the committed snapshot and environment checks; GPU work still requires an authorized node and free GPUs.
-- For documentation-only changes, run the relevant static checks and inspect changed instructions against realistic task cases. An executable failing test is not required when no executable behavior changes.
-- Report validation against a clean, committed snapshot. Record the full SHA, checkout path, execution host, command and artifact directory; rerun affected checks after relevant source changes. Pre-commit formatting is preparation, not evidence that the final commit passed.
+- The control machine runs only light static checks with the tools it has: syntax, metadata, documentation links, Git refs. It installs no project dependencies and starts no project services.
+- Project tests (small unit tests included), builds, benchmarks, training, formatters and linters run in the node checkout's environment.
+- A documentation-only change needs its static checks and a read against realistic task cases, not a failing test.
+- Report results for a clean committed snapshot: full SHA, checkout path, host, command and artifact directory.
 
-## Formatting a local file with a node's tools
+## Checkouts
 
-- Project formatters and linters therefore run from the node checkout's environment. To check a local file before committing, pipe it through that environment's tools, in the order the project's own format script or pre-commit config runs them, passing the file name so each tool finds the project's configuration. Run the remote pipeline with explicit Bash `pipefail` so any failed stage makes the command fail. For example, for a project that formats with isort and black and lints with ruff: `ssh sh-0 "bash -o pipefail -c 'cd -- <checkout> && .venv/bin/isort --filename <path> - | .venv/bin/black -q --stdin-filename <path> - | .venv/bin/ruff check --fix --quiet --stdin-filename <path> -'" < <path>`. Choose the node for the task's cluster. The node checkout must be on a commit with the same formatter configuration and its environment synced to that commit's lock. Use the output only after the command succeeds; never redirect it over the input file.
-
-## Project paths and instruction loading
-- **Use the same absolute checkout path locally and remotely**: main project checkouts normally use `/volume/workspace/<project>[/<checkout>]`; herdr worktrees and their remote counterparts use `/volume/worktree/<repo>/<worktree-name>`. Start Codex or Claude Code in that real local Git checkout. The local directory contains the source code and its Git metadata or a `.git` file pointing to it.
-- Work only in the checkout I select. Starting a task in herdr selects that checkout; its branch follows the assigned issue/MR. Verify the repository identity, current branch or detached HEAD, and identical local/remote absolute path from Git and the selected checkout. Create a missing remote counterpart only as authorized below; other extra clones, worktrees, repository copies, switches to another existing checkout and migrations require my request.
-- Read applicable local project instructions before editing: `AGENTS.override.md` takes precedence over `AGENTS.md` in the same directory; also read applicable `CLAUDE.md`, `CLAUDE.local.md`, and their referenced guidance. Follow nested instructions in the scope of the files being changed.
-- Before the first remote operation for a task, read any project instruction files that exist in the remote checkout, from its root down to the working subdirectory (`/volume/cluster-ops` for ops work). Read remote-only operational guidance and resolve references relative to their instruction file.
-- Confirm both local and remote repository identity, branch, HEAD, and working-tree state before synchronization. After resume or compaction, reload required instructions missing from context. Re-check state before acting; startup snapshots are not current state.
-- Outside the selected `/volume` project path, perform local configuration/ops work or preparatory inspection. Ask for the intended matching path before starting project development there; do not silently select a different checkout.
-- When the current directory genuinely cannot accomplish the task, first explain why and which path you intend to use, and wait for my approval before acting. "Isolated work", "easier comparison", and "preserving the old branch" do not count as reasons.
-- Leave existing worktrees as they are; do not migrate or delete them in passing.
-
-## Creating a remote counterpart for a herdr worktree
-- When I request remote testing for a selected herdr worktree, creating its missing remote counterpart at the identical absolute path is authorized without another confirmation. This includes the necessary parent directories on the task's cluster. GPU jobs still require the node I name and free GPUs.
-- Inspect the destination before creating anything. If it exists, verify its repository, current task, branch or detached HEAD, full SHA, working-tree state, and use by jobs across the cluster. Reuse it under the [worktree reuse rules](../implement/worktrees.md#reusing-worktrees-for-issues-and-mr-review); investigate a different repository or unexpected state instead of replacing it.
-- Create the counterpart through Git: add a worktree from a verified remote clone of the same repository without switching or changing that clone's working tree, or clone the verified repository directly into the selected destination. Keep Git metadata native to each machine; a linked worktree's `.git` file must reference its remote repository. Synchronize the selected task's committed SHA through Git and match the local branch or detached HEAD. The coder's MR review uses its development branch; detached HEAD is for an explicitly requested standalone review.
-- Bootstrap commands may operate from the verified remote source repository or the destination's parent while the target does not yet exist. Once it exists, read its applicable instructions and use the identical local/remote checkout path for every project command. Finish setup with the exact committed SHA, a clean checkout, and the environment required for validation; the synchronization and job checks below still apply.
+- The local and remote checkout share one absolute path: `/volume/workspace/<project>[/<checkout>]`, or `/volume/worktree/<repo>/<name>` for herdr worktrees. Work only in the selected one; ask before using any other. Leave existing worktrees where they are.
+- Read the project instructions locally and, before the first remote command, in the remote checkout: `AGENTS.override.md` over `AGENTS.md`, plus `CLAUDE.md` and what they reference.
+- For requested remote testing of a herdr worktree, create its missing remote counterpart through Git (a clone, or a worktree of an existing clone of the same repository) at the same path. If something already exists there, inspect it and reuse or report it; never replace it.
 
 ## Development and Git synchronization
-- The local checkout is the primary place for source edits. Remote checkouts are for execution and validation. Avoid editing the same source files independently on both sides.
-- Use a clearly identified development branch for each task. Preserve existing work and commit only this task's changes. For an authorized development task, normal phase commits and pushes to the intended development branch are part of synchronization; do not ask for approval again for each sync. Do not push directly to main/master, force-push, or rewrite shared history unless I request it. For a requested merge, use [implement's merge.md](../implement/merge.md) to check the current source and target, handle any authorized server-side rebase, and validate its result.
-- Synchronize a coherent, testable batch of changes, not each file save: review the local diff → commit → record the full commit SHA → push the development branch → update the remote checkout → verify the exact SHA → run the relevant checks remotely.
-- [scripts/checkout.py](scripts/checkout.py), run from the local checkout, performs the checkout checks below. `check <node>` is read-only: the remote counterpart must have the same physical path as its Git root, the same origin and branch, be at the local HEAD (or `--sha`), be clean, and have no process working in it on any machine sharing that node's `/volume`; it then prints the uv lock dry run and fails if that fails. `sync <node>` requires the same except the HEAD, then fetches, fast-forwards to the exact commit and verifies it; a detached HEAD stays detached and may move to any pushed commit once its current commit is on origin, as when a review worktree takes another MR. Both stop at the first mismatch, an unpushed commit, divergence or an unreachable machine, and never reset, clean, stash or switch branches. The process scan sees jobs by their working folder; check launch records for jobs started elsewhere.
-- Before the first push, verify the intended Git remote, branch, and available authentication. Resolve authentication through the normal login/credential flow without printing secrets. A successful clone alone does not prove push access.
-- Update the remote checkout only with `checkout.py sync <node>`, and investigate whatever it refuses (a dirty or busy checkout, another branch, divergence, an unpushed target) instead of working around it; never reset, clean, stash, or overwrite existing work to make synchronization succeed. For another assigned issue, switch branches under the [worktree reuse rules](../implement/worktrees.md#reusing-worktrees-for-issues-and-mr-review); for an explicitly requested standalone review with a detached local HEAD, detach the clean, idle remote checkout too (`git switch --detach`), then `sync` moves it to the source SHA.
-- When the divergence is verified to come solely from an authorized server-side rebase, use the [history-preserving synchronization procedure](../implement/merge.md#synchronize-an-authorized-server-rebase) in the same checkout. Other divergence still requires investigation.
-- **`/volume` is shared within each cluster** (see the machine table in machines.md): updating a given remote checkout once updates it for that cluster's nodes and gate. Do not pull separately on each node of a cluster; a checkout on another cluster is a separate copy, synchronized through Git. Concurrent jobs requiring different versions need explicitly selected separate checkouts; do not create those implicitly.
-- Before validation, verify with `checkout.py check <node>` that the remote checkout is clean, its full HEAD equals the committed local code being validated, and its environment matches the committed lock (for a uv project, `uv sync --locked --dry-run` lists no dependency changes, though the project's own local packages may be rebuilt; sync it only while no job uses the checkout). All changes relevant to the test/review claim must be included in that commit; report unrelated local changes separately. Verify the MR source commit and comparison baseline for reviews.
-- For behavior changes, push and validate the failing-test phase of the [development sequence](../implement/SKILL.md#implement-and-validate) remotely before implementing the fix locally. Intermediate development commits may be consolidated at merge time according to project conventions; do not rewrite history automatically.
-- Record results under [validation scope](#validation-scope). Account for generated files or remote edits before claiming a clean test result.
-- Keep model weights, datasets, logs, caches, secrets, and temporary run scripts out of synchronization commits. Git is the routine source-code transport; temporary remote run artifacts use the directory rules in jobs.md.
 
-## How to operate remotely
-- Use `sh-0`, `zg-0` or `th-0` for file/Git operations on the sh, zg or th cluster the task uses. Their storage is independent; an update on one cluster does not reach another. **GPU jobs run only on the node I specify**; selecting a node for synchronization is not permission to use its GPUs.
-- Run local source operations in the selected real checkout. After the bootstrap exception above, every command acting on the remote project must first `cd` to the checkout's physical path, `pwd -P`, and stop if it fails. In a Herdr app worktree `$PWD` keeps the `~/.herdr/worktrees` link, which the nodes don't have:
+- Edit locally and execute remotely. Commit a testable batch, push the development branch, update the remote checkout, verify its exact SHA, then run.
+- Update a remote checkout with `git fetch` and `git merge --ff-only <sha>`, or `git switch --detach <sha>` for a detached review checkout. First make sure it is clean, on the expected branch, and idle: no process on any machine sharing that `/volume` has its working directory in it (`/proc/*/cwd`). Investigate divergence or dirt; never reset, clean or stash.
+- Each cluster's `/volume` is shared, so update a checkout once per cluster; other clusters have their own copies.
+- Before validating, the remote checkout must be clean, at the committed SHA, and match the lock: `uv sync --locked --dry-run` shows no dependency changes. Sync the environment only while no job uses it.
+- Verify the push remote and authentication before the first push; a clone does not prove push access.
+
+## Operating remotely
+
+- Use `sh-0`, `zg-0` or `th-0` for Git and file work on that cluster. GPU jobs run only on the node the user names.
+- Start every remote project command by changing to the checkout's physical path. A Herdr worktree's `$PWD` goes through `~/.herdr/worktrees`, which the nodes don't have:
 
   ```bash
   ssh sh-0 "cd -- $(printf %q "$(pwd -P)") && "'git status --short --branch'
   ```
 
-- The single-quoted remote command is not expanded locally. Quote paths and arguments with `printf %q`. If the local shell is outside the project, first move into the selected local project directory before constructing a project command; do not accidentally use `/root` as the remote checkout.
-- Read and search source code locally. Use ssh to inspect remote environment details, run state, logs, and checkout status, and to update the checkout through Git.
-- Create temporary run directories on the remote with `mktemp` as described in jobs.md. Run scripts and job configuration may be prepared locally and transferred with `scp` or an explicitly quoted ssh stdin command into that run directory. This is for run artifacts; source-code changes are committed locally and transferred through Git.
-- After synchronization and before running, verify the remote branch, full HEAD, and working-tree state. After execution, inspect results and any generated changes on the remote.
+- To format a local file before committing, pipe it through the node environment's tools, in the order of the project's format config, with explicit `pipefail`. Use the output only if the command succeeds, and never redirect it over its input:
 
+  ```bash
+  ssh sh-0 "bash -o pipefail -c 'cd -- <checkout> && .venv/bin/black -q --stdin-filename <path> - | .venv/bin/ruff check --fix --quiet --stdin-filename <path> -'" < <path>
+  ```
+
+- Run scripts and configs go into the run's `/volume/tmp` directory (jobs.md) with `scp` or ssh stdin; source code travels only through Git.
