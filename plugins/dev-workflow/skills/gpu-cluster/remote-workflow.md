@@ -32,11 +32,11 @@
 ### Issue branch identity
 
 Name a new branch implementing issue `#K` as
-`K-<short-description>`, for example `42-fix-cache` for issue `#42`,
+`issue-K-<short-description>`, for example `issue-42-fix-cache` for issue `#42`,
 `Fix cache`. Use the issue number without `#`; GitLab uses the project-local
 `iid`, not the global issue ID. Summarize the issue in a short English description,
-usually 2–4 lowercase words separated by hyphens. Do not add an `agent/` prefix
-or a hash suffix.
+usually 2–4 lowercase words separated by hyphens. Use the `issue-` prefix without
+an additional agent prefix or hash suffix.
 
 Resolve the issue in its source repository and use its execution record to track
 the actual worktree, branch and MR.
@@ -51,7 +51,7 @@ implementation task. Read [gitlab.md](gitlab.md) before accessing GitLab. A task
 without an issue does not require creating one solely for tracking.
 
 - Before coding or resuming, read the issue's existing execution record and compare it with the actual checkout, branch and MR. Search all comment pages for the marker; reuse the existing comment by its note ID. Create one only when none exists. Multiple matching records or a conflicting active owner require resolving ownership before proceeding; do not overwrite or delete another coder's record.
-- **Read that record before naming an issue as available, not only before starting it**: recommending what to work on next, calling an issue unclaimed, or listing open work all assert that nobody owns it. An issue's comment count is the cheap signal — `glab issue view` prints `comments: N`, and on a `ready-for-agent` issue a nonzero count is usually an execution record, so reading the body alone answers the technical question and not the ownership one. Branch and worktree occupancy are the second signal (`git worktree list`, `git ls-remote --heads origin | grep '<K>-'`). Report an owned issue as owned, with its worktree and status, instead of proposing it.
+- **Read that record before naming an issue as available, not only before starting it**: recommending what to work on next, calling an issue unclaimed, or listing open work all assert that nobody owns it. An issue's comment count is the cheap signal — `glab issue view` prints `comments: N`, and on a `ready-for-agent` issue a nonzero count is usually an execution record, so reading the body alone answers the technical question and not the ownership one. Branch and worktree occupancy are the second signal (`git worktree list`, `git ls-remote --heads origin 'refs/heads/issue-<K>-*'`). This pattern matches the full issue prefix, so issue 42 does not match issue 142. For an existing task, inspect the actual branch named in its execution record regardless of naming convention; an empty prefix search does not establish that an issue is unowned. Report an owned issue as owned, with its worktree and status, instead of proposing it.
 - Record the selected checkout's full absolute path and the branch actually checked out after the reuse checks. This identifies the current execution even when coders share one GitLab account; it is not a permanent issue-to-worktree assignment or an atomic lock. An old timestamp alone is not permission to take over. An explicit reassignment authorizes a handoff after checking the previous execution and preserving its work.
 
 ```markdown
@@ -63,11 +63,11 @@ without an issue does not require creating one solely for tracking.
 | Worktree | <absolute checkout path> |
 | Branch | <development branch> |
 | MR | <MR URL, or Not opened> |
-| Status | <current phase and any blocker or handoff context> |
+| Status | <overall task status and any blocker or handoff context> |
 | Updated | <UTC timestamp> |
 ```
 
-- Update this same comment when implementation starts, the MR opens, review or a corrective round starts, work becomes blocked, or the task stops. Use factual statuses such as `implementing`, `reviewing`, `blocked`, `paused`, `needs-human`, `ready-for-merge` and `merged`. On a blocker or failed third corrective round, include what needs human attention. A passed review means `ready-for-merge`; use `merged` only after confirming the MR was merged. The MR's review-status section remains authoritative for round counts, findings and validation evidence.
+- Update this same comment when the task is claimed or resumed, its checkout or branch changes, the MR opens, work becomes blocked, it is handed off or stopped, or it reaches `ready-for-merge` or `merged`. Record the information needed to establish ownership, locate the work and act on a blocker; use `active` while implementation or review is in progress. Keep review rounds, findings, fixes and validation evidence in the MR's review-status section; starting another review or corrective round alone does not require an issue update. A failed third corrective round is `needs-human`; include what needs attention. Use `merged` only after confirming the merge. If a task leaves `ready-for-merge` for further work, update that coarse status so the issue does not imply it is still ready.
 - The agent executing an authorized merge owns the final record update. If the user merges in the UI, the next agent reading that task or reusing its worktree reconciles the record with the actual MR under [merge completion](merge-workflow.md#record-merge-completion). Check this before labeling the outgoing task paused.
 - Before reusing the worktree for another issue, update the outgoing issue's record: mark Worktree as `Released (last used: <path>)`, preserve its branch and MR links, and keep its actual task status. Use `paused` with the remaining work if an unfinished task is being set aside. On resumption or handoff, update the same record to the new actual checkout after the ownership and reuse checks.
 - Re-read before editing the comment to detect another coder's update, and verify the saved result. If a write times out, inspect the issue before retrying so a successful creation is not duplicated. Resolve conflicting changes instead of repeatedly overwriting them. Report an unresolved tracking failure rather than claiming the record is current.
@@ -93,8 +93,8 @@ results, acceptance and review conclusions, and any findings or fixes. Use the
 choose a compact paragraph or a criterion table. The compact format still requires
 the full review and the same corrective-round limit. Before a corrective round,
 record its number and mark it in progress;
-resume that round after interruption. Keep the status current and update the issue's
-[execution record](#issue-execution-record) to match the current phase or outcome.
+resume that round after interruption. Keep the MR status current; update the issue's
+[execution record](#issue-execution-record) at the milestones defined there.
 Use the run artifact directory for detailed logs.
 
 An authorized merge follows [merge-workflow.md](merge-workflow.md). Any fresh full

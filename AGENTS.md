@@ -6,6 +6,8 @@
 - Install and update this repository's skills with `npx skills`, targeting both
   `codex` and `claude-code` in symlink mode. Keep one shared active installation
   under `~/.agents/skills` and preserve local edits in the repository before updates.
+- Use `python3 scripts/check_installation.py` to compare the installed skills
+  with a source commit before editing and after installation; see README.md.
 - Keep plugin instructions focused on their workflow. Put machine-specific
   service mappings in a referenced file.
 - Keep credentials, generated previews, runtime logs, and local installation
