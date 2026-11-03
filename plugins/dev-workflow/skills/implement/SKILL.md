@@ -51,7 +51,7 @@ table. An issue-free task uses the agreed request as its source.
 
 Continue into the
 [coder-owned review loop](../gpu-cluster/remote-workflow.md#coder-owned-review-after-opening-an-mr)
-for the client-specific review route, corrective-round limit and records to keep
+for the review command, corrective-round limit and records to keep
 across interruptions.
 
 Finish with the MR link, source commit, validation outcome and review status. If

@@ -1,12 +1,9 @@
 # Machines, nodes and network
 
-<!-- Moved from ~/.claude/CLAUDE.md on 2026-10-16; the always-loaded rules there still apply. -->
-
 ## Two-tier setup
 
 Two-tier setup: **edit real local Git checkouts on this control machine, commit and push through Git, then update and run the same commit on the remote GPU nodes over ssh**. The local and remote checkout must have **the same absolute path**: normally `/volume/workspace/<project>[/<checkout>]` for main project checkouts, or `/volume/worktree/<repo>/<worktree-name>` for herdr worktrees and their remote counterparts. Worktree names may stay fixed while the assigned issue/MR and checked-out branch or commit change.
 The local `/volume` is ordinary storage on this control machine, not a mount of the nodes' shared disk. Matching paths contain independent Git checkouts; Git synchronizes their source code.
-These rules implement my explicit switch to local editing and Git synchronization. Older instructions requiring placeholder-only local directories, remote-only editing, or file-by-file mirroring are obsolete.
 
 ## This machine (control machine)
 - Ubuntu 22.04 VPS, running as root, timezone UTC, **4 vCPU / 4 GiB RAM / approximately 80 GB root disk**, no GPU. Check free space before disk-intensive work. Local `/volume` uses this same filesystem.
@@ -31,7 +28,7 @@ These rules implement my explicit switch to local editing and Git synchronizatio
   - Node sshd has MaxSessions=10: when more than 10 sessions run concurrently on one node, the extra ones automatically open new connections; too many new connections at once get randomly rejected by MaxStartups (error `kex_exchange_identification`). Keep concurrency under 10
   - If commands hang after a pod rebuild because of a stale master connection, close that alias's old connection with `ssh -O exit <alias>` and then retry. Every local session's commands to an alias share its master, and `-O exit` cuts the ones in flight, so use it only for that hang; each command already starts a fresh remote shell, so a changed shell startup file needs no reconnect. Report connection timeouts, refusals, or host-key changes as described below.
 - The nodes and gates are k8s pods with timezone **CST (UTC+8)**; this machine is UTC. A pod's hostname need not match its alias; identify machines by their configured SSH aliases. Hardware and mounts checked on 2026-10-16, th on 2026-10-18:
-  - **sh-0, sh-1, sh-2**: 8×H200 (141 GB each), driver 580, 8 IB NICs (mlx5); `/volume` is a 50 TB GPFS mount holding `/volume/models` and the shared HF cache
+  - **sh-0, sh-1, sh-2**: 8×H200 (141 GB each), driver 580, 8 IB NICs (mlx5); `/volume` is a 50 TB GPFS mount with weights in `/volume/model` and `HF_HOME=/volume/.cache` (both seen on 2026-11-03; `/volume/models` is gone, and the older cache under `/volume/.cache/huggingface/hub` is outside that `HF_HOME`)
   - **zg-0, zg-1**: 8×H20-3e (141 GB each), driver 570 (CUDA 13 runs through its forward-compatibility libraries), 4 bonded IB NICs; `/volume` is a 3 PB CPFS FUSE mount that cannot host Unix sockets and has neither `/volume/models` nor an HF cache
   - sh and zg: 192 cores, 2 TiB RAM, NVIDIA PyTorch container; tools Python + pip + uv, gcc, git, rg, jq, gh, glab, rsync, rclone; **no tmux or screen**
   - **th-0, th-1**: 8×B200 (179 GiB each), driver 590 (CUDA 13.1), 8 NDR IB NICs at 400 Gb/s (`mlx5_0`–`mlx5_7`) beside `mlx5_8`–`mlx5_9` (200 Gb/s) and `mezz_0`–`mezz_3` (100 Gb/s); 288 cores, 2.2 TiB RAM; the openrt development image (since 2026-10-24 `dev-20261024-d17e6bc1e841`: Ubuntu 24.04, CUDA 13.2.1 toolkit beside Torch's own CUDA 13.0 libraries, Python 3.12 with pip and uv in `/opt/venv`; it has no forward-compatibility driver library, so pods load the host's 590 `libcuda`); tools gcc, nvcc, nsys, ncu, git, rg, jq, gh, glab, rsync, rclone and tmux; `/volume` is a 1 TB GPFS mount with weights in `/volume/model` and the HF cache in `/volume/.cache`, and no `/volume/models` or `/volume/.cache/huggingface`
@@ -41,7 +38,7 @@ These rules implement my explicit switch to local editing and Git synchronizatio
   - `/root`, `/workspace`, `/mnt/workspace`, and `/tmp` are all pod-local storage — **they are gone after a pod rebuild** and are not shared between nodes. Packages installed into the system Python are lost the same way; environments that need to persist must be built on `/volume`
 - Node shells automatically load their cluster's `/volume/.bashrc`, which sets up:
   - PATH
-  - `HF_HOME=/volume/.cache/huggingface` (th: `/volume/.cache`)
+  - `HF_HOME=/volume/.cache` on sh and th (zg was documented as `/volume/.cache/huggingface`)
   - `TMPDIR=/tmp`, node-local, for programs' temporary files and Unix sockets
   - `http(s)_proxy` routing to the public internet through the gate proxy
 
