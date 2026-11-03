@@ -44,10 +44,11 @@ def compare_files(directory, expected):
     differences = []
     if directory.is_symlink() or not directory.is_dir():
         return ["shared skill directory is missing or is a symlink"]
+    # Running an installed script can leave Python bytecode caches; they are not edits.
     actual = {
         p.relative_to(directory).as_posix()
         for p in directory.rglob("*")
-        if p.is_symlink() or not p.is_dir()
+        if (p.is_symlink() or not p.is_dir()) and "__pycache__" not in p.relative_to(directory).parts
     }
     for name in sorted(actual - expected.keys()):
         differences.append(f"extra file: {name}")

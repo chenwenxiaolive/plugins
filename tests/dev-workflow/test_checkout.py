@@ -22,7 +22,7 @@ node, script = args
 with open(os.environ["FAKE_SSH_LOG"], "a") as log:
     log.write(node + "\n")
 if node in os.environ.get("FAKE_SSH_DOWN", "").split(","):
-    sys.exit("ssh: connect to host " + node + ": Connection refused")
+    sys.exit(os.environ.get("FAKE_SSH_ERROR", "ssh: connect to host " + node + ": Connection refused"))
 local, remote = os.environ["FAKE_SSH_MAP"].split("=", 1)
 result = subprocess.run(["bash", "-c", script.replace(local, remote)], cwd="/", capture_output=True, text=True)
 sys.stdout.write(result.stdout.replace(remote, local))
@@ -147,6 +147,37 @@ class CheckoutTest(unittest.TestCase):
         self.assertEqual(code, 1, out)
         self.assertIn("is on no origin branch", out)
         self.assertEqual(git(self.node, "rev-parse", "HEAD"), sha)
+
+    def test_detached_sync_ignores_stale_and_other_remote_refs(self):
+        git(self.node, "switch", "-q", "--detach", "HEAD")
+        before = git(self.node, "rev-parse", "HEAD")
+        git(self.work, "switch", "-q", "--detach")
+        self.commit(self.work, "c")
+        git(self.work, "push", "-q", "origin", "HEAD:refs/heads/gone")
+        git(self.node, "fetch", "-q", "origin")
+        git(self.work, "push", "-q", "origin", "--delete", "gone")
+        mirror = self.tmp / "mirror.git"
+        git(self.tmp, "init", "-q", "--bare", "-b", "main", str(mirror))
+        git(self.work, "push", "-q", str(mirror), "HEAD:refs/heads/copy")
+        git(self.node, "remote", "add", "mirror", str(mirror))
+        git(self.node, "fetch", "-q", "mirror")
+        code, out = self.checkout("sync", "sh-0")
+        self.assertEqual(code, 1, out)
+        self.assertIn("is on no origin branch", out)
+        self.assertEqual(git(self.node, "rev-parse", "HEAD"), before)
+
+    def test_messages_never_print_credentials_from_urls(self):
+        git(self.node, "remote", "set-url", "origin", "https://coder:glpat-secret@example.invalid/other.git")
+        code, out = self.checkout("check", "sh-0")
+        self.assertEqual(code, 1, out)
+        self.assertIn("remote origin https://example.invalid/other.git differs", out)
+        self.assertNotIn("glpat-secret", out)
+        git(self.node, "remote", "set-url", "origin", str(self.tmp / "origin.git"))
+        error = "fatal: unable to access 'https://coder:glpat-secret@example.invalid/x.git/': timeout"
+        code, out = self.checkout("check", "sh-0", FAKE_SSH_DOWN="sh-2", FAKE_SSH_ERROR=error)
+        self.assertEqual(code, 2, out)
+        self.assertIn("https://example.invalid/x.git/", out)
+        self.assertNotIn("glpat-secret", out)
 
     def test_a_directory_inside_another_checkout_is_not_the_counterpart(self):
         self.commit(self.work, "b")
