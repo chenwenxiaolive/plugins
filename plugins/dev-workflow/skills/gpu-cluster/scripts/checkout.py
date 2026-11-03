@@ -52,7 +52,7 @@ def redact(text):
 
 
 def run(command, cwd=None):
-    result = subprocess.run(command, cwd=cwd, capture_output=True, text=True)
+    result = subprocess.run(command, cwd=cwd, stdin=subprocess.DEVNULL, capture_output=True, text=True)
     if result.returncode:
         raise Failure(redact(f"{shlex.join(command[:4])}: {result.stderr.strip() or result.stdout.strip()}"))
     return result.stdout
@@ -132,7 +132,8 @@ def environment(node, checkout):
         "out=$(uv sync --locked --dry-run 2>&1); rc=$?; printf '%s\\n' \"$out\" | tail -n 15; exit $rc; "
         "else echo 'no uv.lock'; fi"
     )
-    result = subprocess.run(["ssh", "-o", "BatchMode=yes", node, script], capture_output=True, text=True)
+    result = subprocess.run(["ssh", "-o", "BatchMode=yes", node, script], stdin=subprocess.DEVNULL,
+                            capture_output=True, text=True)
     if result.returncode == 255:
         raise Failure(redact(f"ssh {node}: {result.stderr.strip()}"))
     print("environment (uv sync --locked --dry-run; dependency changes mean the environment does not match the lock):")

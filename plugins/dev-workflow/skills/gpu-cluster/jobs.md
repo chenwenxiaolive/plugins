@@ -39,7 +39,7 @@ These rules govern each cluster's shared `/volume`; the control machine has inde
 - Keep directory names short: libraries append Unix socket paths beneath them, and paths that are too long cause errors. Do not embed the checkout path in the directory name
 
 ### Traceability and cleanup
-- Record the following in the run record so that artifacts outside the repo are traceable:
+- Record the following in the run record so that artifacts outside the repo are traceable (`job.py start` writes them to `record.txt`):
   - Absolute checkout path (identical locally and remotely) and execution node
   - Full tested commit SHA, branch or detached HEAD, and working-tree state
   - Launch command, necessary configuration, and artifact directory
@@ -48,25 +48,11 @@ These rules govern each cluster's shared `/volume`; the control machine has inde
 - When results need to be kept, list the paths in the summary and say which ones can be deleted
 
 ## Long-running background jobs
-- Write a `run.sh` in the run directory that uses trap at the top to record the real exit code. **An EXIT trap alone is not enough**: when `run.sh` is killed by SIGTERM it records `0` and is treated as success. Also convert signals to a `128+N` exit:
-
-  ```bash
-  trap 'echo $? > <run_dir>/exit.status' EXIT
-  trap 'exit 143' TERM; trap 'exit 130' INT; trap 'exit 129' HUP
-  ```
-
-  Keep the job command in the foreground (no `cmd & wait`, otherwise the job becomes an orphan after `run.sh` exits and keeps holding the GPU). Then launch it like this:
-
-  ```bash
-  printf -v remote_start \
-    'cd -- %q && { nohup bash %q > %q 2>&1 </dev/null & printf "%%s\\n" "$!" > %q; }' \
-    "$(pwd -P)" "$run_dir/run.sh" "$run_dir/run.log" "$run_dir/run.pid"
-  ssh <node> "$remote_start"
-  ```
-
-- A successful launch only means the job was submitted; **the job's result is determined by `exit.status`**. If the process has exited but there is no status file, treat it as a failure
-- If ssh disconnects or returns non-zero, the job may already have started: first check the log, status file, and processes on the node, and only after confirming nothing is running retry with a new directory
-- Logs are on the shared disk, so `tail` them from any node in the same cluster. Stop polling once success or failure is confirmed; if the job misbehaves or makes no progress for a long time, investigate the cause rather than waiting indefinitely
+- Start a background job with [scripts/job.py](scripts/job.py) from the local checkout, after `checkout.py check <node>` shows the remote counterpart at the commit to run: `job.py start <node> --topic <name> [--gpus 0,1|all] -- <command> [args...]`. Use `bash -c '...'` for shell syntax. It refuses GPUs that are not free, creates `/volume/tmp/<name>-<node date>-XXXXXX`, writes `run.sh` and `record.txt` (checkout, node, branch, commit, working-tree state, GPUs, command; never the environment), launches the job with `nohup` from the checkout and prints the run directory.
+  - `run.sh` records the real exit code in `exit.status`. An EXIT trap alone records `0` when `run.sh` is killed by SIGTERM, so it also turns TERM, INT and HUP into `128+N`. It sets `CUDA_VISIBLE_DEVICES` for a GPU list and keeps the command in the foreground: a backgrounded `cmd & wait` would orphan the job, which keeps holding the GPU after `run.sh` exits.
+- A successful launch only means the job was submitted; **the job's result is determined by `exit.status`**. `job.py status <node> <run_dir>` reports succeeded, failed (including a process gone without `exit.status`) or running, with the log tail; `job.py wait <node> <run_dir>` polls it until the job ends or `--timeout` (default 540 s) passes. Query the launch node, which `record.txt` names.
+- If `start` fails at the launch step, the job may already have started: run `status` on that run directory, and retry only in a new directory after confirming nothing is running.
+- Logs are on the shared disk, so `tail` them from any node in the same cluster. Stop waiting once success or failure is confirmed; if the job misbehaves or makes no progress for a long time, investigate the cause rather than waiting indefinitely
 
 ## GPU usage
 - Nodes are shared by multiple people: only stop processes that belong to this job or that I have explicitly said may be stopped; do not kill in bulk by process name; do not occupy nodes I have not specified
@@ -86,7 +72,7 @@ These rules govern each cluster's shared `/volume`; the control machine has inde
   - The script swallows ssh errors: **no output from the dry run does not mean there are no processes on the node**; cross-check separately with `ssh <node> nvidia-smi`
   - A single checkout may have multiple jobs. Confirm each one against the PID and launch command recorded for the job; if the candidate list mixes in processes from other jobs, do not clean them up as a batch
   - By default the script watches GPU memory usage across all GPUs on the node, so it may time out because of other people's jobs. **Do not widen the cleanup scope because of this**; judge the cleanup result by whether the target processes exited and whether memory on the relevant GPUs dropped
-- Before launching, confirm the GPUs to be used are free and have enough free memory
-  - On th-0, th-1 and zg-0 an idle GPU still shows 100% utilization and a `keepalive.py --occupy <GPU UUID>` process (cwd `/`): it yields to a new job by itself (machines.md). Count only other processes, e.g. by each compute PID's `/proc/<pid>/cmdline`, and never stop the workers; `free-gpus.sh` leaves them whatever the selector (`LEAVE ... keepalive's worker`)
+- Before launching, run `job.py gpus <node> [--gpus 0,1|all] [--min-free-mib N]`; `start` runs the same check. It lists every GPU with the processes holding it (pid, memory, working folder, command line) and exits 0 only when the selected GPUs are free with enough memory.
+  - An idle GPU still shows 100% utilization and a `keepalive.py --occupy <GPU UUID>` process (cwd `/`): it yields to a new job by itself (machines.md). The script ignores these workers and counts their memory as free; never stop them. `free-gpus.sh` leaves them whatever the selector (`LEAVE ... keepalive's worker`)
   - The workers' teardown overlaps a job's first 0.1–0.2 s after its CUDA contexts appear; time only after warm-up
 - When looking up processes with `pgrep -f` or `ps | grep`, the `bash -c` process that ssh runs on the remote will itself match; exclude it when counting

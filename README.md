@@ -127,7 +127,7 @@ no container, touch no node and write no GitLab comment:
 
 ```bash
 python3 -B -m unittest discover -s tests/docker-build -v   # run-build.sh: fake sudo and docker
-python3 -B -m unittest discover -s tests/dev-workflow -v   # checkout.py and issue_record.py: fake ssh and glab
+python3 -B -m unittest discover -s tests/dev-workflow -v   # checkout.py, job.py, issue_record.py: fake ssh, nvidia-smi, glab
 python3 -B -m unittest discover -s tests/repository -v     # check_installation.py on a copied skill
 ```
 
