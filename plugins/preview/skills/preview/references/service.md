@@ -26,7 +26,8 @@ python3 -B <helper> status|start|stop --state-dir "$state" \
 - `status` reports `running`, `reused` or `stopped`, and exits nonzero when the service is stopped or unhealthy.
 - `start` reuses a service only after a probe shows it serves this root, and refuses a port held by anything else.
 - `stop` stops only the process this helper started.
-- To change settings, stop the service with the settings in `service.json`, then start it with the new ones.
+- To change settings, stop the service with the settings in `service.json`, start it with the new ones, and record them in `deployment.json` so later restarts keep them.
+- The service runs a release copy (`release` in `deployment.json`), not this checkout; [server/README.md](../server/README.md#deploying-a-change) says how to deploy a server change.
 
 The server serves HTML as is and renders `.md` as HTML at the same URL; `?raw=1`
 returns the source and `?download=1` the original bytes. It has no authentication,

@@ -17,7 +17,7 @@ machine's region, workspace, profile and file system.
 ## Commands
 
 ```bash
-pai --region <region> dlc job list --workspace-id <id> --all-users --with-metadata [--status Running] [--page N] -o json \
+pai --region <region> dlc job list --workspace-id <id> --all-users --since 365d --with-metadata [--status Running] [--page N] -o json \
   | jq '{pagination, jobs: [.items[] | {job_id, display_name, status, username, request_gpu, resource_name}]}'
 pai --region <region> dlc job get <job-id> -o json \
   | jq '{status, reason_message, data_sources, pods: [.pods[] | {pod_id, status, node_name}], specs: [.job_specs[] | {type, pod_count, ecs_spec, image}]}'
