@@ -22,7 +22,7 @@ You are the leader.
   details, and actual interactions.
 - Give each code worker its own worktree under `/volume/worktree/<repo>/`.
   Reuse fixed slots such as `dev-1` under the
-  [worktree reuse rules](../gpu-cluster/remote-workflow.md#reusing-worktrees-for-issues-and-mr-review),
+  [worktree reuse rules](../implement/worktrees.md#reusing-worktrees-for-issues-and-mr-review),
   preferring a free one whose remote counterpart already has its
   environment: a new counterpart's first environment build can be slow.
   Invoking this skill authorizes creating those worktrees, their branches
@@ -78,7 +78,7 @@ Name the target even when it is the default branch: project docs may say
   completed functional checks; required acceptance criteria still apply.
 - Don't treat a task as finished just because another agent says it is.
 - When the user asks to merge, merge the MRs in dependency order under the
-  [merge workflow](../gpu-cluster/merge-workflow.md). For work you implemented
+  [merge workflow](../implement/merge.md). For work you implemented
   directly, use its selected checkout and reviewed branch. For delegated work,
   merge through a worker in that MR's worktree: its original worker, or, if
   that one was closed, a new worker told the MR link and that the user asked
@@ -91,4 +91,4 @@ Name the target even when it is the default branch: project docs may say
   unresolved issues. Clean up unneeded task processes while preserving the
   work and records needed to continue. Retain local and remote worktrees;
   remove them only when the user explicitly asks, under the
-  [worktree retention rules](../gpu-cluster/remote-workflow.md#reusing-worktrees-for-issues-and-mr-review).
+  [worktree retention rules](../implement/worktrees.md#reusing-worktrees-for-issues-and-mr-review).

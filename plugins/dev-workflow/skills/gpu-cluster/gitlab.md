@@ -22,4 +22,4 @@
 - Clone success does not establish push permission; check the intended origin and authentication when first synchronizing a project. Use the development workflow in remote-workflow.md.
 - Request authentication help only after checking the current endpoint, the applicable proxy/network path and the existing credential environment, and confirming that the intended read-only request still fails. Report the host, operation and sanitized error; do not ask the user to paste a token into chat.
 - GitLab closes an issue when a commit merged to the default branch contains a closing keyword (`closes`, `fixes`, `resolves`) before the issue's reference, squash messages included. Use one only to close that issue; for one item of a tracking issue write `#<N> item <X>` instead.
-- For a requested merge, follow [merge-workflow.md](merge-workflow.md) for current-source and target checks, server-side rebase synchronization, and execution-record updates.
+- For a requested merge, follow implement's [merge.md](../implement/merge.md) for current-source and target checks, server-side rebase synchronization, and execution-record updates.

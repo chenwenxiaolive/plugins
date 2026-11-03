@@ -121,5 +121,5 @@ hc send <name> "<feedback>"       # continue the same conversation
 When its work is accepted and recorded, `hc kill <name>` and `hc rm <name>`.
 Only clean up workers you started, preserving their work and continuation
 records. Keep worktree directories and their environments under the
-[worktree retention rules](../gpu-cluster/remote-workflow.md#reusing-worktrees-for-issues-and-mr-review).
+[worktree retention rules](../implement/worktrees.md#reusing-worktrees-for-issues-and-mr-review).
 Never stop or restart the user's core unless asked.
