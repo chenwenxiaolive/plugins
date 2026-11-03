@@ -9,8 +9,9 @@ Run in the selected local checkout; the remote counterpart has the same physical
                                 read-only: same origin and branch, HEAD at SHA (default:
                                 local HEAD), clean, idle on the cluster; print the uv lock check
   checkout.py sync NODE [--sha SHA]
-                                the same preconditions, then fetch and fast-forward to SHA,
-                                verify, and print the uv lock check
+                                the same preconditions, then fetch and fast-forward to SHA
+                                (a detached HEAD moves to any pushed SHA once its own commit
+                                is on origin), verify, and print the uv lock check
 
 Exit codes: 0 ok or idle, 1 a check failed or the checkout is busy, 2 a command failed.
 Nothing here resets, cleans, stashes or switches branches.
@@ -195,14 +196,20 @@ def main():
                 fetch, move = "git fetch --quiet --prune origin", f"git checkout --quiet --detach {sha}"
                 pushed = f'test -n "$(git for-each-ref --contains {sha} refs/remotes/origin/ 2>/dev/null)"'
                 unpushed = f"{sha} is on no origin branch; push it first"
+                # A detached checkout (a reused review worktree) may move to any pushed commit,
+                # as long as its current commit is on origin too and nothing local is orphaned.
+                safe = 'test -n "$(git for-each-ref --contains HEAD refs/remotes/origin/ 2>/dev/null)"'
+                unsafe = "remote HEAD is on no origin branch; investigate before moving it"
             else:
                 fetch, move = f"git fetch --quiet origin {q(branch)}", f"git merge --quiet --ff-only {sha}"
                 pushed = f"git merge-base --is-ancestor {sha} FETCH_HEAD 2>/dev/null"
                 unpushed = f"{sha} is not on origin/{branch}; push it first"
+                safe = f"git merge-base --is-ancestor HEAD {sha}"
+                unsafe = "remote HEAD is not an ancestor; investigate the divergence"
             script = (
                 f"cd -- {q(checkout)} && {fetch} && "
                 f"{{ {pushed} || {{ echo {q(unpushed)} >&2; exit 1; }}; }} && "
-                f"{{ git merge-base --is-ancestor HEAD {sha} || {{ echo 'remote HEAD is not an ancestor; investigate the divergence' >&2; exit 1; }}; }} && "
+                f"{{ {safe} || {{ echo {q(unsafe)} >&2; exit 1; }}; }} && "
                 f"{move}"
             )
             try:

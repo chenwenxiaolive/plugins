@@ -148,6 +148,25 @@ class CheckoutTest(unittest.TestCase):
         self.assertIn("is on no origin branch", out)
         self.assertEqual(git(self.node, "rev-parse", "HEAD"), sha)
 
+    def test_a_detached_review_checkout_moves_to_an_unrelated_pushed_commit(self):
+        git(self.work, "switch", "-q", "-c", "review-a")
+        first = self.commit(self.work, "review-a.txt")
+        git(self.work, "switch", "-q", "main")
+        git(self.work, "switch", "-q", "-c", "review-b")
+        second = self.commit(self.work, "review-b.txt")
+        git(self.work, "push", "-q", "origin", "review-a", "review-b")
+        git(self.work, "switch", "-q", "--detach", second)
+        git(self.node, "fetch", "-q", "origin")
+        git(self.node, "switch", "-q", "--detach", first)
+        code, out = self.checkout("sync", "sh-0")
+        self.assertEqual(code, 0, out)
+        self.assertEqual(git(self.node, "rev-parse", "HEAD"), second)
+        local_only = self.commit(self.node, "unpushed")
+        code, out = self.checkout("sync", "sh-0")
+        self.assertEqual(code, 1, out)
+        self.assertIn("remote HEAD is on no origin branch", out)
+        self.assertEqual(git(self.node, "rev-parse", "HEAD"), local_only)
+
     def test_detached_sync_ignores_stale_and_other_remote_refs(self):
         git(self.node, "switch", "-q", "--detach", "HEAD")
         before = git(self.node, "rev-parse", "HEAD")
