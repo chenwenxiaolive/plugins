@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build and publish one linux/amd64 image with the xqing-nvme1 builder, then check that
+# Build and publish one linux/amd64 image with the default builder, then check that
 # the registry serves a single image manifest with the exporter's digest.
 #
 # Run on docker-build from a task directory whose ctx/ holds the build context:
@@ -25,7 +25,7 @@ esac
 command -v python3 >/dev/null
 test -f ctx/Dockerfile || { printf 'ctx/Dockerfile is missing\n' >&2; exit 1; }
 
-sudo docker buildx build --builder xqing-nvme1 \
+sudo docker buildx build --builder default \
   --platform linux/amd64 --progress=plain \
   --provenance=false --sbom=false \
   --metadata-file build-metadata.json \
