@@ -32,9 +32,10 @@ import time
 
 KEEPALIVE = re.compile(r"keepalive\.py\b.*--occupy")
 
+# Capture the process query before parsing so its failure is not hidden behind the loop.
 GPU_QUERY = r"""nvidia-smi --query-gpu=index,uuid,memory.used,memory.total --format=csv,noheader,nounits && echo -- &&
-nvidia-smi --query-compute-apps=gpu_uuid,pid,used_memory --format=csv,noheader,nounits |
-while IFS=', ' read -r uuid pid mem; do
+apps=$(nvidia-smi --query-compute-apps=gpu_uuid,pid,used_memory --format=csv,noheader,nounits) &&
+printf '%s\n' "$apps" | while IFS=', ' read -r uuid pid mem; do
   printf '%s\t%s\t%s\t%s\t%s\n' "$uuid" "$pid" "$mem" "$(readlink "/proc/$pid/cwd" 2>/dev/null)" \
     "$(tr '\0\n\t' '   ' < "/proc/$pid/cmdline" 2>/dev/null | cut -c1-160)"
 done"""
@@ -147,13 +148,14 @@ def status(node, run_dir, quiet=False):
     """Return 0 succeeded, 1 failed, 3 running; print the outcome and log tail."""
     lines = ssh(node, STATUS % shlex.quote(run_dir)).split("\n")
     launch_node, state, log = lines[0], lines[1], "\n".join(lines[2:]).rstrip()
-    if state == "running" or (state == "gone" and launch_node != node):
-        if launch_node != node:
-            raise Failure(f"{run_dir} was launched on {launch_node}; query that node")
-        if not quiet:
-            print(f"running: {run_dir}")
+    if (state == "running" or state == "gone") and launch_node != node:
+        raise Failure(f"{run_dir} was launched on {launch_node}; query that node")
+    if state == "running" and quiet:
         return 3
     print(f"log tail ({run_dir}/run.log):\n  " + log.replace("\n", "\n  ") if log else "log is empty")
+    if state == "running":
+        print(f"running: {run_dir}")
+        return 3
     if state == "status 0":
         print(f"succeeded: {run_dir}")
         return 0
@@ -197,8 +199,11 @@ def main():
         if args.command_name == "status":
             return status(args.node, args.run_dir)
         deadline = time.monotonic() + args.timeout
-        while (code := status(args.node, args.run_dir, quiet=True)) == 3 and time.monotonic() < deadline:
-            time.sleep(args.interval)
+        while (code := status(args.node, args.run_dir, quiet=True)) == 3:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                break
+            time.sleep(min(args.interval, remaining))
         if code == 3:
             print(f"still running after {args.timeout} s: {args.run_dir}; wait again or read run.log")
         return code

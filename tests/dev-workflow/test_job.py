@@ -33,7 +33,7 @@ sys.exit(result.returncode)
 FAKE_NVIDIA_SMI = """#!/bin/sh
 case "$*" in
   *--query-gpu=*) printf '%s\\n' "$FAKE_GPUS" ;;
-  *--query-compute-apps=*) printf '%s\\n' "$FAKE_APPS" ;;
+  *--query-compute-apps=*) test -z "$FAKE_APPS_FAIL" || exit 9; printf '%s\\n' "$FAKE_APPS" ;;
 esac
 """
 
@@ -92,6 +92,14 @@ class JobTest(unittest.TestCase):
         self.assertEqual(code, 2, out)
         self.assertIn("has no GPU 7", out)
 
+    def test_a_failed_process_query_is_not_an_idle_gpu(self):
+        code, out = self.job("gpus", "sh-0", FAKE_APPS_FAIL="1")
+        self.assertEqual(code, 2, out)
+        self.assertNotIn("free:", out)
+        code, out = self.job("start", "sh-0", "--topic", "t", "--gpus", "0", "--", "true", FAKE_APPS_FAIL="1")
+        self.assertEqual(code, 2, out)
+        self.assertEqual(list(self.volume_tmp.iterdir()), [])
+
     def test_start_refuses_busy_gpus_and_creates_nothing(self):
         other = self.sleeper("train.py", cwd=self.work)
         code, out = self.job("start", "sh-0", "--topic", "t", "--gpus", "1", "--", "true",
@@ -135,11 +143,17 @@ class JobTest(unittest.TestCase):
         self.assertIn("gone without exit.status", out)
 
     def test_running_jobs_time_out_and_need_the_launch_node(self):
-        code, out = self.job("start", "sh-0", "--topic", "long", "--", "sleep", "4")
+        code, out = self.job("start", "sh-0", "--topic", "long", "--", "bash", "-c", "echo step-1; sleep 4")
         run_dir = self.started(out)
-        code, out = self.job("wait", "sh-0", run_dir, "--timeout", "1", "--interval", "1")
+        time.sleep(0.5)
+        code, out = self.job("status", "sh-0", run_dir)
+        self.assertEqual(code, 3, out)
+        self.assertIn("step-1", out)
+        began = time.monotonic()
+        code, out = self.job("wait", "sh-0", run_dir, "--timeout", "1")
         self.assertEqual(code, 3, out)
         self.assertIn("still running", out)
+        self.assertLess(time.monotonic() - began, 10)
         code, out = self.job("status", "sh-1", run_dir)
         self.assertEqual(code, 2, out)
         self.assertIn("launched on sh-0", out)
