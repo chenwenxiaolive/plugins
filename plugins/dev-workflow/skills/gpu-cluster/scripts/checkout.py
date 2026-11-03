@@ -36,7 +36,7 @@ SCAN = r"""W=%s
 for p in /proc/[0-9]*; do
   c=$(readlink "$p/cwd" 2>/dev/null) || continue
   case $c in "$W"|"$W"/*)
-    printf '%%s\t%%s\t%%s\n' "${p#/proc/}" "$c" "$(tr '\0' ' ' < "$p/cmdline" 2>/dev/null | cut -c1-160)";;
+    printf '%%s\t%%s\t%%s\n' "${p#/proc/}" "$c" "$(tr '\0\n\t' '   ' < "$p/cmdline" 2>/dev/null | cut -c1-160)";;
   esac
 done"""
 
@@ -74,7 +74,8 @@ def cluster_of(node):
 
 
 def parse_scan(output):
-    return [tuple(line.split("\t", 2)) for line in output.splitlines() if line.strip()]
+    records = (line.split("\t", 2) for line in output.splitlines())
+    return [tuple(fields) for fields in records if len(fields) == 3]
 
 
 def own_processes():
@@ -119,12 +120,21 @@ def remote_state(node, checkout):
 
 
 def environment(node, checkout):
+    """Print the uv lock dry run; return False when it fails."""
     script = (
         f"cd -- {shlex.quote(checkout)} && if test -f uv.lock; then "
-        "uv sync --locked --dry-run 2>&1 | tail -n 15; else echo 'no uv.lock'; fi"
+        "out=$(uv sync --locked --dry-run 2>&1); rc=$?; printf '%s\\n' \"$out\" | tail -n 15; exit $rc; "
+        "else echo 'no uv.lock'; fi"
     )
+    result = subprocess.run(["ssh", "-o", "BatchMode=yes", node, script], capture_output=True, text=True)
+    if result.returncode == 255:
+        raise Failure(f"ssh {node}: {result.stderr.strip()}")
     print("environment (uv sync --locked --dry-run; dependency changes mean the environment does not match the lock):")
-    print("  " + ssh(node, script).strip().replace("\n", "\n  "))
+    print("  " + (result.stdout + result.stderr).strip().replace("\n", "\n  "))
+    if result.returncode:
+        print(f"FAIL: the environment check exited with {result.returncode}")
+        return False
+    return True
 
 
 def preconditions(node, checkout, sha, local_branch, allow_behind):
@@ -193,8 +203,7 @@ def main():
             print(f"synced: remote HEAD is {sha} and clean")
         else:
             print(f"ok: remote HEAD is {sha}, clean and idle")
-        environment(args.node, checkout)
-        return 0
+        return 0 if environment(args.node, checkout) else 1
     except Failure as error:
         print(f"checkout: {error}", file=sys.stderr)
         return 2

@@ -138,6 +138,35 @@ class CheckoutTest(unittest.TestCase):
         self.assertIn("Connection refused", out)
         self.assertEqual(self.checkout("check", "xx-0")[0], 2)
 
+    def test_a_failing_lock_check_fails_check(self):
+        (self.work / "uv.lock").write_text("version = 1\n")
+        self.commit(self.work, "pyproject.toml")
+        git(self.work, "add", "uv.lock")
+        subprocess.run(["git", "-c", "user.name=t", "-c", "user.email=t@example.invalid", "commit", "-qm", "lock"],
+                       cwd=self.work, check=True)
+        git(self.work, "push", "-q", "origin", "main")
+        git(self.node, "pull", "-q", "--ff-only")
+        uv = self.tmp / "bin" / "uv"
+        uv.write_text('#!/bin/sh\necho "${FAKE_UV_OUTPUT:-Would make no changes}"\nexit "${FAKE_UV_EXIT:-0}"\n')
+        uv.chmod(0o755)
+        code, out = self.checkout("check", "sh-0")
+        self.assertEqual(code, 0, out)
+        self.assertIn("Would make no changes", out)
+        code, out = self.checkout("check", "sh-0", FAKE_UV_EXIT="2", FAKE_UV_OUTPUT="error: lock out of date")
+        self.assertEqual(code, 1, out)
+        self.assertIn("error: lock out of date", out)
+        self.assertIn("FAIL: the environment check exited with 2", out)
+
+    def test_busy_reports_a_multiline_command_line(self):
+        process = subprocess.Popen(["python3", "-c", "import time\ntime.sleep(60)"], cwd=self.work)
+        self.addCleanup(process.wait)
+        self.addCleanup(process.kill)
+        code, out = self.checkout("busy")
+        self.assertEqual(code, 1, out)
+        self.assertIn(f"busy: local pid {process.pid}", out)
+        self.assertIn("import time time.sleep(60)", out)
+        self.assertNotIn("Traceback", out)
+
     def test_busy_reports_other_local_processes_but_not_its_own(self):
         code, out = self.checkout("busy")
         self.assertEqual(code, 0, out)

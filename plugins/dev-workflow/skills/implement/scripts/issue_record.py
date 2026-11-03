@@ -86,16 +86,19 @@ def show(iid):
     found = records(notes)
     heads = run("git", "ls-remote", "--heads", "origin", f"refs/heads/issue-{iid}-*")
     branches = sorted(line.split("refs/heads/", 1)[1] for line in heads.splitlines() if line.strip())
-    for record in found:
-        named = parse_fields(record["body"]).get("Branch", "")
-        if named and named not in branches and run("git", "ls-remote", "--heads", "origin", f"refs/heads/{named}").strip():
-            branches.append(named)
+    named = {parse_fields(record["body"]).get("Branch", "") for record in found} - {""}
+    for branch in sorted(named - set(branches)):
+        if run("git", "ls-remote", "--heads", "origin", f"refs/heads/{branch}").strip():
+            branches.append(branch)
+    # Local worktrees count even when their branch was never pushed or is already deleted.
     worktrees, path = [], None
     for line in run("git", "worktree", "list", "--porcelain").splitlines():
         if line.startswith("worktree "):
             path = line.split(" ", 1)[1]
-        elif line.startswith("branch refs/heads/") and line.split("refs/heads/", 1)[1] in branches:
-            worktrees.append({"path": path, "branch": line.split("refs/heads/", 1)[1]})
+        elif line.startswith("branch refs/heads/"):
+            branch = line.split("refs/heads/", 1)[1]
+            if branch.startswith(f"issue-{iid}-") or branch in named:
+                worktrees.append({"path": path, "branch": branch})
     return {
         "issue": iid,
         "comments": sum(1 for note in notes if not note.get("system")),

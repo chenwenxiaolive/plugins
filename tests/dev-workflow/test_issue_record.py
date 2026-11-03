@@ -72,6 +72,8 @@ class IssueRecordTest(unittest.TestCase):
         for branch in ["main", "issue-42-fix-cache", "issue-142-other", "custom-name"]:
             git(self.work, "push", "-q", "origin", f"HEAD:refs/heads/{branch}")
         git(self.work, "worktree", "add", "-q", str(self.tmp / "dev-1"), "-b", "issue-42-fix-cache", "origin/issue-42-fix-cache")
+        git(self.work, "worktree", "add", "-q", str(self.tmp / "dev-2"), "-b", "issue-42-not-pushed")
+        git(self.work, "worktree", "add", "-q", str(self.tmp / "dev-3"), "-b", "issue-142-other-local")
         bin_dir = self.tmp / "bin"
         bin_dir.mkdir()
         (bin_dir / "glab").write_text(FAKE_GLAB)
@@ -111,7 +113,10 @@ class IssueRecordTest(unittest.TestCase):
         self.assertEqual([r["note_id"] for r in result["records"]], [11])
         self.assertEqual(result["records"][0]["fields"]["Worktree"], "/w/dev-1")
         self.assertEqual(result["remote_branches"], ["issue-42-fix-cache", "custom-name"])
-        self.assertEqual(result["local_worktrees"], [{"path": str(self.tmp / "dev-1"), "branch": "issue-42-fix-cache"}])
+        self.assertEqual(result["local_worktrees"], [
+            {"path": str(self.tmp / "dev-1"), "branch": "issue-42-fix-cache"},
+            {"path": str(self.tmp / "dev-2"), "branch": "issue-42-not-pushed"},
+        ])
 
     def test_set_creates_a_record_and_requires_its_fields(self):
         code, _, err = self.run_script("set", "42", "--worktree", "/w/dev-1")
