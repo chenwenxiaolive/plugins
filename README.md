@@ -10,7 +10,7 @@ The repository also retains the `chenwenxiaolive-plugins` packaging metadata.
 | Plugin | Version | Purpose |
 | --- | --- | --- |
 | [preview](plugins/preview/skills/preview/SKILL.md) | 0.4.1 | Preview HTML and Markdown locally or through an SSH tunnel, and manage the bundled service. |
-| [dev-workflow](plugins/dev-workflow/skills/implement/SKILL.md) | 0.1.9 | Discuss designs, create tickets, implement and review changes, operate the GPU cluster, inspect Alibaba Cloud PAI, manage persistent agent terminals, lead background workers, and improve the development workflow. |
+| [dev-workflow](plugins/dev-workflow/skills/implement/SKILL.md) | 0.1.10 | Discuss designs, create tickets, implement and review changes, operate the GPU cluster, inspect Alibaba Cloud PAI, manage persistent agent terminals, lead background workers, and improve the development workflow. |
 | [docker-build](plugins/docker-build/skills/docker-build/SKILL.md) | 0.1.0 | Build and publish container images through the existing dedicated build host. |
 
 `dev-workflow` contains `aliyun-pai`, `gpu-cluster`, `grilling`, `herdr-core`,
@@ -135,19 +135,26 @@ publishing an update and update the table above. Preserve skill-relative
 references and explicit-invocation settings when moving or editing skills.
 Use the shared `npx skills` installation workflow for this repository's skills.
 
-Validate metadata with the installed client:
+Run the repository's static checks with Python 3 and the installed Claude Code
+CLI; no dependency installation is needed:
 
 ```bash
-claude plugin validate --strict .
-claude plugin validate --strict plugins/preview
-claude plugin validate --strict plugins/preview/skills
+python3 scripts/validate.py                 # all plugins
+python3 scripts/validate.py dev-workflow    # selected plugin(s)
 ```
 
-Repeat the plugin and skill checks for each changed plugin. Metadata validation
-does not exercise infrastructure workflows: copying a Docker helper is not a
-container build, and importing cluster instructions does not require running a
-GPU job. Check imported file contents and modes against their source, resolve
-relative references inside each package, and report this validation scope.
+The entry point checks both catalogs, manifest names and versions, the version
+table above, and relative inline Markdown file links in the selected plugins and this
+README. It runs `claude plugin validate --strict` on the marketplace, each selected
+plugin and its `skills` component directory. Skill schemas belong to the installed
+client: a generic frontmatter helper may reject supported fields such as
+`disable-model-invocation`. Do not remove those fields to satisfy that helper.
+
+These checks do not exercise infrastructure workflows, fetch external links, or
+validate Markdown anchors. Copying a Docker helper is not a container build, and
+importing cluster instructions does not require running a GPU job. Exercise changed
+workflow behavior separately; for installation updates, compare installed file
+contents and modes with their committed source. Report what was actually checked.
 
 Use a development branch and pull request for changes. Merge only on the owner's
 request.

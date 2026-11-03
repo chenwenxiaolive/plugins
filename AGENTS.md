@@ -10,6 +10,7 @@
   service mappings in a referenced file.
 - Keep credentials, generated previews, runtime logs, and local installation
   settings out of this repository.
-- Use the installed clients' metadata validators for manifest changes. For skill
-  changes, exercise the affected workflow and report what was actually checked.
+- Run `python3 scripts/validate.py` (or pass changed plugin names) for metadata
+  and reference checks; see README.md for its scope. For skill changes, exercise
+  the affected workflow and report what was actually checked.
 - Use a development branch and pull request. Merge only when the owner asks.

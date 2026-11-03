@@ -83,5 +83,7 @@ Name the target even when it is the default branch: project docs may say
   into a feature branch is not on the default branch yet: open that
   branch's MR into it, and merge it when the user asks.
 - At the end, show the user the result, what was verified, and any
-  unresolved issues. Release task resources that are no longer needed while
-  preserving the work and records needed to continue.
+  unresolved issues. Clean up unneeded task processes while preserving the
+  work and records needed to continue. Retain local and remote worktrees;
+  remove them only when the user explicitly asks, under the
+  [worktree retention rules](../gpu-cluster/remote-workflow.md#reusing-worktrees-for-issues-and-mr-review).
