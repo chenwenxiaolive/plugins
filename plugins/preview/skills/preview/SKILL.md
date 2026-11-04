@@ -13,4 +13,5 @@ has this machine's root, browser URL and token, and how to restart the service.
 - Tracked repository docs stay where they are; to preview one, copy it in and call it a snapshot.
 - Publish only content meant for the user: no credentials, environment dumps or unrelated private files.
 - The link is the browser base URL plus the URL-encoded path below the root (no `/preview` prefix). Check it with `curl` and the access token as service.md shows: the status, the content type and some of this page's text; Markdown must come back as HTML.
+- When the layout matters (charts, wide tables, phone width, dark mode), look at the page rendered: [references/visual-check.md](references/visual-check.md) screenshots it in headless Chromium. `curl` only shows that the server returns the page. Fix what the screenshots show before returning the link.
 - If the service is down, restart it as service.md says and check again; never change its settings as a side effect. If it still fails, keep the file and report its path and the failed check.
