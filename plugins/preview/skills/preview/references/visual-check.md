@@ -6,7 +6,7 @@ browser host instead, and look at the screenshots.
 | Setting | Value |
 | --- | --- |
 | Browser host | `sh-gate` (the owner's choice; it shares the sh cluster's `/volume`) |
-| Browser environment | `/volume/tmp/preview-browser-20261104-tXH3vL` on that `/volume` |
+| Browser environment | `/volume/tmp/preview-browser-20261104-cGh9jv` on that `/volume` |
 
 The environment lives in user space and contains:
 
