@@ -1,6 +1,6 @@
 ---
 name: docker-build
-description: "Builds Docker images on the shared build host (SSH alias docker-build) and publishes them only to registry-cn-shanghai.siflow.cn. Use when building, tagging, pushing or verifying container images for that registry."
+description: "Builds Docker images on the shared build host (SSH alias docker-build) and publishes them only to registry-cn-shanghai.siflow.cn. Use it for building, tagging, pushing or verifying those images, and for writing or changing their Dockerfiles, including build-time secrets such as tokens and package mirrors."
 ---
 
 # Docker builds on the build host
