@@ -2,7 +2,7 @@
 
 ## Control machine (this one)
 
-- Ubuntu 22.04, root, UTC, 4 vCPU / 4 GiB RAM / about 80 GB disk, no GPU. Edit, commit and push the selected checkout here; keep work light ([validation scope](remote-workflow.md#validation-scope)). Its `/volume` is local disk, not the nodes' storage.
+- Ubuntu 22.04, root, UTC, 4 vCPU / 4 GiB RAM / about 80 GB disk, no GPU; the [validation scope](remote-workflow.md#validation-scope) says what runs here.
 - Tools: Python 3.10 without `pip`, `ensurepip` or `gcc`; `uv` in `~/.local/bin`; `git`, `curl`, `jq`, `rsync`, Docker CLI, `gh`, `glab`. Use gate's `rclone`. Docker builds go to the build host (docker-build skill). `glab` came from GitLab's release `.deb`: update it by installing a newer `.deb` checked against `checksums.txt`.
 - Its `/volume/.bashrc`, `/volume/.ssh` and `/volume/.config` are saved gate deployment inputs (gate.md), not this machine's configuration; don't source them here.
 
@@ -22,5 +22,5 @@
 - th has no gate proxy and no public internet (Hugging Face, GitHub, PyPI time out) but reaches the internal GitLab; copy public files there from this machine.
 - The nodes run cluster-ops `keepalive.py`, which keeps pods from being reclaimed as idle. While no other process holds a GPU of the node, every GPU carries a `keepalive.py --occupy <GPU UUID>` worker; they leave within about 0.25 s of a CUDA context opening on any GPU and return after 10 idle minutes. A GPU is free when only these workers hold it; never stop them (jobs.md).
 - Git: credentials and identity come from the existing environment (`GIT_CONFIG_COUNT`, `GIT_CONFIG_GLOBAL`); don't unset or replace them. Use HTTPS remotes (gitlab.md); outbound SSH port 22 is closed. Use the logged-in `gh api`: anonymous GitHub API calls hit the egress rate limit.
-- Host keys survive pod rebuilds; the NodePort may not, showing as a connection timeout or refusal. Tell the user and wait for the new port. `REMOTE HOST IDENTIFICATION HAS CHANGED` means something is wrong: tell the user and leave `known_hosts` alone.
+- Host keys survive pod rebuilds; the NodePort may not, which shows as a connection timeout or refusal until the alias gets the new port. A changed host key (`REMOTE HOST IDENTIFICATION HAS CHANGED`) therefore means something is wrong.
 - Gates: `sh-gate` and `zg-gate` share their cluster's `/volume` (gate.md); this machine's GitLab tunnel runs through `sh-gate`.

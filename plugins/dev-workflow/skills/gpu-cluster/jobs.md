@@ -14,15 +14,12 @@ Each cluster shares its own `/volume`; the control machine has independent local
 | `/volume/cluster-ops` | Deployed ops scripts (`free-gpus.sh`, `keepalive.py`, ...); the Git checkout is on the control machine | Read-only outside an authorized ops task |
 | `/volume/.bashrc`, `.config`, `.ssh` and other hidden files | Shared configuration and credentials | Only on an explicit ops request |
 
-- Put nothing in the `/volume`, `/volume/workspace` or `/volume/worktree` roots. Create project directories only when asked or for an authorized remote counterpart.
-
 ## Temporary files
 
-- Each run gets a new directory: `mktemp -d /volume/tmp/<topic>-$(date +%Y%m%d)-XXXXXX` on the node (CST date); a retry gets another. It holds scripts, logs, PIDs, exit statuses and evidence, never repository copies. Artifacts of a checkout go here too, not into the repo or its old `scratch/`.
+- Each run gets a new directory: `mktemp -d /volume/tmp/<topic>-$(date +%Y%m%d)-XXXXXX` on the node (CST date); a retry gets another. It holds the run's scripts, logs, PIDs, exit statuses and evidence, never repository copies.
 - A node's `/tmp` is not shared and fills the pod's overlay disk; it is only the programs' `TMPDIR` (library temp files, Unix sockets), which `/volume/.bashrc` sets to `/tmp`. Keep it there: CPFS cannot host Unix sockets. A job that needs its own `TMPDIR` gets a short `mktemp -d /tmp/<topic>-XXXXXX`, set before the process starts and removed afterwards; long paths break socket names.
 - A file the node needs must reach its `/volume` by `scp` or ssh stdin; a matching local path is a different disk.
-- Each run's record names the checkout path, node, full SHA, branch, working-tree state, launch command and configuration. Never write the environment into it: it holds tokens.
-- Delete only your own directories once nothing uses them, and list the ones worth keeping.
+- Each run's record names the checkout path, node, full SHA, branch, working-tree state, launch command and configuration.
 
 ## Background jobs
 
@@ -45,13 +42,12 @@ Each cluster shares its own `/volume`; the control machine has independent local
   ```
 
 - `exit.status` decides the result; a process gone without it failed. After an ssh error the job may still have started: check the log, status and processes before retrying in a new directory.
-- Logs are on the shared disk. Stop polling once the result is known; investigate a job that stalls instead of waiting.
 
 ## GPUs
 
 - Before launching, confirm the GPUs are free with enough memory: `nvidia-smi --query-gpu=index,uuid,memory.free --format=csv` and `nvidia-smi --query-compute-apps=gpu_uuid,pid,used_memory --format=csv`, then each PID's `/proc/<pid>/cmdline`.
   - `keepalive.py --occupy <GPU UUID>` workers (cwd `/`) hold idle GPUs at 100% utilization and leave by themselves when a job starts (machines.md). They and their memory count as free; never stop them. Time only after warm-up: their teardown overlaps a job's first 0.1–0.2 s.
-- Stop only this job's processes or ones the user names, never by process name in bulk. `pgrep -f` also matches the ssh `bash -c` running it.
+- Over ssh, `pgrep -f <pattern>` also matches the `bash -c` running it; check each PID's command before stopping it.
 - To free GPU memory, use `/volume/cluster-ops/free-gpus.sh`. It ssh-es to the nodes itself, so run it here; on a node it silently does nothing and returns 0. Dry-run first:
 
   ```bash
