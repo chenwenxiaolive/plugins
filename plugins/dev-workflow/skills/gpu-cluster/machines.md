@@ -10,7 +10,7 @@
 
 | Cluster | Nodes | Gate | Shared `/volume` | GPUs per node |
 |---|---|---|---|---|
-| sh | `sh-0`, `sh-1`, `sh-2` | `sh-gate` | 50 TB GPFS | 8×H200 141 GB, driver 580 |
+| sh | `sh-0`, `sh-1`, `sh-2`, `sh-3` | `sh-gate` | 50 TB GPFS | 8×H200 141 GB, driver 580 |
 | zg | `zg-0`, `zg-1` | `zg-gate` | 3 PB CPFS (FUSE; no Unix sockets) | 8×H20-3e 141 GB, driver 570 (CUDA 13 via forward compatibility) |
 | th | `th-0`, `th-1` | none | 1 TB GPFS | 8×B200 179 GiB, driver 590 |
 
