@@ -7,7 +7,7 @@ disable-model-invocation: true
 # To Tickets
 
 Write issues a fresh coder can implement without the planning conversation, in the
-selected checkout's GitLab project ([gitlab.md](../gpu-cluster/gitlab.md)).
+selected checkout's GitLab project ([gpu-cluster](../gpu-cluster/SKILL.md#gitlab)).
 Running this skill authorizes publishing them, unless the user asked for drafts.
 
 - Make each issue one independently verifiable result for one branch and MR. Split by behavior or a concrete technical result, not by layer. Give performance work its workload, baseline, metric and threshold, leaving unknown targets open.
