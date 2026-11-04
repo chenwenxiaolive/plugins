@@ -51,7 +51,7 @@ Each cluster shares its own `/volume`; the control machine has independent local
 - To free GPU memory, use `/volume/cluster-ops/free-gpus.sh`. It ssh-es to the nodes itself, so run it here; on a node it silently does nothing and returns 0. Dry-run first:
 
   ```bash
-  node=sh-0    # zg-0 or th-0 for those clusters
+  node=<node>    # any reachable node of the job's cluster
   owner=$(ssh "$node" "cd -- $(printf %q "$(pwd -P)") && pwd -P")
   ssh "$node" 'cat /volume/cluster-ops/free-gpus.sh' | DRY_RUN=1 OWNER_CWD="$owner" bash -s -- <node...>
   ```
