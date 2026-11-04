@@ -16,7 +16,8 @@ if [[ ! -e $env_dir/ready ]]; then
   [[ -x $env_dir/venv/bin/python ]] || uv venv -q "$env_dir/venv"
   uv pip install -q --python "$env_dir/venv/bin/python" playwright
   "$env_dir/venv/bin/python" -m playwright install --only-shell chromium
-  echo "deb http://archive.ubuntu.com/ubuntu noble main universe" > "$env_dir/apt/sources.list"
+  printf 'deb http://archive.ubuntu.com/ubuntu %s main universe\n' noble noble-updates > "$env_dir/apt/sources.list"
+  echo "deb http://security.ubuntu.com/ubuntu noble-security main universe" >> "$env_dir/apt/sources.list"
   apt=(apt-get -qq -o "Dir::State::Lists=$env_dir/apt/lists" -o "Dir::Cache=$env_dir/apt/cache"
     -o "Dir::Etc::sourcelist=$env_dir/apt/sources.list" -o Dir::Etc::sourceparts=-
     -o Debug::NoLocking=1 -o APT::Sandbox::User=root)
