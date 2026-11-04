@@ -5,13 +5,13 @@ description: Create or update standalone HTML and Markdown artifacts in the loca
 
 # Preview
 
-Write the page under `/preview` and return its link: `http://74.82.197.96:8000/` plus
-the URL-encoded path below `/preview`. The server renders `.md` as HTML at the same
-URL (`?raw=1` gives the source, `?download=1` the bytes), so don't make HTML copies.
-Publish only content meant for the user, and leave tracked repository docs where
-they are; copy one in as a snapshot to preview it.
+Publish a page the user wants to view: write it under the preview root, check it
+through the service, and return its link. [references/service.md](references/service.md)
+has this machine's root, browser URL and token, and how to restart the service.
 
-- Every request needs the access token as the HTTP Basic password, with any username; the browser asks once. It's in `/volume/tmp/preview-ssh-20261101-q6t3azd2/token`. Never print or repeat it. To check a page, keep it out of command arguments: `printf 'user = "preview:%s"\n' "$(cat <token file>)" | curl -K - --fail -sS --max-time 10 <url>`.
-- When layout matters (charts, wide tables, phone width, dark mode), screenshot the page at desktop and phone width, in light and dark, and fix what you see. sh-gate's image has Playwright and headless Chromium: copy the page into a new `/volume/tmp` run directory there and screenshot it with `python3` and `playwright`.
-- The server runs as `preview.service` (systemd, `Restart=always`, enabled at boot, bound to `0.0.0.0:8000` by the owner's choice). If it's down, `systemctl restart preview`; its settings are in `systemctl cat preview`, and its log is `journalctl -u preview`. Don't start a second server, and don't re-enable the retired `preview-local-only.service`.
-- The service runs a release copy of the server (source in this repository's `plugins/preview/server/`) from `~/.local/share/preview/releases/<commit>/`. To deploy a merged change, `git archive <commit> plugins/preview/server | tar -x -C <release> --strip-components=3`, point the unit's `ExecStart` at the new `server.py`, then `systemctl daemon-reload && systemctl restart preview` and check a page.
+- Write a new artifact with a descriptive name, or a task subdirectory when it has assets; don't overwrite an existing file unless it is the update target. Markdown is rendered by the server, so don't make an HTML copy. HTML needs a charset, title and viewport, and relative asset paths.
+- Tracked repository docs stay where they are; to preview one, copy it in and call it a snapshot.
+- Publish only content meant for the user: no credentials, environment dumps or unrelated private files.
+- The link is the browser base URL plus the URL-encoded path below the root (no `/preview` prefix). Check it with `curl` and the access token as service.md shows: the status, the content type and some of this page's text; Markdown must come back as HTML.
+- When the layout matters (charts, wide tables, phone width, dark mode), screenshot the page in the headless browser service.md names, at desktop and phone width in light and dark, and fix what you see before returning the link.
+- If the service is down, restart it as service.md says and check again; never change its settings as a side effect. If it still fails, keep the file and report its path and the failed check.

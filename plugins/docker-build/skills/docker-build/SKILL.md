@@ -6,37 +6,44 @@ description: >-
   container images for this registry.
 ---
 
-# Docker builds
+# Docker builds on the build host
 
 Build on the shared host `docker-build` and publish only to
-`registry-cn-shanghai.siflow.cn` (Harbor project `skyinfer`): one `linux/amd64` image
-manifest per build, with an immutable tag (date plus source commit; `latest` only on
-request). A build is done when the registry serves the digest the build exported.
+`registry-cn-shanghai.siflow.cn`: one `linux/amd64` image manifest per build, with
+an immutable tag (date plus source commit; `latest` only on request). A build is
+done when the registry serves the exporter's digest. Follow an explicit request to
+skip the push, add attestations or build more platforms.
 
-## Host (checked 2026-11-03)
+Read [references/build-notes.md](references/build-notes.md) before writing or
+changing a Dockerfile, when a download or push is slow, or when an image misbehaves
+at runtime: it holds this host's facts, measurements and incidents.
 
-- SSH alias for user `xqing` at 10.161.41.7, reached through `sh-gate`; passwordless `sudo`. Ubuntu 22.04, 192 CPUs, 2 TiB RAM, no GPU. `/` (1 TB) holds home and build contexts; `/data` (7 TB) is Docker's root.
-- Docker 29.5.2 with the containerd image store. Use the `default` builder (docker driver, BuildKit 0.30): a build also lands in the local store, and `--push` publishes the same digest.
-- Docker runs as `sudo docker`, so registry credentials are root's `/root/.docker/config.json`. Check only that the registry entry exists; never print it.
-- The host is shared: no `docker ... prune`, daemon restarts or configuration changes. Remove only your own tags and build directories.
+## Host
+
+- `docker-build` is an SSH alias for user `xqing` on an x86_64 VM without GPUs, reached through `sh-gate`. Every ssh command starts with a `cd`. Docker runs as `sudo docker` (passwordless), so registry credentials are root's `/root/.docker/config.json`; check only that the registry's entry exists (`sudo grep -Fq registry-cn-shanghai.siflow.cn /root/.docker/config.json`), never print it. An entry doesn't prove push access to the Harbor project (`skyinfer` in the examples).
+- Build with the `default` builder: the docker driver, whose BuildKit runs in the daemon and keeps images in its containerd image store under `/data/docker`. A build therefore also leaves its image in the local store, and `--push` publishes that same manifest digest. Pin bases by digest when reproducibility matters. Check the host first with `sudo docker buildx inspect default` and `df -h / /data`.
+- The host is shared, with other users' images and containers: don't format disks, migrate storage, restart daemons, change the daemon configuration or run any `docker ... prune`. Remove only your own tags, and report a missing builder or a full disk instead.
 
 ## Build
 
-```bash
-sudo docker buildx build --builder default --platform linux/amd64 --provenance=false --sbom=false \
-  --push --metadata-file build-metadata.json -t <image> ctx
-```
+1. Stage the context in `ctx/` of a fresh directory per build or retry (`mkdir -p ~/builds && mktemp -d ~/builds/<task>-$(date +%Y%m%d)-XXXXXX`): `tar --exclude-vcs -czf - -C <context> . | ssh docker-build "cd <dir>/ctx && tar -xzf -"`, or pipe `git archive <commit>` to `tar -xf -` for a committed tree. Keep it focused (`.dockerignore`) and free of credentials and checkpoints.
+2. Copy [scripts/run-build.sh](scripts/run-build.sh) beside `ctx/` and start it detached. It runs one `buildx build --builder default --platform linux/amd64 --provenance=false --sbom=false --push`, checks that the tag serves a single manifest with the exporter digest, and writes `build.status` (including `143` when killed). Extra arguments go to `buildx build`:
 
-- Stage the context in a fresh `~/builds/<task>-<date>-XXXXXX/ctx` per build: `git archive <commit>` or a tar over ssh, without credentials or checkpoints.
-- Run the build detached, as gpu-cluster describes for `run.sh`: traps record `build.status`, and you reconnect instead of rebuilding.
-- Publish only with `--push`. A later `docker push` of a local tag may send an older image.
-- Verify: `sudo docker buildx imagetools inspect <image>` must show a single manifest (no index) whose digest equals `containerimage.digest` in `build-metadata.json`. Then check imports and versions with `sudo docker run --rm --network=none <image> ...`.
+   ```bash
+   ssh docker-build "cd -- $(printf %q "$REMOTE_DIR") && cat > run-build.sh" < "$SKILL_DIR/scripts/run-build.sh"
+   printf -v start 'cd -- %q && { nohup bash run-build.sh %q > build.log 2>&1 </dev/null & echo $! > build.pid; }' "$REMOTE_DIR" "$IMAGE"
+   ssh docker-build "$start"
+   ```
 
-## What builds have taught
+3. Poll `build.log` and `build.status` in short calls. Without `build.status` the result is unknown; reconnect to the same build rather than starting another.
 
-- PyPI's CDN is the fastest index here (29 MiB/s, against 13 for Tsinghua and 4.5 for Aliyun). Routes drift: the previous host got 20–64 KiB/s from PyPI. Measure a 64 MB range from each index before switching, and pass a mirror only as a declared `ARG PIP_INDEX_URL` (uv reads `UV_DEFAULT_INDEX`); changing it invalidates that layer and all later ones.
-- BuildKit `RUN` steps start with a soft `nofile` limit of 1024 and ignore `--ulimit`. `uv` with `UV_COMPILE_BYTECODE=1` dies with "No file descriptors available". Raise the limit inside the step (`ulimit -n 65536 && ...`) or set `UV_COMPILE_BYTECODE=0`.
-- Same version doesn't mean same bytes. A silently re-released `nvidia-cutlass-dsl==4.5.2` main wheel, paired with older `-libs`, passed the build and crashed at the first GPU JIT. Byte-pin load-bearing packages: copy a known-good tarball in and assert an md5 in the same `RUN`. Take package families from one release, and diff file hashes before theorizing about "same pip list, different behavior".
-- The host has no GPU, so lazily compiled kernels (CuTe-DSL, triton autotune) first run on the deploy node. Assert what you can at build time, and smoke-test on a GPU node the user names.
-- A `--build-arg` token is recorded, expanded, in the image history, and a token in a clone URL stays in `.git/config`. Use `RUN --mount=type=secret,id=gitlab_token` with `--secret id=gitlab_token,src=<file>`, reset the clone's remote URL, and check `sudo docker history --no-trunc <image> | grep -c glpat-` is 0 before pushing.
-- A new repository name can re-upload base layers that exist elsewhere in the registry; a 6.5 GB push took about 108 s. If it stalls, the Registry V2 cross-repository blob mount can reuse an existing digest (201 on success).
+- Use the default package indexes: PyPI's CDN measured faster here than the mirrors. If a download step is slow, measure before switching (build notes), and pass a mirror only as a build argument that each downloading stage declares (`ARG PIP_INDEX_URL`; uv reads `UV_DEFAULT_INDEX`), never as `ENV` or `pip.conf`. Changing it invalidates that layer and all later ones.
+- Never pass a token with `--build-arg`: it is recorded in the image history. Use `--secret` (build notes).
+- Publish only through `run-build.sh`, not with a later `docker push` of a local tag, which may name an older image.
+- A build without a push is the same `buildx build` by hand without `--push`; its image stays in the local store under its tag.
+
+## Verify and clean up
+
+- Success needs `build.status` `0` and a log ending in `Verified <image>@<digest>`. Then run the checks that apply (imports, versions, CPU tests) in the local image with `sudo docker run --rm --network=none`, and, on a GPU node the user named, a smoke test; say when GPU testing used the source outside the image.
+- Report the source commits, base digest, image reference and digest, and what was verified. On failure, report the publication state; retry in a fresh directory with the same inputs and tag.
+- Remove only this build's directory once its logs and digest are recorded, and its local tags (`sudo docker image rm <tag>`) once nobody needs the image on this host.
