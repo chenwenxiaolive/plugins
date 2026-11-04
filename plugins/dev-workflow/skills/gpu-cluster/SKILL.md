@@ -48,7 +48,7 @@ behind them that you can't discover yourself.
   trap 'exit 143' TERM; trap 'exit 130' INT; trap 'exit 129' HUP
   ```
 
-  Keep the job in the foreground: `cmd & wait` leaves an orphan holding the GPU. Start it from the checkout with `nohup bash run.sh > run.log 2>&1 < /dev/null &`. ssh passes only configured variables, so set what the job needs in `run.sh`. To select GPUs by `nvidia-smi` index, export `CUDA_DEVICE_ORDER=PCI_BUS_ID` with `CUDA_VISIBLE_DEVICES`.
+  Keep the job in the foreground: `cmd & wait` leaves an orphan holding the GPU. Start it from the checkout with `nohup bash <run_dir>/run.sh > <run_dir>/run.log 2>&1 < /dev/null &`. ssh passes only configured variables, so set what the job needs in `run.sh`. To select GPUs by `nvidia-smi` index, export `CUDA_DEVICE_ORDER=PCI_BUS_ID` with `CUDA_VISIBLE_DEVICES`.
 - Keep `TMPDIR` on `/tmp`, with short paths: CPFS can't host Unix sockets, and long socket paths fail.
 - Idle GPUs carry `keepalive.py --occupy <GPU UUID>` workers (cwd `/`, 100% utilization). They leave within about 0.25 s of a CUDA context opening on any GPU, return after 10 idle minutes, and count as free; never stop them. Their exit overlaps a job's first 0.1–0.2 s, so time only after warm-up.
 - `/volume/cluster-ops/free-gpus.sh` frees GPU memory but must run here, since nodes can't ssh to each other: `ssh <node> 'cat /volume/cluster-ops/free-gpus.sh' | DRY_RUN=1 OWNER_CWD=<physical checkout path> bash -s -- <nodes>`. It marks matching processes `WOULD kill` and leaves keepalive workers alone. It swallows ssh errors, so an empty result proves nothing; check `nvidia-smi` too.
