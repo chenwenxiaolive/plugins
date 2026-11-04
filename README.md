@@ -46,17 +46,21 @@ python3 -B -m unittest discover -s plugins/preview/skills/preview/server/tests -
 ```
 
 The tests use fake external commands and temporary directories; they never touch a node, the registry or the deployed preview service.
+Don't remove client-supported frontmatter such as `disable-model-invocation` to
+satisfy a generic validator. Work on a branch with a pull request; merge only on
+the owner's request.
 
 ## Evals
 
-`plugins/dev-workflow/evals/` (for `gpu-cluster` and `implement`) and
-`plugins/preview/evals/` hold cases for Claude Code's
-[`claude plugin eval`](https://code.claude.com/docs/en/plugin-evals): a prompt a user
-might type and graders for the answer, each run with and without the group's skills
-to show what the skills add.
+Each group's `evals/` holds three cases per skill, tagged with the skill's name, for
+Claude Code's [`claude plugin eval`](https://code.claude.com/docs/en/plugin-evals): a
+prompt a user might type and graders for the answer, each run with and without the
+group's skills to show what the skills add. Cases for the skills only the user
+invokes start with their slash command, and a few cases create sample files first.
 
 ```sh
-scripts/run_evals.sh dev-workflow --runs 1 --judge-model sonnet
+scripts/run_evals.sh dev-workflow --runs 1 --judge-model sonnet [--tag <skill>...]
+scripts/run_evals.sh docker-build --runs 1 --judge-model sonnet
 scripts/run_evals.sh preview --runs 1 --judge-model sonnet
 ```
 
@@ -65,7 +69,4 @@ run directory, which receives the results and `report.html`. Runs load no
 `CLAUDE.md`, credentials or ssh configuration and get only read-only tools, so the
 cases test what the skills tell the agent, not the live machines. Each run is a
 full Claude Code session billed to your account; `--runs 1` keeps a pass at one
-session per case and arm (the default is three).
-Don't remove client-supported frontmatter such as `disable-model-invocation` to
-satisfy a generic validator. Work on a branch with a pull request; merge only on
-the owner's request.
+session per case and arm (the default is three), and `--model` tests another model.
