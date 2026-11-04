@@ -1,50 +1,24 @@
 # Visual check in headless Chromium
 
-This machine has no browser or display. Render a page in headless Chromium on the
-browser host instead, and look at the screenshots.
-
-| Setting | Value |
-| --- | --- |
-| Browser host | `sh-gate` (the owner's choice; it shares the sh cluster's `/volume`) |
-| Browser environment | `/volume/tmp/preview-browser-20261104-cGh9jv` on that `/volume` |
-
-The environment lives in user space and contains:
-
-- a Playwright venv;
-- the Chromium headless shell;
-- the shared libraries and fonts Chromium needs, unpacked from Ubuntu packages.
-
-apt keeps its lists and cache inside the environment. Building it installs no system
-package, writes no apt state, and leaves the gate's proxy and tunnel alone.
-
-## Check a page
-
-1. Create a run directory on the host with `mktemp -d /volume/tmp/preview-shot-$(date +%Y%m%d)-XXXXXX`.
-2. Copy the page there. For a page with assets, copy its task subdirectory too, but never the whole preview root. The page is opened as a file, so the token-protected URL isn't needed.
-3. Stream the screenshot script to the environment's Python. Widths default to 1280 and 400 pixels, schemes to light and dark:
-   ```sh
-   ssh sh-gate "<env>/python - <run>/<page>.html <run>/out" < scripts/screenshot.py
-   ```
-4. Copy back `out/report.json` and the slices (`out/*-[0-9]*.png`, cut from each full-page shot) to the session's scratch directory. Then view them.
-
-## What to check
-
-- `report.json`: `errors` (console and page errors) and `horizontal_overflow_px` at 400 pixels must be empty and 0.
-- Charts and diagrams at phone width: text that becomes too small to read. Wrap such a chart in an `overflow-x: auto` box with a minimum width.
-- Overlapping labels, panels running past the margin, and colors that disappear in dark mode.
-- Captions that claim more than the chart shows.
-
-Fix the page, render it again, and remove the run directory when you're done. Keep the environment.
-
-## Rebuild the environment
-
-If the environment is missing or a run fails to launch the browser, build a new one. The script
-targets Ubuntu 24.04 package names:
+This machine has no browser. Render the page on `sh-gate` (the owner's choice; it shares
+the sh `/volume`) with `scripts/browser-shot.sh`. The script reuses the browser
+environment `/volume/tmp/preview-browser-20261104-cGh9jv`; if that is gone, pass a new
+`mktemp -d /volume/tmp/preview-browser-<date>-XXXXXX` and record it here. The first run
+fills it in about 30 s without installing anything system-wide.
 
 ```sh
-env=$(ssh sh-gate 'mktemp -d /volume/tmp/preview-browser-$(date +%Y%m%d)-XXXXXX')
-ssh sh-gate "bash -s -- $env" < scripts/browser-env.sh
+run=$(ssh sh-gate 'mktemp -d /volume/tmp/preview-shot-$(date +%Y%m%d)-XXXXXX')
+scp scripts/browser-shot.sh <page>.html sh-gate:$run/   # a page with assets: also its task subdirectory
+ssh sh-gate "bash $run/browser-shot.sh <env> $run/<page>.html $run/out"
+scp "sh-gate:$run/out/*" <scratch>/
 ```
 
-It finishes by checking that Chromium resolves every shared library and finds fonts.
-Record the new path in the table above.
+It shoots the page at 1280 and 400 px, light and dark, in slices of 1400 px. View the
+slices and check:
+
+- `report.json` shows no errors and `overflow_px` 0;
+- chart text is still readable at 400 px (otherwise give the chart a minimum width
+  inside an `overflow-x: auto` box);
+- no labels overlap, nothing runs past the margin, and colors hold in dark mode.
+
+Fix the page, shoot it again, then remove the run directory.
