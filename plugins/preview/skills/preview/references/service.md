@@ -8,6 +8,7 @@
 | Local check URL | `http://127.0.0.1:8000` |
 | Server bind | `0.0.0.0:8000` |
 | Access token file | `/volume/tmp/preview-ssh-20261101-q6t3azd2/token` (mode `0600`) |
+| Headless browser | Playwright Chromium on `sh-gate` in `/volume/tmp/preview-browser-20261104-XrJSjB` (`source env.sh` there; its `README.txt` says how to rebuild it without system-wide installs) |
 
 Direct access is the owner's standing choice. Keep `0.0.0.0:8000`, and don't
 re-enable the retired `preview-local-only.service` unless the owner asks.

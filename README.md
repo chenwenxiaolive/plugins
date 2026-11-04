@@ -16,7 +16,7 @@ Each skill lives in `plugins/<group>/skills/<name>/`:
 - The `dev-workflow` skills link to each other, so install them together.
 - `improve-codebase-architecture`, `leader`, `retro` and `to-tickets` run only when invoked: `disable-model-invocation` in `SKILL.md` for Claude Code, `allow_implicit_invocation: false` in `agents/openai.yaml` for Codex.
 - They expect this environment: `gpu-cluster` the global instructions, SSH aliases and cluster layout; `aliyun-pai` authenticated `pai` and `aliyun` CLIs; `docker-build` the build host and registry access; `herdr-core` `hc` on `PATH` and signed-in Claude Code and Codex. Installing them creates no infrastructure and authorizes no jobs, cloud changes or publication.
-- The workflow skills state rules and facts; the agent runs `git`, `glab`, `ssh`, `nvidia-smi`, `pai` and `aliyun` itself. The only scripts are the preview server's helper, preview's `browser-shot.sh` for its [visual check](plugins/preview/skills/preview/references/visual-check.md), and `docker-build`'s `run-build.sh`.
+- The workflow skills state rules and facts; the agent runs `git`, `glab`, `ssh`, `nvidia-smi`, `pai` and `aliyun` itself. The only scripts are the preview server's helper and `docker-build`'s `run-build.sh`.
 - `preview` needs Linux, Python 3.10+ and Node.js 18+. This machine's settings are in [service.md](plugins/preview/skills/preview/references/service.md), the server's features and tests in [its README](plugins/preview/skills/preview/server/README.md).
 
 ## Install
