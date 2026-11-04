@@ -36,5 +36,5 @@ Follow Anthropic's [skill authoring best practices](https://platform.claude.com/
   whether to run or read it.
 - Keep `SKILL.md` short, with detail in references one level below it.
 - No emphasis, capitals or dated history; date a measurement that can drift.
-- Test a change on realistic tasks, ideally in a fresh session with and without
-  the skill.
+- Test a change on realistic tasks: run the eval suite that covers the skill
+  (README.md), and add a case when a skill gains a rule worth checking.
