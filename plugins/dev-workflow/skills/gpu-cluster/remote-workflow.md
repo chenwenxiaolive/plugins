@@ -3,7 +3,7 @@
 ## Validation scope
 
 - The control machine runs only light static checks with the tools it has: syntax, metadata, documentation links, Git refs. It installs no project dependencies and starts no project services.
-- Project tests (small unit tests included), builds, benchmarks, training, formatters and linters run in the node checkout's environment. Work without GPUs may run on the cluster's `-0` node with `CUDA_VISIBLE_DEVICES=` (empty), so it cannot touch a GPU.
+- Project tests (small unit tests included), builds, benchmarks, training, formatters and linters run in the node checkout's environment. Work without GPUs may run on any reachable node of the cluster with `CUDA_VISIBLE_DEVICES=` (empty), so it cannot touch a GPU.
 - A documentation-only change needs its static checks and a read against realistic task cases, not a failing test.
 - Report results for a clean committed snapshot: full SHA, checkout path, host, command and artifact directory.
 
@@ -22,15 +22,15 @@
 
 ## Operating remotely
 
-- Use `sh-0`, `zg-0` or `th-0` for Git and file work on that cluster.
+- Git and file work can use any reachable node of the cluster, since its nodes share one `/volume`.
 - Start every remote project command by changing to the checkout's physical path. A Herdr worktree's `$PWD` goes through `~/.herdr/worktrees`, which the nodes don't have:
 
   ```bash
-  ssh sh-0 "cd -- $(printf %q "$(pwd -P)") && "'git status --short --branch'
+  ssh <node> "cd -- $(printf %q "$(pwd -P)") && "'git status --short --branch'
   ```
 
 - To format a local file before committing, pipe it through the node environment's tools, in the order of the project's format config, with explicit `pipefail`. Use the output only if the command succeeds, and never redirect it over its input:
 
   ```bash
-  ssh sh-0 "bash -o pipefail -c 'cd -- <checkout> && .venv/bin/black -q --stdin-filename <path> - | .venv/bin/ruff check --fix --quiet --stdin-filename <path> -'" < <path>
+  ssh <node> "bash -o pipefail -c 'cd -- <checkout> && .venv/bin/black -q --stdin-filename <path> - | .venv/bin/ruff check --fix --quiet --stdin-filename <path> -'" < <path>
   ```
