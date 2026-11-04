@@ -20,3 +20,21 @@
   frontmatter checks; see README.md for its scope. For skill changes, exercise
   the affected workflow and report what was actually checked.
 - Use a development branch and pull request. Merge only when the owner asks.
+
+## Writing skills
+
+Follow Anthropic's [skill authoring best practices](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices):
+
+- The description says in the third person what the skill does and when to use
+  it; with the name, it is all the model sees before the skill loads.
+- Add only what the model can't know or discover: this environment's facts, the
+  owner's standing decisions, hard boundaries and gotchas. Leave out generic
+  advice and anything the global instructions already say (`~/.claude/CLAUDE.md`,
+  which `~/.codex/AGENTS.md` links to).
+- State a goal, fact or boundary rather than a procedure. Give exact commands or
+  a tested script where a step is fragile or must be deterministic, and say
+  whether to run or read it.
+- Keep `SKILL.md` short, with detail in references one level below it.
+- No emphasis, capitals or dated history; date a measurement that can drift.
+- Test a change on realistic tasks, ideally in a fresh session with and without
+  the skill.

@@ -8,10 +8,9 @@
 | Local check URL | `http://127.0.0.1:8000` |
 | Server bind | `0.0.0.0:8000` |
 | Access token file | `/volume/tmp/preview-ssh-20261101-q6t3azd2/token` (mode `0600`) |
-| Headless browser | Playwright Chromium on `sh-gate` in `/volume/tmp/preview-browser-20261104-XrJSjB` (`source env.sh` there; its `README.txt` says how to rebuild it without system-wide installs) |
+| Headless browser | Playwright with headless Chromium in `sh-gate`'s system `python3` (none on this machine): screenshot a copy of the page (for Markdown, the server's HTML) in a new `/volume/tmp` run directory there |
 
-Direct access is the owner's standing choice. Keep `0.0.0.0:8000`, and don't
-re-enable the retired `preview-local-only.service` unless the owner asks.
+The disabled `preview-local-only.service` is retired; leave it off.
 
 ## Check and restart
 
@@ -31,8 +30,8 @@ edit `ExecStart` in `/etc/systemd/system/preview.service`, then
 `systemctl daemon-reload && systemctl restart preview`, and check a page.
 
 Pages need the token: a browser asks for it as the password (any username).
-Never print or repeat it; to check a page, let `curl` read the credentials from
-stdin so they stay out of command arguments:
+To check a page, let `curl` read the credentials from stdin, which keeps the token
+out of command arguments:
 
 ```sh
 printf 'user = "preview:%s"\n' "$(cat <token_file>)" | curl -K - --fail -sS --max-time 10 <url>

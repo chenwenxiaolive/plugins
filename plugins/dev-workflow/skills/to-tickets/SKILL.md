@@ -1,6 +1,6 @@
 ---
 name: to-tickets
-description: "Turn the current discussion or a supplied plan into actionable GitLab issues for independent coders in reusable worktrees."
+description: "Turns the current discussion or a supplied plan into GitLab issues that independent coders can implement without the conversation. Runs only when the user invokes it."
 disable-model-invocation: true
 ---
 

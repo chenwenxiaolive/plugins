@@ -1,6 +1,6 @@
 ---
 name: herdr-core
-description: Run and coordinate persistent programs and coding agents with herdr-core's hc CLI from the current session; start Claude Code and Codex workers, wait for them, read back their results, and show them in the Herdr desktop app. Use when the user mentions hc, herdr-core, persistent terminals, remote commands or files through hc, or delegating work to watchable background agents. Not for the older herdr terminal multiplexer.
+description: "Runs and coordinates persistent programs and coding agents with herdr-core's hc CLI: starts Claude Code and Codex workers, waits for them, reads back their results and shows them in the Herdr desktop app. Use when the user mentions hc, herdr-core, persistent terminals, remote commands or files through hc, or delegating work to watchable background agents. Not for the older herdr terminal multiplexer."
 ---
 
 # herdr-core coordination
@@ -19,7 +19,7 @@ claude auth status   # JSON: read only loggedIn
 codex login status   # read only whether it says "Logged in"
 ```
 
-- Capture the auth output and report only signed in or not. Install a missing CLI with its official installer; ask the user to sign in a signed-out one, never for a key or token.
+- Capture the auth output and report only signed in or not. Install a missing CLI with its official installer; ask the user to sign in a signed-out one.
 - Workers inherit the core's environment, whose `PATH` lacks `~/.local/bin` (`hc`, `uv`): launch them through `env PATH="$PATH"`.
 - Claude Code reports status from 2.1.295, Codex from 0.163.0. Older versions stay `reported: false`: no Herdr sidebar entry, and waits end only at exit or timeout.
 

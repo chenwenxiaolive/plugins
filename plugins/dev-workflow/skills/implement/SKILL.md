@@ -1,6 +1,6 @@
 ---
 name: implement
-description: "Implement an assigned issue or agreed development task in the selected checkout, through validation, MR or PR creation, coder-owned review and a requested merge. Also use before reusing a worktree for another issue/MR, proposing an issue as next work, or reviewing an MR."
+description: "Implements an assigned issue or agreed development task in the selected checkout, through validation, an MR or PR, its review and a requested merge. Use when starting or resuming issue or MR work, reusing a worktree for another issue, proposing an issue as next work, reviewing an MR, or merging one."
 ---
 
 # Implement
@@ -41,19 +41,18 @@ An implemented issue carries one editable comment that says who works on it:
 
 - For features and fixes: update docs → write a minimal failing test → implement → check that tests, code and docs agree. When tests run remotely, validate the failing test there before the fix.
 - Expected results come from a specification, known example or independent reference.
-- KISS: no backward-compatibility layers, no data migrations, no abstraction for anticipated needs.
-- Validate committed code under gpu-cluster's [validation scope](../gpu-cluster/remote-workflow.md#validation-scope). GPU work needs a node the user named and free GPUs. Never claim an unrun check passed.
+- gpu-cluster's [validation scope](../gpu-cluster/remote-workflow.md#validation-scope) says where each check runs.
 
 ## Deliver and review
 
-Commit only this task's changes, push the branch and open the MR with the
-project's template: behavior, issue links, validation evidence and limitations.
-Use a closing reference only when the MR completes the issue.
+Push the branch and open the MR with the project's template: behavior, issue
+links, validation evidence and limitations. Use a closing reference only when the
+MR completes the issue.
 
 Then review it yourself:
 
-1. Round 0: in the clean checkout at the MR source commit, run `codex review --base <target-sha> > <run_dir>/review-0.md 2> <run_dir>/review-0.log` (minutes; run it in the background). Separately check the change against the issue's requirements, which `codex review` does not see.
-2. A pass means the requirements are met with evidence, no actionable finding is left and the checks pass on the current commit. Weigh each finding against KISS: fix real defects in scope with the smallest change, and reject findings about rare or hypothetical cases nobody asked for, with a one-line reason in the MR.
+1. Round 0: in the clean checkout at the MR source commit, run `codex review --base <target-sha> < /dev/null > <run_dir>/review-0.md 2> <run_dir>/review-0.log` (minutes; run it in the background). Separately check the change against the issue's requirements, which `codex review` does not see.
+2. A pass means the requirements are met with evidence, no actionable finding is left and the checks pass on the current commit. Weigh each finding against KISS: fix real defects in scope with the smallest change; reject style preferences and findings about rare or hypothetical cases nobody asked for, with a one-line reason in the MR.
 3. Otherwise fix, push, rerun affected checks and review again: at most three corrective rounds. If round 3 still fails, stop, set `needs-human` and report what remains. After that, follow the user's feedback; further automatic rounds need their explicit allowance.
 4. Record each round's commit, checks and outcome in a review-status section of the MR description, so that the count survives interruptions. A later merge recheck uses the remaining rounds and never resets them.
 
@@ -64,6 +63,6 @@ discussion); post it to the MR only when asked.
 ## Merge, only when the user asks
 
 - Recheck the MR, its source SHA and the current target. If either moved since the passing review, reassess what changed, using a remaining round if a new review is needed.
-- Merge with the reviewed SHA as a guard: `glab mr merge <iid> --sha <sha>` or `gh pr merge <n> --merge --match-head-commit <sha>`. While a pipeline runs, `glab` schedules an auto-merge instead: wait until the MR shows merged before the next step. After an error or timeout, read the MR and target back before retrying: if the target already holds a merge of the reviewed SHA while the MR stays open (a 504 did this on 2026-10-20), close the MR with a note naming that commit instead of merging again.
-- If the forge's rebase leaves a checkout diverged only by that rebase, rename its old branch to an archive name with `git branch -m` and recreate the branch at the new SHA. Never reset or force-push.
+- Merge with the reviewed SHA as a guard: `glab mr merge <iid> --sha <sha>` or `gh pr merge <n> --merge --match-head-commit <sha>`. While a pipeline runs, `glab` schedules an auto-merge instead: wait until the MR shows merged before the next step. After an error or timeout, read the MR and target back before retrying. A 504 can still merge: if the target already holds a merge of the reviewed SHA while the MR stays open, close the MR with a note naming that commit instead of merging again.
+- If the forge's rebase leaves a checkout diverged only by that rebase, rename its old branch to an archive name with `git branch -m` and recreate the branch at the new SHA.
 - Confirm the merge commit, then set the execution record to `merged` and delete the merged source branch on the forge.
