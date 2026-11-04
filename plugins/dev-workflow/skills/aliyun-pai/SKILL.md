@@ -6,8 +6,10 @@ description: Inspect Alibaba Cloud PAI jobs, resource usage, and mounted NAS, CP
 # Alibaba Cloud PAI
 
 Answer PAI questions from live data, read-only unless the user asks for a change.
-[references/current-environment.md](references/current-environment.md) has this
-machine's region, workspace, profile and file system.
+This machine's defaults (seen 2026-11-02; confirm live): region `cn-hangzhou`,
+workspace `ai_lab` (ID `513442`), `aliyun` profile `pai-readonly` (read-only through
+its RAM policy, not its name), CPFS file system `bmcpfs-0013ooqcih8196nqamf` (CPFS for
+Lingjun), mounted at `/cpfs01` in PAI jobs.
 
 ## Credentials
 

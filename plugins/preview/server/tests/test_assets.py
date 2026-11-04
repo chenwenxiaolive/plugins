@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import unittest
 
-SERVER = Path(__file__).resolve().parents[2] / 'plugins/preview/skills/preview/server'
+SERVER = Path(__file__).resolve().parents[1]
 
 
 class AssetTests(unittest.TestCase):
