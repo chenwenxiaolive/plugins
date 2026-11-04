@@ -1,8 +1,22 @@
 # Plugin maintenance
 
-- Each skill is one `SKILL.md` in `plugins/<group>/skills/<name>/`: only facts an agent can't discover and the owner's rules. No helper scripts, no reference files, no procedures a capable agent can work out. Fix a gap with one precise sentence, not code.
-- Keep an explicit-invocation skill's `disable-model-invocation` and `agents/openai.yaml` policy in step.
-- Check a change with `claude plugin validate --strict plugins/<group>/skills`, confirm that its relative links and anchors resolve, and exercise the workflow it describes. Report what was actually checked.
-- After committing, install with `DISABLE_TELEMETRY=1 npx skills add /volume/repo/plugins --skill '*' --global --agent codex claude-code --yes`. Then `diff -r plugins/<group>/skills/<name> ~/.agents/skills/<name>` shows nothing, and `~/.claude/skills/<name>` links there.
-- The preview server in `plugins/preview/server/` is a program with its own tests (`python3 -B -m unittest discover -s plugins/preview/server/tests`).
-- Keep credentials, generated previews, runtime logs and local installation settings out of the repository. Use a development branch and pull request; merge only when the owner asks.
+- Keep each skill in `plugins/<group>/skills/<name>/`; there is no plugin or
+  marketplace packaging. Share skill content across clients, and keep an
+  explicit-invocation skill's `disable-model-invocation` and
+  `agents/openai.yaml` policy in step.
+- Install and update this repository's skills with `npx skills`, targeting both
+  `codex` and `claude-code` in symlink mode. Keep one shared active installation
+  under `~/.agents/skills` and preserve local edits in the repository before updates.
+  After committing, install from this checkout with
+  `DISABLE_TELEMETRY=1 npx skills add /volume/repo/plugins --skill '*' --global --agent codex claude-code --yes`;
+  `skills update` skips local sources, so rerun that command to refresh them.
+- Use `python3 scripts/check_installation.py` to compare the installed skills
+  with a source commit before editing and after installation; see README.md.
+- Keep plugin instructions focused on their workflow. Put machine-specific
+  service mappings in a referenced file.
+- Keep credentials, generated previews, runtime logs, and local installation
+  settings out of this repository.
+- Run `python3 scripts/validate.py` (or pass changed group names) for link and
+  frontmatter checks; see README.md for its scope. For skill changes, exercise
+  the affected workflow and report what was actually checked.
+- Use a development branch and pull request. Merge only when the owner asks.

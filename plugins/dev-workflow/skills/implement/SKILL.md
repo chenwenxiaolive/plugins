@@ -12,7 +12,7 @@ steps: a pull request is the MR. The project's own rules come first.
 
 ## Start or resume
 
-- An agreed task needs no issue.
+- Read the issue, its discussions and any existing MR. An agreed task needs no issue.
 - Continue an existing issue/MR on its branch. Name a new issue branch `issue-<iid>-<2-4 words>`, e.g. `issue-42-fix-cache`, created from the fetched target branch; base it on another unmerged branch only for an intended dependency.
 - Worktrees such as `/volume/worktree/<repo>/dev-1` serve one task at a time and keep their names across tasks. Create one with `git worktree add --no-track -b <branch> <path> origin/<target>`. Before switching it to another task, its work must be committed and pushed, and no process may be working in it, here or on the nodes sharing its remote counterpart. Never remove a worktree unless the user asks.
 - If the MR was already merged, update the execution record and report; don't recreate its branch.
@@ -40,8 +40,9 @@ An implemented issue carries one editable comment that says who works on it:
 ## Implement and validate
 
 - For features and fixes: update docs → write a minimal failing test → implement → check that tests, code and docs agree. When tests run remotely, validate the failing test there before the fix.
+- Expected results come from a specification, known example or independent reference.
 - KISS: no backward-compatibility layers, no data migrations, no abstraction for anticipated needs.
-- Validate committed code under gpu-cluster's [validation scope](../gpu-cluster/SKILL.md#validation-scope). GPU work needs a node the user named and free GPUs.
+- Validate committed code under gpu-cluster's [validation scope](../gpu-cluster/remote-workflow.md#validation-scope). GPU work needs a node the user named and free GPUs. Never claim an unrun check passed.
 
 ## Deliver and review
 
