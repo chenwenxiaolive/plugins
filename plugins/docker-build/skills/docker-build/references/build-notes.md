@@ -15,7 +15,7 @@ Measured from this host on 2026-11-03, on 64 MB ranges (whole files when smaller
 | GitHub release assets; Ubuntu and NVIDIA apt repositories | 7.6 MiB/s; 8.3 and 8.6 MiB/s |
 | Push of a 6.5 GB image into a new `skyinfer` repository | 108 s, about 58 MiB/s |
 
-- PyPI's CDN is the fastest index here, so builds use the default indexes. Routes drift: on 2026-10-17 the previous host reached PyPI at 20–64 KiB/s (a torch + CUDA-wheel layer took 23 min) and the Tsinghua mirror at 7.6–12.2 MiB/s.
+- PyPI's CDN is the fastest index here, so builds use the default indexes, but routes drift.
 - If a download step looks slow, re-measure before blaming the build: fetch a range of one wheel from each index (`curl -r 0-63999999 -o /dev/null -w '%{speed_download}'`) and check the host's `/proc/net/dev` rate.
 - A mirror's index URL is recorded in the image history, which is acceptable because it is not a secret. Switching it mid-build costs a restart in a fresh task directory.
 - A mirror changes transport only. pip checks each file against the `#sha256=` its index lists, but version pins still do not pin bytes; byte-pin load-bearing packages (below).
