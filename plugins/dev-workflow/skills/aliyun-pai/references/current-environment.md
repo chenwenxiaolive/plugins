@@ -1,6 +1,6 @@
 # Current PAI environment
 
-Observed on 2026-11-02 and 2026-11-03; confirm live before relying on them.
+Confirm these values live before relying on them.
 
 | Setting | Value |
 | --- | --- |

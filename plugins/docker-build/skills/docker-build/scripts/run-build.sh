@@ -22,7 +22,7 @@ case $image in
     exit 2
     ;;
 esac
-command -v python3 >/dev/null
+command -v python3 >/dev/null || { printf 'python3 is required on the build host\n' >&2; exit 1; }
 test -f ctx/Dockerfile || { printf 'ctx/Dockerfile is missing\n' >&2; exit 1; }
 
 sudo docker buildx build --builder default \
