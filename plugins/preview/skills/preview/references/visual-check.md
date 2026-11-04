@@ -2,9 +2,9 @@
 
 This machine has no browser. Render the page on `sh-gate` (the owner's choice; it shares
 the sh `/volume`) with `scripts/browser-shot.sh`. The script reuses the browser
-environment `/volume/tmp/preview-browser-20261104-cGh9jv`; if that is gone, pass a new
+environment `/volume/tmp/preview-browser-20261104-XrJSjB`; if that is gone, pass a new
 `mktemp -d /volume/tmp/preview-browser-<date>-XXXXXX` and record it here. The first run
-fills it in about 30 s without installing anything system-wide.
+fills it in about 25 s without installing anything system-wide.
 
 ```sh
 run=$(ssh sh-gate 'mktemp -d /volume/tmp/preview-shot-$(date +%Y%m%d)-XXXXXX')
