@@ -2,19 +2,6 @@
 
 Facts, measurements and incidents behind the rules in [SKILL.md](../SKILL.md).
 
-## Host
-
-Checked on 2026-11-03:
-
-| item | value |
-|---|---|
-| Access | user `xqing` at 10.161.41.7 through `sh-gate`; passwordless `sudo` |
-| Machine | Ubuntu 22.04 VM, x86_64, 192 CPUs, 2 TiB RAM; no NVIDIA GPU or driver |
-| Disks | `/`: 1 TB, home directories and build contexts; `/data`: 7 TB, Docker's data root `/data/docker` |
-| Docker | 29.5.2 with the containerd image store; `default` builder: docker driver, BuildKit v0.30.0 |
-| Registry login | root's `/root/.docker/config.json` holds only the `registry-cn-shanghai.siflow.cn` entry |
-| File descriptors | daemon 524288; `RUN` steps start at soft 1024, hard 524288 |
-
 ## Download and upload speeds
 
 Measured from this host on 2026-11-03, on 64 MB ranges (whole files when smaller):

@@ -9,7 +9,7 @@ Workers run as hc terminals while the conversation stays in this session, which
 need not be a Herdr terminal. `hc --skill` prints the full manual (commands, other
 machines and files, recovery, exit codes); read it before going beyond this page.
 Window commands are in `herdr-app --skill` on the machine running the Herdr app.
-Verified on 2026-11-02 with hc 0.1.16, Claude Code 2.1.295 and Codex 0.163.0.
+Tested with hc 0.1.16, Claude Code 2.1.295 and Codex 0.163.0.
 
 ## Before the first worker
 

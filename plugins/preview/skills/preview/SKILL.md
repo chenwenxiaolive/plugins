@@ -7,7 +7,8 @@ description: "Publishes standalone HTML and Markdown pages through this machine'
 
 Publish a page the user wants to view: write it under the preview root, check it
 through the service, and return its link. [references/service.md](references/service.md)
-has this machine's root, browser URL and token, and how to restart the service.
+has this machine's root, browser base URL and token, and how to restart the service;
+[server/README.md](server/README.md) describes the server's features, deployment and tests.
 
 - Write a new artifact with a descriptive name, or a task subdirectory when it has assets; don't overwrite an existing file unless it is the update target. Markdown is rendered by the server, so don't make an HTML copy; HTML uses relative asset paths.
 - Tracked repository docs stay where they are; to preview one, copy it in and call it a snapshot.
