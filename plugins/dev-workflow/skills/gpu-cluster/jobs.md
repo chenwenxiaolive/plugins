@@ -2,7 +2,7 @@
 
 ## /volume directories
 
-- `/volume/.cache` on sh and th is `HF_HOME`, the shared Hugging Face cache; HF downloads are the one exception to its read-only rule.
+- `/volume/.cache` on sh and th is `HF_HOME`, the shared Hugging Face cache: read-only except for HF downloads.
 
 ## Temporary files
 
