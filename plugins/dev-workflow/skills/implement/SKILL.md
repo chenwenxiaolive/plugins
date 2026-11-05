@@ -12,8 +12,8 @@ request is the MR. The project's own rules come first.
 ## Start or resume
 
 - Read the issue, its discussions and any existing MR. An agreed task needs no issue.
-- Continue an existing issue/MR on its branch. Name a new issue branch `issue-<iid>-<2-4 words>`, e.g. `issue-42-fix-cache`, created from the fetched target branch; base it on another unmerged branch only for an intended dependency.
-- Worktrees such as `/volume/worktree/<repo>/dev-1` serve one task at a time and keep their names across tasks. Create one with `git worktree add --no-track -b <branch> <path> origin/<target>`. Before switching it to another task, its work must be committed and pushed, and no process may be working in it, here or on the nodes sharing its remote counterpart. Never remove a worktree unless the user asks.
+- Name a new issue branch `issue-<iid>-<2-4 words>`, e.g. `issue-42-fix-cache`, created from the fetched target branch; base it on another unmerged branch only for an intended dependency.
+- Create a worktree with `git worktree add --no-track -b <branch> <path> origin/<target>`. Before switching one to another task, its work must be committed and pushed, and no process may be working in it, here or on the nodes sharing its remote counterpart. Never remove a worktree unless the user asks.
 - If the MR was already merged, update the execution record and report; don't recreate its branch.
 
 ## Execution record

@@ -2,15 +2,13 @@
 
 ## /volume directories
 
-- `/volume/.cache` on sh and th is `HF_HOME`, the shared Hugging Face cache: write to it only through HF downloads.
-- `/volume/cluster-ops` holds the deployed ops scripts (`free-gpus.sh`, `keepalive.py`, ...); their Git checkout is on the control machine.
+- `/volume/.cache` on sh and th is `HF_HOME`, the shared Hugging Face cache; HF downloads are the one exception to its read-only rule.
 
 ## Temporary files
 
 - Each run gets a new directory: `mktemp -d /volume/tmp/<topic>-$(date +%Y%m%d)-XXXXXX` on the node (CST date); a retry gets another. It holds the run's scripts, logs, PIDs, exit statuses and evidence, never repository copies.
-- A node's `/tmp` is not shared and fills the pod's overlay disk; it is only the programs' `TMPDIR` (library temp files, Unix sockets), which `/volume/.bashrc` sets to `/tmp`. Keep it there: CPFS cannot host Unix sockets. A job that needs its own `TMPDIR` gets a short `mktemp -d /tmp/<topic>-XXXXXX`, set before the process starts and removed afterwards; long paths break socket names.
-- A file the node needs must reach its `/volume` by `scp` or ssh stdin; a matching local path is a different disk.
-- Keep each run's record complete enough to rerun it from its commit.
+- A node's `/tmp` is not shared and fills the pod's overlay disk; it is only the programs' `TMPDIR` (library temp files, Unix sockets), which `/volume/.bashrc` sets to `/tmp`. Keep it there: zg's CPFS runs on FUSE and can't host Unix sockets. A job that needs its own `TMPDIR` gets a short `mktemp -d /tmp/<topic>-XXXXXX`, set before the process starts and removed afterwards; long paths break socket names.
+- A file the node needs must reach its `/volume` by `scp` or ssh stdin.
 
 ## Background jobs
 
@@ -23,6 +21,7 @@
 
   Keep the job in the foreground: `cmd & wait` orphans it, and the orphan keeps holding the GPU. When selecting GPUs by `nvidia-smi` index, export `CUDA_DEVICE_ORDER=PCI_BUS_ID` with `CUDA_VISIBLE_DEVICES`; CUDA's default order can differ. A CPU-only job exports `CUDA_VISIBLE_DEVICES=` (empty) so it can't touch a GPU.
   ssh passes only configured environment variables, so set what the job needs in `run.sh`.
+- OSS credentials for jobs: `source /volume/.config/oss/<account>.env` in `run.sh` (`qr` for bucket skyinfer-qr, `zg` for skyinfer-zg); each file sets `OSS_ACCESS_KEY_ID`, `OSS_ACCESS_KEY_SECRET`, `OSS_ENDPOINT` and `OSS_REGION`. The control machine's copy is the source, deployed with `profile.sh push <gate>` ([gate.md](gate.md)).
 - Launch it from the checkout:
 
   ```bash

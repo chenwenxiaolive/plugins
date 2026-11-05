@@ -39,8 +39,3 @@ printf 'user = "preview:%s"\n' "$(cat <token_file>)" | curl -K - --fail -sS --ma
 To screenshot a page, run Playwright on `sh-gate` against the browser base URL, which it
 reaches directly: give the browser context the token as HTTP credentials read from
 ssh stdin, and keep the script and images in a new `/volume/tmp` run directory there.
-
-The server serves HTML as is and renders `.md` as HTML at the same URL; `?raw=1`
-returns the source and `?download=1` the original bytes. Credentials travel over
-plain HTTP, so the root still holds only content meant for viewing. The server's
-source, features and tests are described in [server/README.md](../server/README.md).
