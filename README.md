@@ -65,8 +65,10 @@ scripts/run_evals.sh preview --runs 1 --judge-model sonnet
 ```
 
 The script runs a copy of the group with a plugin manifest in a new `/volume/tmp`
-run directory, which receives the results and `report.html`. Runs load no
-`CLAUDE.md`, credentials or ssh configuration and get only read-only tools, so the
-cases test what the skills tell the agent, not the live machines. Each run is a
+run directory, which receives the results and `report.html`. It also gives every
+run your global instructions (`~/.claude/CLAUDE.md`), in both arms, as real
+sessions load them, so a case measures what its skill adds on top of them. Runs get
+no credentials or ssh configuration and only read-only tools, so the cases test
+what the skills tell the agent, not the live machines. Each run is a
 full Claude Code session billed to your account; `--runs 1` keeps a pass at one
 session per case and arm (the default is three), and `--model` tests another model.
