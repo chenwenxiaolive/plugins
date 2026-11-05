@@ -15,8 +15,7 @@ The disabled `preview-local-only.service` is retired; leave it off.
 ## Check and restart
 
 The unit runs the deployed server release in the foreground, outside any agent
-session; a server started from an agent's terminal dies with that terminal. Don't
-start one with `scripts/preview.py` here.
+session; a server started from an agent's terminal dies with that terminal.
 
 ```sh
 systemctl status preview          # running? recent log lines
