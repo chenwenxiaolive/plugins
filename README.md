@@ -52,7 +52,7 @@ the owner's request.
 
 ## Evals
 
-Each group's `evals/` holds three cases per skill, tagged with the skill's name, for
+Each group's `evals/` holds three or more cases per skill, tagged with the skills they test, for
 Claude Code's [`claude plugin eval`](https://code.claude.com/docs/en/plugin-evals): a
 prompt a user might type and graders for the answer, each run with and without the
 group's skills to show what the skills add. Cases for the skills only the user
