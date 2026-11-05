@@ -6,7 +6,7 @@ description: "Runs and coordinates persistent programs and coding agents with he
 # herdr-core coordination
 
 Workers run as hc terminals while the conversation stays in this session, which
-need not be a Herdr terminal. `hc --skill` prints the full manual (commands, other
+need not be an hc terminal. `hc --skill` prints the full manual (commands, other
 machines and files, recovery, exit codes); read it before going beyond this page.
 Window commands are in `herdr-app --skill` on the machine running the Herdr app.
 Tested with hc 0.1.16, Claude Code 2.1.295 and Codex 0.163.0.
@@ -15,11 +15,11 @@ Tested with hc 0.1.16, Claude Code 2.1.295 and Codex 0.163.0.
 
 ```sh
 hc --version && claude --version && codex --version
-claude auth status   # JSON: read only loggedIn
-codex login status   # read only whether it says "Logged in"
+claude auth status | jq -r .loggedIn
+codex login status 2>&1 | grep -q 'Logged in' && echo signed-in || echo signed-out
 ```
 
-- Capture the auth output and report only signed in or not. Install a missing CLI with its official installer; ask the user to sign in a signed-out one.
+- Install a missing CLI with its official installer; ask the user to sign in a signed-out one.
 - Workers inherit the core's environment, whose `PATH` lacks `~/.local/bin` (`hc`, `uv`): launch them through `env PATH="$PATH"`.
 - Claude Code reports status from 2.1.295, Codex from 0.163.0. Older versions stay `reported: false`: no Herdr sidebar entry, and waits end only at exit or timeout.
 
@@ -29,7 +29,7 @@ Give each worker its own `--name`, an explicit `--cwd`, an exact scope and the
 whole task in the launch (a message to a booting agent can be lost). Set the model
 and effort explicitly; if unavailable, tell the user instead of substituting. Both
 run with full access and no approval prompts, so the task sets what they may
-change, and they start no other agents unless it says so.
+change and whether they may start other agents.
 
 ```sh
 SPACE="sp$(python3 -c 'import uuid; print(uuid.uuid4().hex)')"
@@ -48,7 +48,7 @@ hc run --bg --name <name> --cwd <dir> --label "herdr.space=$SPACE" \
 
 - `--no-daemon` keeps Codex's commands inside hc. Don't pass Codex `--worktree`: it ignores `-c` for its root and leaves `<root>/<hex>/<repo>` checkouts behind. Prepare the checkout under the project's worktree rules and pass it as `--cwd`.
 - Outside an hc terminal `$HC_TERMINAL_ID` is empty: drop `$REPORT` and collect results with wait and read.
-- The `herdr.space=<id>` label puts the worker's live terminal in that Herdr space (a new id creates a space named after the folder; to group workers, reuse the space id, optionally adding `herdr.tab=<id>`; a terminal without a space label is not placed). Unlabeled workers appear only under their parent. Closing a placed terminal's space or pane in the app ends it.
+- The `herdr.space=<id>` label puts the worker's live terminal in that Herdr space (a new id creates a space named after the folder; to group workers, reuse the space id, optionally adding `herdr.tab=<id>`). Unlabeled workers appear only under their parent. Closing a placed terminal's space or pane in the app ends it.
 - A new folder triggers a trust prompt that blocks the task. `hc read <name>` shows Claude Code's "Is this a project you trust?"; for a folder the user owns or approved, `hc keys <name> down enter` answers yes. Otherwise, or if it stays stuck, tell the user.
 
 ## Wait, read, follow up

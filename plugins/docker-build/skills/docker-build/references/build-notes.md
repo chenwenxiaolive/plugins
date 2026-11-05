@@ -15,11 +15,10 @@ Measured from this host on 2026-11-03, on 64 MB ranges (whole files when smaller
 | GitHub release assets; Ubuntu and NVIDIA apt repositories | 7.6 MiB/s; 8.3 and 8.6 MiB/s |
 | Push of a 6.5 GB image into a new `skyinfer` repository | 108 s, about 58 MiB/s |
 
-- PyPI's CDN is the fastest index here, so builds use the default indexes, but routes drift.
 - If a download step looks slow, re-measure before blaming the build: fetch a range of one wheel from each index (`curl -r 0-63999999 -o /dev/null -w '%{speed_download}'`) and check the host's `/proc/net/dev` rate.
-- A mirror's index URL is recorded in the image history, which is acceptable because it is not a secret. Switching it mid-build costs a restart in a fresh task directory.
+- A mirror's index URL is recorded in the image history, which is acceptable because it is not a secret. Switching it mid-build costs a restart in a fresh build directory.
 - A mirror changes transport only. pip checks each file against the `#sha256=` its index lists, but version pins still do not pin bytes; byte-pin load-bearing packages (below).
-- For scale: the IQuestRT image (CUDA 13.2 devel base, torch and 62 locked packages, 6.5 GB) built from nothing in about 5 minutes, of which `uv sync` took 67 s and the image export 155 s.
+- For scale, on 2026-11-03: the IQuestRT image (CUDA 13.2 devel base, torch and 62 locked packages, 6.5 GB) built from nothing in about 5 minutes, of which `uv sync` took 67 s and the image export 155 s.
 
 ## Slow pushes into a new repository
 

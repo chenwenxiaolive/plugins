@@ -12,7 +12,7 @@ machine's region, workspace, profile and file system.
 ## Credentials
 
 - A PAI console URL can carry a bearer `Token`. Take only `regionId`, `workspaceId` and the job ID from it; never repeat the URL.
-- The `pai` and `aliyun` CLIs already authenticate here; `pai config show` prints credentials. If one fails to authenticate, ask the user to set it up interactively (`! pai config init`, `! aliyun configure --profile <profile>`).
+- `pai config show` prints credentials. If the `pai` or `aliyun` CLI fails to authenticate, ask the user to set it up interactively (`! pai config init`, `! aliyun configure --profile <profile>`).
 
 ## Commands
 

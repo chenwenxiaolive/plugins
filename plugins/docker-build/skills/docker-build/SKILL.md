@@ -17,14 +17,14 @@ at runtime: it holds this host's facts, measurements and incidents.
 
 ## Host
 
-- `docker-build` is an SSH alias for user `xqing` on an x86_64 VM without GPUs, reached through `sh-gate`. Every ssh command starts with a `cd`. Docker runs as `sudo docker` (passwordless), so registry credentials are root's `/root/.docker/config.json`; check only that the registry's entry exists (`sudo grep -Fq registry-cn-shanghai.siflow.cn /root/.docker/config.json`), never print it. An entry doesn't prove push access to the Harbor project (`skyinfer` in the examples).
+- `docker-build` is an SSH alias for user `xqing` on an x86_64 VM without GPUs, reached through `sh-gate`. Every ssh command starts with a `cd`. Docker runs as `sudo docker` (passwordless), so registry credentials are root's `/root/.docker/config.json`; check only that the registry's entry exists (`sudo grep -Fq registry-cn-shanghai.siflow.cn /root/.docker/config.json`). An entry doesn't prove push access to the Harbor project (`skyinfer` in the examples).
 - Build with the `default` builder: the docker driver, whose BuildKit runs in the daemon and keeps images in its containerd image store under `/data/docker`. A build therefore also leaves its image in the local store, and `--push` publishes that same manifest digest. Check the host first with `sudo docker buildx inspect default` and `df -h / /data`.
 - The host is shared, with other users' images and containers: don't format disks, migrate storage, restart daemons, change the daemon configuration or run any `docker ... prune`. Remove only your own tags, and report a missing builder or a full disk instead.
 
 ## Build
 
 1. Stage the context in `ctx/` of a fresh directory per build or retry (`mkdir -p ~/builds && mktemp -d ~/builds/<task>-$(date +%Y%m%d)-XXXXXX`): `tar --exclude-vcs -czf - -C <context> . | ssh docker-build "cd <dir>/ctx && tar -xzf -"`, or pipe `git archive <commit>` to `tar -xf -` for a committed tree. Keep it focused (`.dockerignore`) and free of credentials and checkpoints.
-2. Copy [scripts/run-build.sh](scripts/run-build.sh) beside `ctx/` and start it detached. It runs one `buildx build --builder default --platform linux/amd64 --provenance=false --sbom=false --push`, checks that the tag serves a single manifest with the exporter digest, and writes `build.status` (including `143` when killed). Extra arguments go to `buildx build`:
+2. Copy [scripts/run-build.sh](scripts/run-build.sh) beside `ctx/` and start it detached. It runs one `buildx build --builder default --platform linux/amd64 --provenance=false --sbom=false --push` of `ctx/Dockerfile`, checks that the tag serves a single manifest with the exporter digest, and writes `build.status` (including `143` when killed). Extra arguments go to `buildx build`:
 
    ```bash
    ssh docker-build "cd -- $(printf %q "$REMOTE_DIR") && cat > run-build.sh" < "$SKILL_DIR/scripts/run-build.sh"

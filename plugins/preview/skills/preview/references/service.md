@@ -7,7 +7,7 @@
 | Browser base URL | `http://74.82.197.96:8000` (direct; no SSH tunnel) |
 | Local check URL | `http://127.0.0.1:8000` |
 | Server bind | `0.0.0.0:8000` |
-| Access token file | `/volume/tmp/preview-ssh-20261101-q6t3azd2/token` (mode `0600`) |
+| Access token file | `/volume/.config/preview/token` (mode `0600`) |
 | Headless browser | Playwright with headless Chromium in `sh-gate`'s system `python3` (none on this machine) |
 
 The disabled `preview-local-only.service` is retired; leave it off.
@@ -39,8 +39,3 @@ printf 'user = "preview:%s"\n' "$(cat <token_file>)" | curl -K - --fail -sS --ma
 To screenshot a page, run Playwright on `sh-gate` against the browser base URL, which it
 reaches directly: give the browser context the token as HTTP credentials read from
 ssh stdin, and keep the script and images in a new `/volume/tmp` run directory there.
-
-The server serves HTML as is and renders `.md` as HTML at the same URL; `?raw=1`
-returns the source and `?download=1` the original bytes. Credentials travel over
-plain HTTP, so the root still holds only content meant for viewing. The server's
-source, features and tests are described in [server/README.md](../server/README.md).

@@ -12,6 +12,8 @@ facts behind them. Read the one for what the task does next, not all:
 |---|---|
 | ssh to a node or gate; node hardware, storage, network or tools; a node that stops answering | [machines.md](machines.md) |
 | syncing a remote checkout, creating a remote counterpart, remote commands, formatting with a node's tools, where validation runs | [remote-workflow.md](remote-workflow.md) |
-| `/volume` paths, temporary files, `TMPDIR`, checking whether GPUs are free, a background job, freeing GPU memory | [jobs.md](jobs.md) |
-| GitLab issues, MRs, API calls or pushes; a dependency fetched from GitLab; OSS credentials for jobs | [gitlab.md](gitlab.md) |
+| `/volume` paths, temporary files, `TMPDIR`, checking whether GPUs are free, a background job and its OSS credentials, freeing GPU memory | [jobs.md](jobs.md) |
+| GitLab issues, MRs, API calls or pushes; a dependency fetched from GitLab | [gitlab.md](gitlab.md) |
 | gate deployment, its saved configuration, the proxy and tunnel | [gate.md](gate.md) |
+
+CPU-only work on a node exports `CUDA_VISIBLE_DEVICES=` (empty) so it can't touch a GPU.

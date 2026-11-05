@@ -2,7 +2,7 @@
 # Build and publish one linux/amd64 image with the default builder, then check that
 # the registry serves a single image manifest with the exporter's digest.
 #
-# Run on docker-build from a task directory whose ctx/ holds the build context:
+# Run on docker-build from a build directory whose ctx/ holds the build context:
 #   bash run-build.sh registry-cn-shanghai.siflow.cn/<project>/<name>:<tag> [buildx args...]
 # Extra arguments such as --build-arg, --pull or --no-cache go to `docker buildx build`.
 # Writes build.status (the exit code), build-metadata.json, image-inspect.txt,
