@@ -1,6 +1,6 @@
 ---
 name: preview
-description: "Publishes standalone HTML and Markdown pages through this machine's preview server, checks them and returns their links; also restarts the service. Use when the user wants a page, report or preview to view in a browser, or asks about existing /preview pages. Not for tracked repository documentation, which stays where it is."
+description: "Publishes standalone HTML and Markdown pages through this machine's preview server, checks them, screenshots them when the layout matters (the headless browser is on sh-gate) and returns their links; also restarts the service. Use when the user wants a page, report or preview to view in a browser, or asks about an existing /preview page, including how it looks on a phone or in dark mode. Not for tracked repository documentation, which stays where it is."
 ---
 
 # Preview

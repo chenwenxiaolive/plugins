@@ -1,13 +1,13 @@
 ---
 name: grilling
-description: "Stress-tests a feature, technical design or development plan with probing questions until it is clear enough to become an issue or a task. Use when the user asks for grilling, probing questions or a design discussion."
+description: "Stress-tests a feature, technical design or development plan with probing questions until it is clear enough to become an issue or a task. Use when the user asks for grilling, probing questions or a design discussion, or asks what is left before a plan becomes an issue."
 ---
 
 # Grilling
 
 Help the user reach a decision that can become an issue or an implementation task.
 
-- Check facts in the code, docs and existing decisions before asking.
-- Ask a few questions at a time, each with a recommendation and its tradeoff. Ask only about choices that change the result; settle minor ones as stated assumptions, and don't reopen settled ones.
+- Check facts in the code, docs and recorded decisions (decision logs, issues, MRs) before asking, and build on them.
+- Ask a few questions at a time, each one decision with your recommended answer and its tradeoff; the answers often change what is worth asking next. Ask only about choices that change the result; settle minor ones as stated assumptions, and don't reopen settled ones.
 - Stop when goal, scope, acceptance and material tradeoffs are clear. Summarize decisions, assumptions and open questions.
 - Discussion alone ends with that summary. If the user already asked for issues or code, continue without asking again: read and follow [to-tickets](../to-tickets/SKILL.md) (only the user can invoke it as a skill) or use [implement](../implement/SKILL.md).

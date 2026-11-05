@@ -1,6 +1,6 @@
 ---
 name: implement
-description: "Implements an assigned issue or agreed development task in the selected checkout, through validation, an MR or PR, its review and a requested merge. Use it for any question about this user's issues, MRs or PRs: starting, resuming or claiming an issue, checking whether one is free or proposing it as next work, reusing a worktree, reviewing an MR or acting on its codex review findings, and merging, including after a failed or timed-out merge."
+description: "Implements an assigned issue or agreed development task in the selected checkout, through validation, an MR or PR, its review and a requested merge, under this user's rules for branches, execution records, which review findings to fix or reject, and merge guards. Use it for any question about this user's issues, MRs or PRs: starting, resuming or claiming an issue, checking whether one is free or proposing it as next work, reusing a worktree, reviewing an MR or acting on its codex review findings, and merging, including after a failed or timed-out merge."
 ---
 
 # Implement
