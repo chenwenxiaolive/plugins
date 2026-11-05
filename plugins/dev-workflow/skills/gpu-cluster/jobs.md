@@ -19,7 +19,7 @@
   trap 'exit 143' TERM; trap 'exit 130' INT; trap 'exit 129' HUP
   ```
 
-  Keep the job in the foreground: `cmd & wait` orphans it, and the orphan keeps holding the GPU. When selecting GPUs by `nvidia-smi` index, export `CUDA_DEVICE_ORDER=PCI_BUS_ID` with `CUDA_VISIBLE_DEVICES`; CUDA's default order can differ. A CPU-only job exports `CUDA_VISIBLE_DEVICES=` (empty) so it can't touch a GPU.
+  Keep the job in the foreground: `cmd & wait` orphans it, and the orphan keeps holding the GPU. When selecting GPUs by `nvidia-smi` index, export `CUDA_DEVICE_ORDER=PCI_BUS_ID` with `CUDA_VISIBLE_DEVICES`; CUDA's default order can differ.
   ssh passes only configured environment variables, so set what the job needs in `run.sh`.
 - OSS credentials for jobs: `source /volume/.config/oss/<account>.env` in `run.sh` (`qr` for bucket skyinfer-qr, `zg` for skyinfer-zg); each file sets `OSS_ACCESS_KEY_ID`, `OSS_ACCESS_KEY_SECRET`, `OSS_ENDPOINT` and `OSS_REGION`. The control machine's copy is the source, deployed with `profile.sh push <gate>` ([gate.md](gate.md)).
 - Launch it from the checkout:

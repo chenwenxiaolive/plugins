@@ -3,7 +3,7 @@
 ## Validation scope
 
 - The control machine runs only light static checks with the tools it has: syntax, metadata, documentation links, Git refs. It installs no project dependencies and starts no project services.
-- Project tests (small unit tests included), builds, benchmarks, training, formatters and linters run in the node checkout's environment. Work without GPUs may run on any reachable node of the cluster with `CUDA_VISIBLE_DEVICES=` (empty), so it cannot touch a GPU.
+- Project tests (small unit tests included), builds, benchmarks, training, formatters and linters run in the node checkout's environment. Work without GPUs may run on any reachable node of the cluster.
 - Report results so they can be reproduced from the committed SHA.
 
 ## Checkouts

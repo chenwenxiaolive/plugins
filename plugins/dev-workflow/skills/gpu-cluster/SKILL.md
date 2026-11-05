@@ -15,3 +15,5 @@ facts behind them. Read the one for what the task does next, not all:
 | `/volume` paths, temporary files, `TMPDIR`, checking whether GPUs are free, a background job and its OSS credentials, freeing GPU memory | [jobs.md](jobs.md) |
 | GitLab issues, MRs, API calls or pushes; a dependency fetched from GitLab | [gitlab.md](gitlab.md) |
 | gate deployment, its saved configuration, the proxy and tunnel | [gate.md](gate.md) |
+
+CPU-only work on a node exports `CUDA_VISIBLE_DEVICES=` (empty) so it can't touch a GPU.
