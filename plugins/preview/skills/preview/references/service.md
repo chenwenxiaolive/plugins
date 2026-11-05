@@ -7,7 +7,7 @@
 | Browser base URL | `http://74.82.197.96:8000` (direct; no SSH tunnel) |
 | Local check URL | `http://127.0.0.1:8000` |
 | Server bind | `0.0.0.0:8000` |
-| Access token file | `/volume/tmp/preview-ssh-20261101-q6t3azd2/token` (mode `0600`) |
+| Access token file | `/volume/.config/preview/token` (mode `0600`) |
 | Headless browser | Playwright with headless Chromium in `sh-gate`'s system `python3` (none on this machine) |
 
 The disabled `preview-local-only.service` is retired; leave it off.
