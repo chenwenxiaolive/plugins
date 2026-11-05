@@ -13,6 +13,6 @@ has this machine's root, browser base URL and token, and how to restart the serv
 - Write a new artifact with a descriptive name, or a task subdirectory when it has assets; don't overwrite an existing file unless it is the update target. Markdown is rendered by the server, so don't make an HTML copy; HTML uses relative asset paths.
 - Tracked repository docs stay where they are; to preview one, copy it in and call it a snapshot.
 - Publish only content meant for the user: no credentials, environment dumps or unrelated private files.
-- The link is the browser base URL plus the URL-encoded path below the root (no `/preview` prefix). Check it with `curl` and the access token as service.md shows: the status, the content type and some of this page's text; Markdown must come back as HTML.
+- The link is the browser base URL plus the URL-encoded path below the root (no `/preview` prefix). Check it with `curl` and the access token as service.md shows: the status, the content type and some of this page's text; Markdown must come back as `text/html`, never as Markdown source.
 - When the layout matters (charts, wide tables, phone width, dark mode), screenshot the page with the headless browser service.md names and fix what you see before returning the link.
 - If the service is down, restart it as service.md says and check again; if it still fails, report the file's path and the failed check.
