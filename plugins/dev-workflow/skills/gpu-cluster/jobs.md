@@ -30,7 +30,7 @@ Each cluster shares its own `/volume`; the control machine has independent local
   trap 'exit 143' TERM; trap 'exit 130' INT; trap 'exit 129' HUP
   ```
 
-  Keep the job in the foreground: `cmd & wait` orphans it, and the orphan keeps holding the GPU. When selecting GPUs by `nvidia-smi` index, export `CUDA_DEVICE_ORDER=PCI_BUS_ID` with `CUDA_VISIBLE_DEVICES`; CUDA's default order can differ.
+  Keep the job in the foreground: `cmd & wait` orphans it, and the orphan keeps holding the GPU. When selecting GPUs by `nvidia-smi` index, export `CUDA_DEVICE_ORDER=PCI_BUS_ID` with `CUDA_VISIBLE_DEVICES`; CUDA's default order can differ. A CPU-only job exports `CUDA_VISIBLE_DEVICES=` (empty) so it can't touch a GPU.
   ssh passes only configured environment variables, so set what the job needs in `run.sh`.
 - Launch it from the checkout:
 
