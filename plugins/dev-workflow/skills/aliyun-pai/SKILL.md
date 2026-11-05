@@ -31,10 +31,4 @@ pai --region <region> dsw instance exec <running-instance-id> -- "df -h /cpfs01"
 - Run these with `set -o pipefail`: `pai` reports errors on stderr, and `jq` alone would hide a failed call.
 - Lists are paged: follow a job list's `pagination.next_page` while `has_more`, and fetch the next DSW `--page` while a page is full, or say the result is partial.
 - Directory entries and live capacity come only from a running DLC pod or DSW instance; the APIs list file systems and filesets, and an empty fileset list doesn't mean an empty file system. Run only read-only commands there, and never create, restart or stop a task to browse storage.
-
-## Report
-
-Keep apart job status and requested resources, file-system inventory and
-configured capacity, live capacity, and directory entries actually read. Name the
-job or instance used, region, workspace and path, and say when a result covers
-the whole account rather than one workspace.
+- `aliyun nas DescribeFileSystems` lists the whole account's file systems with their configured capacity; job and DSW lists cover one workspace.

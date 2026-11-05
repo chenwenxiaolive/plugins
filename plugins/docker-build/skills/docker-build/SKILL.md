@@ -18,7 +18,7 @@ at runtime: it holds this host's facts, measurements and incidents.
 ## Host
 
 - `docker-build` is an SSH alias for user `xqing` on an x86_64 VM without GPUs, reached through `sh-gate`. Every ssh command starts with a `cd`. Docker runs as `sudo docker` (passwordless), so registry credentials are root's `/root/.docker/config.json`; check only that the registry's entry exists (`sudo grep -Fq registry-cn-shanghai.siflow.cn /root/.docker/config.json`), never print it. An entry doesn't prove push access to the Harbor project (`skyinfer` in the examples).
-- Build with the `default` builder: the docker driver, whose BuildKit runs in the daemon and keeps images in its containerd image store under `/data/docker`. A build therefore also leaves its image in the local store, and `--push` publishes that same manifest digest. Pin bases by digest when reproducibility matters. Check the host first with `sudo docker buildx inspect default` and `df -h / /data`.
+- Build with the `default` builder: the docker driver, whose BuildKit runs in the daemon and keeps images in its containerd image store under `/data/docker`. A build therefore also leaves its image in the local store, and `--push` publishes that same manifest digest. Check the host first with `sudo docker buildx inspect default` and `df -h / /data`.
 - The host is shared, with other users' images and containers: don't format disks, migrate storage, restart daemons, change the daemon configuration or run any `docker ... prune`. Remove only your own tags, and report a missing builder or a full disk instead.
 
 ## Build

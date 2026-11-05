@@ -39,4 +39,4 @@ into a feature branch.
 - A worker's "done" is a claim: inspect its changes and its MR's review status yourself.
 - For page changes, report visual acceptance apart from functional checks: screenshot the page as the preview skill describes, or give the user its preview link and say that visual acceptance is pending.
 - When the user asks to merge, merge in dependency order under implement's [merge rules](../implement/SKILL.md#merge-only-when-the-user-asks). Your own work merges from its checkout; a delegated MR merges through a worker in its worktree (the original, or a new one given the MR link and the user's request to merge). Each merge moves the target, so recheck the next MR against it and run the checks on the integrated result. Work merged into a feature branch reaches the default branch only through that branch's own MR.
-- At the end, report the result, what was verified and what is unresolved. Stop finished task processes, and keep the worktrees and the records needed to continue.
+- At the end, stop finished task processes, and keep the worktrees and the records needed to continue.
