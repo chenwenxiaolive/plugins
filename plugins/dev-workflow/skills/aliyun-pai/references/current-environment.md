@@ -7,7 +7,7 @@ Confirm these values live before relying on them.
 | Region | `cn-hangzhou` |
 | Workspace | `ai_lab`, ID `513442` |
 | `aliyun` CLI profile | `pai-readonly` (read-only through its RAM policy and workspace role, not its name) |
-| CPFS file system | `bmcpfs-0013ooqcih8196nqamf`, CPFS for Lingjun `bm_advance_400_large` |
+| CPFS file system | `bmcpfs-0013ooqcih8196nqamf`, CPFS for Lingjun `bm_advance_400_large`; not zg's `/volume`, which is a different CPFS |
 | CPFS mount in PAI jobs | `/cpfs01` |
 
 - `aliyun` is at `/usr/local/bin/aliyun` and `pai` at `/usr/local/bin/pai`; `pai` authenticates without a profile file.
