@@ -16,7 +16,7 @@ Each skill lives in `plugins/<group>/skills/<name>/`:
 - The `dev-workflow` skills link to each other, so install them together.
 - `improve-codebase-architecture`, `leader`, `retro` and `to-tickets` run only when invoked: `disable-model-invocation` in `SKILL.md` for Claude Code, `allow_implicit_invocation: false` in `agents/openai.yaml` for Codex.
 - They expect this environment: `gpu-cluster` the global instructions, SSH aliases and cluster layout; `aliyun-pai` authenticated `pai` and `aliyun` CLIs; `docker-build` the build host and registry access; `herdr-core` `hc` on `PATH` and signed-in Claude Code and Codex. Installing them creates no infrastructure and authorizes no jobs, cloud changes or publication.
-- The workflow skills state rules and facts; the agent runs `git`, `glab`, `ssh`, `nvidia-smi`, `pai` and `aliyun` itself. The only scripts are the preview server's helper and `docker-build`'s `run-build.sh`.
+- The workflow skills state rules and facts; the agent runs `git`, `glab`, `ssh`, `nvidia-smi`, `pai` and `aliyun` itself. The only skill script is `docker-build`'s `run-build.sh`; `preview` bundles its server.
 - `preview` needs Linux, Python 3.10+ and Node.js 18+. This machine's settings are in [service.md](plugins/preview/skills/preview/references/service.md), the server's features and tests in [its README](plugins/preview/skills/preview/server/README.md).
 
 ## Install
@@ -52,7 +52,7 @@ the owner's request.
 
 ## Evals
 
-Each group's `evals/` holds three cases per skill, tagged with the skill's name, for
+Each group's `evals/` holds three or more cases per skill, tagged with the skills they test, for
 Claude Code's [`claude plugin eval`](https://code.claude.com/docs/en/plugin-evals): a
 prompt a user might type and graders for the answer, each run with and without the
 group's skills to show what the skills add. Cases for the skills only the user
@@ -65,8 +65,10 @@ scripts/run_evals.sh preview --runs 1 --judge-model sonnet
 ```
 
 The script runs a copy of the group with a plugin manifest in a new `/volume/tmp`
-run directory, which receives the results and `report.html`. Runs load no
-`CLAUDE.md`, credentials or ssh configuration and get only read-only tools, so the
-cases test what the skills tell the agent, not the live machines. Each run is a
+run directory, which receives the results and `report.html`. It also gives every
+run your global instructions (`~/.claude/CLAUDE.md`), in both arms, as real
+sessions load them, so a case measures what its skill adds on top of them. Runs get
+no credentials or ssh configuration and only read-only tools, so the cases test
+what the skills tell the agent, not the live machines. Each run is a
 full Claude Code session billed to your account; `--runs 1` keeps a pass at one
 session per case and arm (the default is three), and `--model` tests another model.

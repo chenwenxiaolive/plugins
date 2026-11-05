@@ -4,28 +4,6 @@ The preview service ships with the skill and is maintained here; there is no
 separate service checkout. It needs Linux, Python 3.10+ and Node.js 18+ on PATH,
 with no package installation, build or CDN.
 
-## Helper
-
-`scripts/preview.py start|status|stop` manages one detached server; it installs no
-system service and arranges no restart after reboot. Flags override environment
-variables:
-
-| Flag | Environment variable | Default |
-| --- | --- | --- |
-| `--directory` | `PREVIEW_ROOT` | `/preview` (must exist) |
-| `--bind` | `PREVIEW_BIND` | `127.0.0.1` |
-| `--port` | `PREVIEW_PORT` | `8000` |
-| `--base-url` | `PREVIEW_BASE_URL` | Local URL for the bind address and port |
-| `--state-dir` | `PREVIEW_STATE_DIR` | `~/.local/state/preview/<hostname>/<port>` |
-| `--token-file` | `PREVIEW_TOKEN_FILE` | none: no access control |
-
-State and logs live outside the document root and the skill. `start` reuses a
-running server only when a temporary Markdown probe shows it serves the selected
-root, and never adopts another server's PID. `stop` checks the recorded host,
-boot, PID and command before signaling through a pidfd, so it never stops a server
-it didn't start; keep the same state directory across skill upgrades. Output is
-JSON on success and an English message on stderr on failure.
-
 ## Features
 
 - With a token file, every request needs HTTP Basic credentials whose password is the token (any username); the browser asks once. The file holds only the token, must be mode `0600` and outside the document root; commands pass its path, never the token. Plain HTTP sends the credentials unencrypted.

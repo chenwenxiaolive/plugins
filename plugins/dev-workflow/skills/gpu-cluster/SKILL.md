@@ -15,9 +15,3 @@ facts behind them. Read the one for what the task does next, not all:
 | `/volume` paths, temporary files, `TMPDIR`, checking whether GPUs are free, a background job, freeing GPU memory | [jobs.md](jobs.md) |
 | GitLab issues, MRs, API calls or pushes; a dependency fetched from GitLab; OSS credentials for jobs | [gitlab.md](gitlab.md) |
 | gate deployment, its saved configuration, the proxy and tunnel | [gate.md](gate.md) |
-
-The issue/MR process (worktree reuse, branch names, execution records, review and
-merging) is in the [implement](../implement/SKILL.md) skill.
-
-A procedure is done when its own checks pass: a synced checkout at the exact SHA and
-clean, a job's `exit.status` read, a cleanup confirmed on the GPUs it targeted.

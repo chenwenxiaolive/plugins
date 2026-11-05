@@ -2,24 +2,15 @@
 
 ## /volume directories
 
-Each cluster shares its own `/volume`; the control machine has independent local storage at the same paths.
-
-| Path | Purpose | May modify? |
-|---|---|---|
-| `/volume/workspace/<project>/...` | Project checkouts | Only the selected checkout |
-| `/volume/worktree/<repo>/<name>` | Reusable worktrees such as `dev-1` and their remote counterparts | Only the selected checkout ([implement](../implement/SKILL.md#start-or-resume)) |
-| `/volume/tmp/<topic>-<YYYYMMDD>-<suffix>/` | All your temporary files | Only directories you created |
-| `/volume/model` | Model checkpoints | Read-only |
-| `/volume/.cache` on sh and th | `HF_HOME`, the shared HF cache | Only through HF downloads |
-| `/volume/cluster-ops` | Deployed ops scripts (`free-gpus.sh`, `keepalive.py`, ...); the Git checkout is on the control machine | Read-only outside an authorized ops task |
-| `/volume/.bashrc`, `.config`, `.ssh` and other hidden files | Shared configuration and credentials | Only on an explicit ops request |
+- `/volume/.cache` on sh and th is `HF_HOME`, the shared Hugging Face cache: write to it only through HF downloads.
+- `/volume/cluster-ops` holds the deployed ops scripts (`free-gpus.sh`, `keepalive.py`, ...); their Git checkout is on the control machine.
 
 ## Temporary files
 
 - Each run gets a new directory: `mktemp -d /volume/tmp/<topic>-$(date +%Y%m%d)-XXXXXX` on the node (CST date); a retry gets another. It holds the run's scripts, logs, PIDs, exit statuses and evidence, never repository copies.
 - A node's `/tmp` is not shared and fills the pod's overlay disk; it is only the programs' `TMPDIR` (library temp files, Unix sockets), which `/volume/.bashrc` sets to `/tmp`. Keep it there: CPFS cannot host Unix sockets. A job that needs its own `TMPDIR` gets a short `mktemp -d /tmp/<topic>-XXXXXX`, set before the process starts and removed afterwards; long paths break socket names.
 - A file the node needs must reach its `/volume` by `scp` or ssh stdin; a matching local path is a different disk.
-- Each run's record names the checkout path, node, full SHA, branch, working-tree state, launch command and configuration.
+- Keep each run's record complete enough to rerun it from its commit.
 
 ## Background jobs
 
@@ -46,7 +37,7 @@ Each cluster shares its own `/volume`; the control machine has independent local
 ## GPUs
 
 - Before launching, confirm the GPUs are free with enough memory: `nvidia-smi --query-gpu=index,uuid,memory.free --format=csv` and `nvidia-smi --query-compute-apps=gpu_uuid,pid,used_memory --format=csv`, then each PID's `/proc/<pid>/cmdline`.
-  - `keepalive.py --occupy <GPU UUID>` workers (cwd `/`) hold idle GPUs at 100% utilization and leave by themselves when a job starts (machines.md). They and their memory count as free; never stop them. Time only after warm-up: their teardown overlaps a job's first 0.1–0.2 s.
+  - The nodes run cluster-ops `keepalive.py` so pods aren't reclaimed as idle: while no other process holds a GPU, each GPU carries a `keepalive.py --occupy <GPU UUID>` worker (cwd `/`) at 100% utilization. The workers leave within about 0.25 s of a CUDA context opening, so time a job only after warm-up, and return after 10 idle minutes. They and their memory count as free; never stop them.
 - Over ssh, `pgrep -f <pattern>` also matches the `bash -c` running it; check each PID's command before stopping it.
 - To free GPU memory, use `/volume/cluster-ops/free-gpus.sh`. It ssh-es to the nodes itself, so run it here; on a node it silently does nothing and returns 0. Dry-run first:
 

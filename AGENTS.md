@@ -19,7 +19,6 @@
 - Run `python3 scripts/validate.py` (or pass changed group names) for link and
   frontmatter checks; see README.md for its scope. For skill changes, exercise
   the affected workflow and report what was actually checked.
-- Use a development branch and pull request. Merge only when the owner asks.
 
 ## Writing skills
 

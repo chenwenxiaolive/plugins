@@ -6,9 +6,8 @@ description: "Implements an assigned issue or agreed development task in the sel
 # Implement
 
 Own the assigned task through its MR and review outcome, in the checkout the user
-selected. Read its project instructions. Use [gpu-cluster](../gpu-cluster/SKILL.md)
-for remote checkouts, validation and GitLab access. On GitHub, `gh` does the same
-steps: a pull request is the MR. The project's own rules come first.
+selected. Read its project instructions. On GitHub, `gh` does the same steps: a pull
+request is the MR. The project's own rules come first.
 
 ## Start or resume
 
@@ -34,14 +33,13 @@ An implemented issue carries one editable comment that says who works on it:
 | Updated | <UTC timestamp> |
 ```
 
-- Read it before starting an issue and before calling an issue free or proposing it as next work. Another active worktree owns the issue until it is released or the user reassigns it.
+- Another active worktree owns the issue until it is released or the user reassigns it.
 - Create or edit it with `glab api` (or `gh`) when you claim the task, open the MR, get blocked, reach `ready-for-merge` or `merged`, or release the worktree. Keep one record per issue and never overwrite another coder's.
 
 ## Implement and validate
 
 - For features and fixes: update docs → write a minimal failing test → implement → check that tests, code and docs agree. When tests run remotely, validate the failing test there before the fix.
 - Expected results come from a specification, known example or independent reference.
-- gpu-cluster's [validation scope](../gpu-cluster/remote-workflow.md#validation-scope) says where each check runs.
 
 ## Deliver and review
 
@@ -57,8 +55,7 @@ Then review it yourself:
 4. Record each round's commit, checks and outcome in a review-status section of the MR description, so that the count survives interruptions. A later merge recheck uses the remaining rounds and never resets them.
 
 A standalone review the user requests uses a detached checkout at the MR's source
-commit, the same command, and a verdict in chat (approve, changes needed, needs
-discussion); post it to the MR only when asked.
+commit, the same command, and a verdict in chat; post it to the MR only when asked.
 
 ## Merge, only when the user asks
 

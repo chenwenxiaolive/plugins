@@ -9,6 +9,8 @@
 # a temporary plugin with one, in a new /volume/tmp run directory, and writes the
 # results and report.html to <run directory>/results. --scaffold runs the cases'
 # setup.sh scripts, which create sample files in each run's empty workspace.
+# Every case also gets ~/.claude/CLAUDE.md as appended system prompt, in both
+# arms, as real sessions load it, so a case measures what its skill adds on top.
 set -euo pipefail
 
 group=${1:-}
@@ -24,5 +26,15 @@ run=$(mktemp -d "/volume/tmp/skill-evals-$group-$(date +%Y%m%d)-XXXXXX")
 mkdir -p "$run/plugin/.claude-plugin"
 printf '{"name": "%s"}\n' "$group" > "$run/plugin/.claude-plugin/plugin.json"
 cp -R "$src/skills" "$src/evals" "$run/plugin/"
+python3 - "$run/plugin/evals" "$HOME/.claude/CLAUDE.md" <<'PY'
+import pathlib, sys
+lines = pathlib.Path(sys.argv[2]).read_text().splitlines()
+block = "append_system_prompt: |\n" + "".join(f"  {line}\n" if line.strip() else "\n" for line in lines)
+for prompt in pathlib.Path(sys.argv[1]).glob("*/prompt.md"):
+    text = prompt.read_text()
+    if not text.startswith("---\n"):
+        sys.exit(f"{prompt}: no frontmatter")
+    prompt.write_text("---\n" + block + text[4:])
+PY
 printf 'run directory: %s\n' "$run"
 claude plugin eval "$run/plugin" --trust-plugin --scaffold --no-publish --output-dir "$run/results" "$@"
