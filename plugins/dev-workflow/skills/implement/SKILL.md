@@ -1,6 +1,6 @@
 ---
 name: implement
-description: "Implements an assigned issue or agreed development task in the selected checkout, through validation, an MR or PR, its review and a requested merge. Use it for any question about this user's issues, MRs or PRs: starting, resuming or claiming an issue, checking whether one is free or proposing it as next work, reusing a worktree, reviewing an MR or acting on its codex review findings, and merging, including after a failed or timed-out merge."
+description: "Implements an assigned issue or agreed development task in the selected checkout, through validation, an MR or PR, its review and a requested merge, under this user's rules for branches, execution records, which review findings to fix or reject, and merge guards. Use it for any question about this user's issues, MRs or PRs: starting, resuming or claiming an issue, checking whether one is free or proposing it as next work, reusing a worktree, reviewing an MR or acting on its codex review findings, and merging, including after a failed or timed-out merge."
 ---
 
 # Implement
@@ -50,7 +50,7 @@ MR completes the issue.
 Then review it yourself:
 
 1. Round 0: in the clean checkout at the MR source commit, run `codex review --base <target-sha> < /dev/null > <run_dir>/review-0.md 2> <run_dir>/review-0.log` (minutes; run it in the background). Separately check the change against the issue's requirements, which `codex review` does not see.
-2. A pass means the requirements are met with evidence, no actionable finding is left and the checks pass on the current commit. Weigh each finding against KISS: fix real defects in scope with the smallest change; reject style preferences and findings about rare or hypothetical cases nobody asked for, with a one-line reason in the MR.
+2. A pass means the requirements are met with evidence, no actionable finding is left and the checks pass on the current commit. Weigh each finding against KISS: fix real defects in scope with the smallest change; reject style preferences, such as naming, and findings about rare or hypothetical cases nobody asked for, with a one-line reason in the MR.
 3. Otherwise fix, push, rerun affected checks and review again: at most three corrective rounds. If round 3 still fails, stop, set `needs-human` and report what remains. After that, follow the user's feedback; further automatic rounds need their explicit allowance.
 4. Record each round's commit, checks and outcome in a review-status section of the MR description, so that the count survives interruptions. A later merge recheck uses the remaining rounds and never resets them.
 
