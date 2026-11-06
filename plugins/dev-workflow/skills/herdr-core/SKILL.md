@@ -48,6 +48,7 @@ hc run --bg --name <name> --cwd <dir> --label "herdr.space=$SPACE" \
   -c 'model_reasoning_effort="xhigh"' "<task> $REPORT"
 ```
 
+- hc's `cwd` can be stale; list the directories agents really run in with `for p in $(pgrep -x claude; pgrep -x codex); do readlink /proc/$p/cwd; done`.
 - `--no-daemon` keeps Codex's commands inside hc. Don't pass Codex `--worktree`: it ignores `-c` for its root and leaves `<root>/<hex>/<repo>` checkouts behind. Prepare the checkout under the project's worktree rules and pass it as `--cwd`.
 - Outside an hc terminal `$HC_TERMINAL_ID` is empty: drop `$REPORT` and collect results with wait and read.
 - The `herdr.space=<id>` label puts the worker's live terminal in that Herdr space (a new id creates a space named after the folder; to group workers, reuse the space id, optionally adding `herdr.tab=<id>`). Unlabeled workers appear only under their parent. Closing a placed terminal's space or pane in the app ends it.
