@@ -10,7 +10,8 @@
 # results and report.html to <run directory>/results. --scaffold runs the cases'
 # setup.sh scripts, which create sample files in each run's empty workspace.
 # Every case also gets ~/.claude/CLAUDE.md as appended system prompt, in both
-# arms, as real sessions load it, so a case measures what its skill adds on top.
+# arms, as real sessions load it, so a case measures what its skill adds on top;
+# EVAL_INSTRUCTIONS=<file> uses another file, to test a change to them first.
 set -euo pipefail
 
 group=${1:-}
@@ -26,7 +27,7 @@ run=$(mktemp -d "/volume/tmp/skill-evals-$group-$(date +%Y%m%d)-XXXXXX")
 mkdir -p "$run/plugin/.claude-plugin"
 printf '{"name": "%s"}\n' "$group" > "$run/plugin/.claude-plugin/plugin.json"
 cp -R "$src/skills" "$src/evals" "$run/plugin/"
-python3 - "$run/plugin/evals" "$HOME/.claude/CLAUDE.md" <<'PY'
+python3 - "$run/plugin/evals" "${EVAL_INSTRUCTIONS:-$HOME/.claude/CLAUDE.md}" <<'PY'
 import pathlib, sys
 lines = pathlib.Path(sys.argv[2]).read_text().splitlines()
 block = "append_system_prompt: |\n" + "".join(f"  {line}\n" if line.strip() else "\n" for line in lines)
