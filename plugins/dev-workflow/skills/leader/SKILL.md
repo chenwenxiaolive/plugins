@@ -25,7 +25,7 @@ A worker reads its task, not this skill, so the launch carries everything
 ```text
 Goal: <objective and the context it needs>. Done when: <completion criteria>.
 Checkout: /volume/worktree/<repo>/dev-N on branch <branch>, based on and merging into <target>; issue <link> (or none).
-Use the implement skill and stop at ready-for-merge.
+Use the implement skill and stop at ready-for-merge, with the MR's risk score recorded.
 The user requested remote testing for this worktree on <cluster>, and named <node> for GPU work: use only <GPUs, or the whole node>. (Or: no GPU work; CPU-only checks run on a reachable <cluster> node with CUDA_VISIBLE_DEVICES= empty.)
 Start no other agents; the `codex review` that implement runs is part of the task.
 Write no memory notes; put lasting findings in your final report or the issue's execution record.
@@ -40,4 +40,4 @@ write into yours; record what is worth keeping yourself.
 - Send feedback to the same worker so it keeps its context; handle its questions and blocked states with [herdr-core's follow-up guidance](../herdr-core/SKILL.md#wait-read-follow-up).
 - A worker that needs the target's changes merges the target into its branch; rebasing a pushed branch would need a force-push.
 - For page changes, report visual acceptance apart from functional checks: screenshot the page as the preview skill describes, or give the user its preview link and say that visual acceptance is pending.
-- When the user asks to merge, merge in dependency order under implement's [merge rules](../implement/SKILL.md#merge-only-when-the-user-asks). Merge an MR yourself while its target hasn't moved since its review, so a worker can be closed once its MR is ready-for-merge and accepted. Each merge moves the target: recheck the next MR against it, and merge that MR through a worker in its worktree (the original, or a new one given the MR link and the user's request to merge) that runs the checks on the integrated result. Work merged into a feature branch reaches the default branch only through that branch's own MR.
+- Merge in dependency order under implement's [merge rules](../implement/SKILL.md#merge): on your own at a low risk score, otherwise when the user asks. Merge an MR yourself while its target hasn't moved since its review, so a worker can be closed once its MR is ready-for-merge and accepted. Each merge moves the target: recheck the next MR against it, and merge that MR through a worker in its worktree (the original, or a new one given the MR link) that runs the checks on the integrated result. Work merged into a feature branch reaches the default branch only through that branch's own MR.
