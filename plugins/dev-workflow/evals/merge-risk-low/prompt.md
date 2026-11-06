@@ -4,4 +4,4 @@ max_turns: 15
 allowed_tools: [Read, Glob, Grep, Skill]
 ---
 
-MR !60 in /volume/workspace/launcher fixes the wrong exit code for a missing config file: 18 changed lines in launcher/cli.py plus a new test for it. Codex review round 0 passed, the checks pass on the final commit, and main hasn't moved since the review. What happens now?
+MR !60 in /volume/workspace/launcher fixes an off-by-one error in the internal retry loop of launcher/retry.py: 18 changed lines plus a new test for it. Codex review round 0 passed, the checks pass on the final commit, and main hasn't moved since the review. What happens now?
