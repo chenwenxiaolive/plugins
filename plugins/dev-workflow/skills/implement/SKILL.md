@@ -68,9 +68,9 @@ beside the review status. Start at 1 and add, up to 10:
 - 1 for a behavior change users will notice;
 - 4 when it touches CI, build, deployment, dependencies, credentials, data migrations or stored formats, public interfaces (APIs, CLI flags, config formats), or skills and agent instructions.
 
-At 3 or below, merge it yourself and report the merge, unless the project's
-instructions opt out of automatic merges. Above 3, set the execution record to
-`needs-human` with the score, tell the user, and merge only when they ask.
+At 3 or below, merge it yourself without asking and report the merge, unless the
+project's instructions opt out of automatic merges. Above 3, set the execution
+record to `needs-human` with the score, tell the user, and merge only when they ask.
 
 Every merge:
 
