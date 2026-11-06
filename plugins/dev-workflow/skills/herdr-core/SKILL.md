@@ -25,11 +25,13 @@ codex login status 2>&1 | grep -q 'Logged in' && echo signed-in || echo signed-o
 
 ## Start a worker
 
-Give each worker its own `--name`, an explicit `--cwd`, an exact scope and the
-whole task in the launch (a message to a booting agent can be lost). Set the model
-and effort explicitly; if unavailable, tell the user instead of substituting. Both
-run with full access and no approval prompts, so the task sets what they may
-change and whether they may start other agents.
+Give each worker its own `--name`, an exact scope and the whole task in the launch
+(a message to a booting agent can be lost), and a `--cwd` where no other Claude
+Code or Codex instance runs: instances in one directory share its working tree,
+Git index and HEAD, uncommitted files, and per-directory session state and
+settings. Set the model and effort explicitly; if unavailable, tell the user
+instead of substituting. Both run with full access and no approval prompts, so the
+task sets what they may change and whether they may start other agents.
 
 ```sh
 SPACE="sp$(python3 -c 'import uuid; print(uuid.uuid4().hex)')"
