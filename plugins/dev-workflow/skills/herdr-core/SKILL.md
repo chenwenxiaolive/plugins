@@ -29,9 +29,7 @@ Give each worker its own `--name`, an exact scope and the whole task in the laun
 (a message to a booting agent can be lost), and a `--cwd` where no other Claude
 Code or Codex instance runs: instances in one directory share its working tree,
 Git index and HEAD, uncommitted files, and per-directory session state and
-settings. Work that has to happen in a directory where an agent already runs, such
-as your own checkout, goes to a subagent of that agent (the Agent tool), not to a
-new worker. Set the model and effort explicitly; if unavailable, tell the user
+settings. Set the model and effort explicitly; if unavailable, tell the user
 instead of substituting. Both run with full access and no approval prompts, so the
 task sets what they may change and whether they may start other agents.
 
