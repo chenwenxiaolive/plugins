@@ -25,11 +25,13 @@ codex login status 2>&1 | grep -q 'Logged in' && echo signed-in || echo signed-o
 
 ## Start a worker
 
-Give each worker its own `--name`, an explicit `--cwd`, an exact scope and the
-whole task in the launch (a message to a booting agent can be lost). Set the model
-and effort explicitly; if unavailable, tell the user instead of substituting. Both
-run with full access and no approval prompts, so the task sets what they may
-change and whether they may start other agents.
+Give each worker its own `--name`, an exact scope and the whole task in the launch
+(a message to a booting agent can be lost), and a `--cwd` where no other Claude
+Code or Codex instance runs: instances in one directory share its working tree,
+Git index and HEAD, uncommitted files, and per-directory session state and
+settings. Set the model and effort explicitly; if unavailable, tell the user
+instead of substituting. Both run with full access and no approval prompts, so the
+task sets what they may change and whether they may start other agents.
 
 ```sh
 SPACE="sp$(python3 -c 'import uuid; print(uuid.uuid4().hex)')"
@@ -46,6 +48,7 @@ hc run --bg --name <name> --cwd <dir> --label "herdr.space=$SPACE" \
   -c 'model_reasoning_effort="xhigh"' "<task> $REPORT"
 ```
 
+- hc's `cwd` can be stale; list the directories agents really run in with `for p in $(pgrep -x claude; pgrep -x codex); do readlink /proc/$p/cwd; done`.
 - `--no-daemon` keeps Codex's commands inside hc. Don't pass Codex `--worktree`: it ignores `-c` for its root and leaves `<root>/<hex>/<repo>` checkouts behind. Prepare the checkout under the project's worktree rules and pass it as `--cwd`.
 - Outside an hc terminal `$HC_TERMINAL_ID` is empty: drop `$REPORT` and collect results with wait and read.
 - The `herdr.space=<id>` label puts the worker's live terminal in that Herdr space (a new id creates a space named after the folder; to group workers, reuse the space id, optionally adding `herdr.tab=<id>`). Unlabeled workers appear only under their parent. Closing a placed terminal's space or pane in the app ends it.

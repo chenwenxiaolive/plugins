@@ -13,7 +13,8 @@
 
 ## Development and Git synchronization
 
-- Update a remote checkout with `git fetch` and `git merge --ff-only <sha>`, or `git switch --detach <sha>` for a detached review checkout. First make sure it is clean, on the expected branch, holds no unpushed commit (after `git fetch --prune origin`, `git branch -r --contains HEAD --list 'origin/*'` must list a branch for a detached HEAD), and is idle: no process on any machine sharing that `/volume` has its working directory in it (`/proc/*/cwd`; also check run records for jobs started from elsewhere).
+- Update a remote checkout by fetching its branch and `git merge --ff-only <sha>`, or `git switch --detach <sha>` for a detached review checkout. First make sure it is clean, on the expected branch, holds no unpushed commit (after `git fetch --prune origin`, `git branch -r --contains HEAD --list 'origin/*'` must list a branch for a detached HEAD), and is idle: no process on any machine sharing that `/volume` has its working directory in it (`/proc/*/cwd`; also check run records for jobs started from elsewhere).
+- Worktrees share their clone's fetch configuration, which may track only the branch another session set: fetch with an explicit refspec (`git fetch origin <branch>:refs/remotes/origin/<branch>`), and never change a shared clone's fetch configuration.
 - Before validating, the remote checkout must be clean, at the committed SHA, and match its lock: for a uv project, `uv sync --locked --dry-run` shows no dependency changes. Sync the environment only while no job uses it.
 
 ## Operating remotely
