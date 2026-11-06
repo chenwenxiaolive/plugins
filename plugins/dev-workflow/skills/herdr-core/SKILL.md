@@ -29,21 +29,24 @@ Give each worker its own `--name`, an exact scope and the whole task in the laun
 (a message to a booting agent can be lost), and a `--cwd` where no other Claude
 Code or Codex instance runs: instances in one directory share its working tree,
 Git index and HEAD, uncommitted files, and per-directory session state and
-settings. Set the model and effort explicitly; if unavailable, tell the user
+settings. Work that has to happen in a directory where an agent already runs, such
+as your own checkout, goes to a subagent of that agent (the Agent tool), not to a
+new worker. Set the model and effort explicitly; if unavailable, tell the user
 instead of substituting. Both run with full access and no approval prompts, so the
 task sets what they may change and whether they may start other agents.
 
 ```sh
-SPACE="sp$(python3 -c 'import uuid; print(uuid.uuid4().hex)')"
 REPORT="When done, run exactly once: hc send $HC_TERMINAL_ID '<name> done: <one-line summary>'"
 
 # Claude Code (IS_SANDBOX=1 lets root use --dangerously-skip-permissions)
-hc run --bg --name <name> --cwd <dir> --label "herdr.space=$SPACE" \
+hc run --bg --name <name> --cwd <dir> \
+  --label "herdr.space=sp$(python3 -c 'import uuid; print(uuid.uuid4().hex)')" \
   env IS_SANDBOX=1 PATH="$PATH" claude --dangerously-skip-permissions \
   --model claude-opus-5-5 --effort xhigh "<task> $REPORT"
 
 # Codex
-hc run --bg --name <name> --cwd <dir> --label "herdr.space=$SPACE" \
+hc run --bg --name <name> --cwd <dir> \
+  --label "herdr.space=sp$(python3 -c 'import uuid; print(uuid.uuid4().hex)')" \
   env PATH="$PATH" codex --no-daemon --yolo -m gpt-6-astra \
   -c 'model_reasoning_effort="xhigh"' "<task> $REPORT"
 ```
@@ -51,7 +54,7 @@ hc run --bg --name <name> --cwd <dir> --label "herdr.space=$SPACE" \
 - hc's `cwd` can be stale; list the directories agents really run in with `for p in $(pgrep -x claude; pgrep -x codex); do readlink /proc/$p/cwd; done`.
 - `--no-daemon` keeps Codex's commands inside hc. Don't pass Codex `--worktree`: it ignores `-c` for its root and leaves `<root>/<hex>/<repo>` checkouts behind. Prepare the checkout under the project's worktree rules and pass it as `--cwd`.
 - Outside an hc terminal `$HC_TERMINAL_ID` is empty: drop `$REPORT` and collect results with wait and read.
-- The `herdr.space=<id>` label puts the worker's live terminal in that Herdr space (a new id creates a space named after the folder; to group workers, reuse the space id, optionally adding `herdr.tab=<id>`). Unlabeled workers appear only under their parent. Closing a placed terminal's space or pane in the app ends it.
+- The `herdr.space=<id>` label puts the worker's live terminal in that Herdr space. Each worker gets a new id, as above, so it opens in a space of its own; workers that share an id open as panes of one space, so reuse an id (optionally adding `herdr.tab=<id>`) only when the user asks to group workers. Unlabeled workers appear only under their parent. Closing a placed terminal's space or pane in the app ends it.
 - A new folder triggers a trust prompt that blocks the task. `hc read <name>` shows Claude Code's "Is this a project you trust?"; for a folder the user owns or approved, `hc keys <name> down enter` answers yes. Otherwise, or if it stays stuck, tell the user.
 
 ## Wait, read, follow up
