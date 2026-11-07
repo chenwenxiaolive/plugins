@@ -1,5 +1,5 @@
 ---
-tags: [herdr-core]
+tags: [herdr-core, native-subagent-routing]
 max_turns: 15
 allowed_tools: [Read, Glob, Grep, Skill]
 ---

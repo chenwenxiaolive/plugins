@@ -1,8 +1,13 @@
 # Native worker communication
 
-Use the client's native agent/session address for task messages. Record its
-mapping to the Herdr terminal and checkout; a terminal ID, PID or display name
-alone is not a verified native identity. The launch task includes the leader's
+Native subagents use their harness's spawn, message and wait tools and return
+results to their parent through that harness. They need no Herdr terminal or
+mapping between native and terminal identities.
+
+For independent workers launched through Herdr, use the client's native
+agent/session address for task messages. Record its mapping to the Herdr
+terminal and checkout; a terminal ID, PID or display name alone is not a
+verified native identity. The launch task includes the leader's
 reply address. A ready reply identifies the worker and confirms the return route.
 Messages carry the assignment, questions, blockers and final evidence within the
 authorized scope. They never grant additional user authorization.
@@ -25,8 +30,8 @@ write inbox files or replace native messaging with shell socket code.
 
 ## Codex
 
-Native subagents use the available spawn, message and wait tools. For independent
-Codex sessions launched through Herdr on this host, send in either direction with:
+For independent Codex sessions launched through Herdr on this host, send in
+either direction with:
 
 ```sh
 codex queue --thread <native-session-uuid> --message '<task message or worker report>'
