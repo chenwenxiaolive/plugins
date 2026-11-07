@@ -16,7 +16,7 @@ Validation: <checks on committed code and their expected results>.
 Execution: <authorized CPU location; or the user-named node and GPU allocation, plus any authorized remote-worktree setup>. No GPU work unless allocated here.
 Use the implement skill and stop at ready-for-merge, with the MR's risk score recorded. Follow repository instructions and read the issue's execution record.
 Start with the listed reads, then read complete relevant definitions and callers and expand when correctness requires it. Ask the leader for a specific missing fact or scope change when dependencies extend beyond the assignment.
-If a refusal or model fallback is reported, stop further task work, preserve changes and report the blocked operation, needed context, current branch/commit and unfinished work. Include the reported category and request ID when available; do not infer a cause or retry under a different model.
+If a safeguard or automatic model fallback is reported, preserve changes and tell the leader the reported category/request ID and actual model when available. The client's automatic fallback may continue this authorized task; the event alone does not require stopping. Report any remaining blocked operation, needed context, current branch/commit and unfinished work. Respect the refusal, do not infer its cause or repeatedly rephrase the blocked request, and do not describe fallback work as Opus 5.5 work.
 Start no other agents; the codex review that implement runs is part of the task.
 Write no memory notes; put lasting findings in your final report or the issue's execution record.
 Report: changed behavior, commit/MR, checks and evidence, remaining blockers and any observed model switch.
@@ -33,3 +33,8 @@ The leader can summarize verified facts with their file/symbol sources. Avoid
 attaching a whole architecture document, historical benchmark archive or prior
 refusal conversation just because it is available. If broad investigation is
 still needed, the leader does it before assigning the bounded implementation.
+
+Keep full validation logs as artifacts. Read concise status, source revision and
+check summaries first, then inspect failures and other details needed to verify
+the result. Preserve the real test and model names and any evidence needed for
+acceptance; summarizing output is not permission to skip required checks.
