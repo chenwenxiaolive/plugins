@@ -17,8 +17,12 @@ user to sign in only if that client's authentication is missing.
 
 ## Start a worker
 
-Give each worker its own `--name`, an exact scope and the whole task in the launch
-(a message to a booting agent can be lost), and a `--cwd` where no other Claude
+These launch and exclusive-directory rules apply to external Herdr workers.
+Native subagents share their leader's checkout under
+[leader's shared-checkout rules](../../leader/SKILL.md#shared-checkout).
+
+Give each Herdr worker its own `--name`, an exact scope and the whole task in the
+launch (a message to a booting agent can be lost), and a `--cwd` where no other Claude
 Code or Codex instance runs: instances in one directory share its working tree,
 Git index and HEAD, uncommitted files, and per-directory session state and
 settings. Set the model and effort explicitly; if unavailable, tell the user
@@ -26,10 +30,11 @@ instead of substituting. Both run with full access and no approval prompts, so t
 task sets what they may change and whether they may start other agents.
 
 For a leader/worker team, the owner's default is GPT-6-Astra as leader and
-Claude Opus 5.5 as implementation workers, both at `xhigh`; an explicit user
-choice overrides it. Use [leader's brief](../../leader/worker-brief.md) for an
-implementation assignment. The Codex command below is for a specifically
-assigned Codex role, not an automatic replacement for an Opus worker.
+Claude Opus 5.5 as Herdr implementation workers, both at `xhigh`; an explicit user
+choice overrides it. Native subagents inherit the leader's model and reasoning
+effort by default. Use [leader's brief](../../leader/worker-brief.md) for a Herdr
+implementation assignment. The Codex command below is for a specifically assigned
+Codex role, not an automatic replacement for an Opus worker.
 
 ```sh
 REPORT="When done, run exactly once: hc send $HC_TERMINAL_ID '<name> done: <one-line summary>'"

@@ -1,5 +1,5 @@
 interface:
   display_name: "Leader"
-  short_description: "Lead with Astra, scope Opus 5.5 workers and integrate"
+  short_description: "Coordinate native subagents and independent Herdr workers"
 policy:
   allow_implicit_invocation: false
