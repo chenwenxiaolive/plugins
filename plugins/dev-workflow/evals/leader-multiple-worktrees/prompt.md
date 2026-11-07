@@ -12,6 +12,7 @@ return commits for my existing delivery targeting main, without separate MRs.
 Can I spawn two native subagents from this session and assign one to each
 worktree, perhaps using native worktree isolation? If that does not fit our
 rules, give the appropriate arrangement, including where any subagents belong,
-who owns Git in each checkout and how results reach the leader. Keep the current
+who owns Git in each checkout and when a worker with active local subagents may
+commit or integrate. Explain how results reach the leader. Keep the current
 harness/model/effort and prefer native messaging. Explain the plan only; do not
 launch agents, run shell commands or edit files. Reading skill references is fine.
