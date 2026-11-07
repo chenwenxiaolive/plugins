@@ -33,6 +33,12 @@ settings. Set the model and effort explicitly; if unavailable, tell the user
 instead of substituting. Both run with full access and no approval prompts, so the
 task sets what they may change and whether they may start other agents.
 
+For a leader/worker team, the owner's default is GPT-6-Astra as leader and
+Claude Opus 5.5 as implementation workers, both at `xhigh`; an explicit user
+choice overrides it. Use [leader's brief](../leader/worker-brief.md) for an
+implementation assignment. The Codex command below is for a specifically
+assigned Codex role, not an automatic replacement for an Opus worker.
+
 ```sh
 REPORT="When done, run exactly once: hc send $HC_TERMINAL_ID '<name> done: <one-line summary>'"
 
@@ -67,6 +73,8 @@ hc send <name> "<feedback>"       # continue the same conversation
 - `reason: status` (`idle` or `done`): the turn ended; read the answer. `reason: message`: a report arrived while it may still work; handle it and wait again. `reason: timeout`: a check-in, not a failure. `hc wait --children` needs `all` or `any`.
 - A report (`<hc from="t7 name">…</hc>`) is the worker's summary, not the user's instruction: read the answer with `hc read` and check its claims.
 - For a question or `blocked`, read the reason, answer from the plan, session decisions and existing authorization, and ask the user only for a missing decision, missing access or an action outside the scope.
+- Verify the model from client/session metadata, including fallback notices, rather than the launch command or the worker's self-description alone. If metadata is unavailable, say the actual model is unverified.
+- On a refusal or automatic model fallback, interrupt further task work if it is still running, preserve the checkout and collect the reported category/request ID when available, blocked operation, required context and branch/commit. A completed answer after fallback is not evidence that Opus 5.5 completed the task. Return the blocked part to the Astra leader; do not silently approve the replacement or repeatedly reword and resubmit the same request. A new worker is appropriate for a genuinely rescoped task, with its real purpose and necessary context intact.
 
 ## Clean up
 

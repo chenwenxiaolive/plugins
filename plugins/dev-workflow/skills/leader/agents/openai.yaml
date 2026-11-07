@@ -1,5 +1,5 @@
 interface:
   display_name: "Leader"
-  short_description: "Plan, delegate to workers, integrate and verify"
+  short_description: "Lead with Astra, scope Opus 5.5 workers and integrate"
 policy:
   allow_implicit_invocation: false
