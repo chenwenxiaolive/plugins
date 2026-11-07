@@ -1,3 +1,3 @@
 interface:
   display_name: "Herdr Core (hc)"
-  short_description: "Run Claude Code and Codex workers with hc and show them in Herdr"
+  short_description: "Run visible workers with hc and native session messaging"
