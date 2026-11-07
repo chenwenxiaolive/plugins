@@ -10,7 +10,7 @@ Write issues a fresh coder can implement without the planning conversation, in t
 selected checkout's GitLab project ([gitlab.md](../gpu-cluster/gitlab.md)).
 Running this skill authorizes publishing them, unless the user asked for drafts.
 
-- Make each issue one independently verifiable result for one branch and MR. Split by behavior or a concrete technical result, not by layer: each MR updates its own docs and tests ([implement](../implement/SKILL.md#implement-and-validate)), so they are not issues of their own.
+- Make each issue one independently verifiable result for one branch and MR. Split by behavior or a concrete technical result, not by layer: include any needed docs and test changes in the issue they support ([implement](../implement/SKILL.md#implement-and-validate)).
 - Ask only about missing decisions that change scope, acceptance or dependencies.
 - Check for equivalent issues first. Link dependent issues to their prerequisites with native blocking links when available. Use existing labels only.
 - After an interrupted or timed-out publish, check what was created before retrying.
