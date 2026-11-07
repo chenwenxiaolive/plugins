@@ -13,7 +13,7 @@ Window commands are in `herdr-app --skill` on the machine running the Herdr app.
 
 ## Start a worker
 
-Before launching a Claude Code or Codex worker, read
+Before launching a Claude Code or Codex worker through Herdr, read
 [workers.md](references/workers.md) for the selected client's checks, exact
 interactive launch, model choices, working directory and Herdr space rules.
 An existing worker's status or output uses the commands below.
