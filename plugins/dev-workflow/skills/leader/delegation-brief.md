@@ -1,6 +1,6 @@
-# Worker brief
+# Delegation brief
 
-Use the common brief and one delivery section for each implementation worker.
+Use the common brief and the matching delivery section for each assignment.
 Fill it with facts checked by the leader, marking anything still unknown. Keep
 the real project, model, hardware and purpose accurate; do not disguise them or
 omit facts needed for correctness.
@@ -8,11 +8,11 @@ omit facts needed for correctness.
 ## Common brief
 
 ```text
-Role: implementation worker, <native subagent or Herdr worker>, <selected model and reasoning effort>. The leader owns coordination and integration.
+Role: <native subagent or Herdr worker>, <selected model and reasoning effort>. The leader owns coordination and integration.
 Goal: <one observable change and why it is needed>.
 Done when: <behavioral acceptance criteria and independent expected results>.
 Checkout: <actual checkout path> on branch <branch>, based on and merging into <target>; issue <link> (or none).
-Owned files: <existing files and exact new paths; no overlap with other workers>.
+Owned files: <existing files and exact new paths; no overlap with other agents>.
 First reads: <file plus symbol or section for the implementation, direct caller and relevant test>.
 Required facts: <interfaces, invariants, compatibility requirements and concise supporting evidence; name unknowns>.
 Validation: <checks on committed code and their expected results>.
@@ -23,10 +23,11 @@ If a safeguard or automatic model fallback is reported, preserve changes and tel
 Write no memory notes; put lasting findings in your final report or the issue's execution record.
 ```
 
-## Shared-checkout subagent
+## Native subagent
 
 Use the leader's current checkout and branch. Inherit its model and reasoning
-effort unless the user chooses otherwise. Append:
+effort unless the user chooses otherwise. Launch, follow up and collect results
+with the harness's native subagent tools. Append:
 
 ```text
 Edit only your owned files and return the changes to the leader. Do not stage, commit, switch branches, integrate, push or create an MR; the leader owns Git mutations and the full implement delivery and review. Start no other agents.
