@@ -4,7 +4,7 @@ max_turns: 15
 allowed_tools: [Read, Glob, Grep, Skill]
 ---
 
-/leader You remain the project leader in /volume/workspace/launcher. Our
+/leader You remain the Codex project leader in /volume/workspace/launcher. Our
 independent Codex worker in /volume/worktree/launcher/dev-1 on fix-config-errors
 owns an MR targeting main and the files launcher/config.py and
 tests/test_config.py. It asks to create two native subagents under its own
