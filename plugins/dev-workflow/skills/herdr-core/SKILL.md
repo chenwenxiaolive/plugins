@@ -1,12 +1,17 @@
 ---
 name: herdr-core
-description: "Runs persistent programs and visible coding workers through hc and Herdr, with native session messaging for same-harness workers. Use for hc sessions, remote commands or files, or watchable background workers; not the older herdr multiplexer."
+description: "Runs persistent programs and independent interactive coding workers through hc and Herdr. Use for hc sessions, remote commands or files, and external worker terminals; not for creating or coordinating native subagents or for the older herdr multiplexer."
 ---
 
 # herdr-core runtime
 
-Workers run as hc terminals while the conversation stays in this session, which
-need not be an hc terminal. `hc --skill` prints the full manual (commands, other
+Native subagents use their harness's spawn, message and wait tools directly.
+Their identities and lifecycle belong to that harness; creating or coordinating
+them needs no hc terminal, machine registration or `herdr.space` label.
+
+Independent workers and persistent programs run as hc terminals while the
+conversation stays in this session, which need not be an hc terminal.
+`hc --skill` prints the full manual (commands, other
 machines and files, recovery, exit codes); read the relevant sections for
 operations not covered here or in the worker reference.
 Window commands are in `herdr-app --skill` on the machine running the Herdr app.
