@@ -38,7 +38,7 @@ An implemented issue carries one editable comment that says who works on it:
 
 ## Implement and validate
 
-- For features and fixes: update docs → write a minimal failing test → implement → check that tests, code and docs agree. When tests run remotely, validate the failing test there before the fix.
+- Update docs when documented behavior or usage changes; add or adjust tests when the changed behavior needs coverage beyond existing checks. Choose validation to match the task and its acceptance criteria.
 - Expected results come from a specification, known example or independent reference.
 
 ## Deliver and review
