@@ -9,21 +9,27 @@ disable-model-invocation: true
 You are the only leader. You stay in the project's original checkout and own
 understanding, planning, splitting, integration and the final review.
 
-Keep the current leader's harness, model and reasoning effort. Workers use that
-same harness and inherit the model and effort unless the user explicitly chooses
-otherwise. A Claude Code leader starts Claude Code workers; a Codex leader starts
-Codex workers. Do not switch the leader or start another leadership session to
-satisfy a fixed model pairing.
+Here, a subagent is a child agent created and managed by the current harness's
+native tools. A worker is an independent interactive CLI session launched
+through Herdr. Agent is the common term for both. Creation and lifecycle
+ownership determine the term; checkout placement and message transport are
+separate choices. A worker using native cross-session messages remains a worker.
+
+Keep the current leader's harness, model and reasoning effort. Subagents and
+workers inherit those settings unless the user explicitly chooses otherwise.
+A Claude Code leader starts Claude Code workers; a Codex leader starts Codex
+workers. Do not switch the leader or start another leadership session to satisfy
+a fixed model pairing.
 
 ## Plan and delegate
 
-- Make small changes yourself under [implement](../implement/SKILL.md), even across several files. For scoped work in the current checkout, including code changes, prefer native subagents (Codex's `spawn_agent`, Claude Code's Agent tool). Invoking this skill authorizes that delegation. For frontend work, have the worker polish layout, visuals and interactions.
+- Make small changes yourself under [implement](../implement/SKILL.md), even across several files. For scoped work in the current checkout, including code changes, prefer native subagents (Codex's `spawn_agent`, Claude Code's Agent tool). Invoking this skill authorizes that delegation. Frontend assignments include layout, visuals and interactions.
 - Use [herdr-core](../herdr-core/SKILL.md) for an independently watchable or steerable session or a task with its own branch/MR. An explicit request for a model in another harness, such as Opus from a Codex leader, overrides the same-harness default. Preserve that choice and use the explicit cross-harness communication route.
 - Herdr workers get a directory where no other Claude Code or Codex instance runs, your checkout included. A code worker gets a worktree slot such as `/volume/worktree/<repo>/dev-1`, reused under the [worktree rules](../implement/SKILL.md#start-or-resume); prefer a free slot whose remote counterpart already has its environment, since a first build is slow. A Herdr worker that changes no repository files, such as a deployment, also gets its own directory, such as a free slot, and its brief names the remote paths it needs instead of using them as its cwd. Invoking this skill authorizes creating worktrees, their branches and, when remote checks are needed, their remote counterparts; native subagents need no new worktree.
-- Assign disjoint files to the leader and workers, naming new files too. Independent MRs must not touch the same files; a task that builds on another starts from that task's branch.
+- Assign disjoint files to the leader, subagents and workers, naming new files too. Independent MRs must not touch the same files; a task that builds on another starts from that task's branch.
 - Explain the split briefly, then start independent tasks in parallel. A Herdr worker grows to about 500 MB (measured 2026-11-02) and a fresh one doesn't show in `free -m` yet, so start them in batches that keep about 500 MB available.
-- Give each worker its own GPUs, or a whole node when the project's validation needs one; never the same GPUs to two workers.
-- Keep project-wide discovery, architecture decisions, task selection and integration with the leader. Give a worker one coherent deliverable, the verified facts it needs and concrete starting points in the code. Necessary dependencies still belong in its scope; do not split a correctness-critical change merely to shorten a prompt.
+- Give each agent its own GPUs, or a whole node when the project's validation needs one; never the same GPUs to two agents.
+- Keep project-wide discovery, architecture decisions, task selection and integration with the leader. Give each agent one coherent deliverable, the verified facts it needs and concrete starting points in the code. Necessary dependencies still belong in its scope; do not split a correctness-critical change merely to shorten a prompt.
 
 ## Shared checkout
 
@@ -35,12 +41,12 @@ Commit the accepted changes before validation; keep the validation checkout clea
 and idle at that SHA until checks finish. The leader may delegate checks on that
 commit and remains responsible for the full implement delivery and review.
 
-## Brief each worker
+## Brief each assignment
 
-A worker reads its task, not this skill. Build its launch from
-[worker-brief.md](worker-brief.md), choosing its shared-checkout or Herdr
-instructions. A Herdr assignment names whether it owns an MR or returns commits
-for the leader's existing delivery, and includes the reply route under
+Each delegated agent reads its task, not this skill. Build its assignment from
+[delegation-brief.md](delegation-brief.md), choosing the native subagent or Herdr
+worker instructions. A worker's assignment names whether it owns an MR or returns
+commits for the leader's existing delivery, and includes the reply route under
 [worker communication](../herdr-core/references/communication.md).
 Send the assignment and necessary evidence, not the leader's whole conversation
 or unrelated project documents. Follow repository instructions and the issue's
@@ -48,13 +54,13 @@ execution record as usual. First reads are entry points, not a restriction on
 evidence needed for correctness.
 
 Always name the target branch: project docs may say `main` while this work goes
-into a feature branch. Claude Code keeps memory per repository, so workers would
-write into yours; record what is worth keeping yourself.
+into a feature branch. Claude Code keeps memory per repository, so delegated
+agents would write into yours; record what is worth keeping yourself.
 
 ## Follow through
 
-- Send feedback to the same worker so it keeps its context. Use native subagent tools or the harness's [cross-session communication](../herdr-core/references/communication.md) for Herdr workers. Herdr owns their terminals and processes; native sessions carry task messages and results.
-- Check the actual model as well as the result. The owner's preference is to reduce avoidable safeguard interruptions while completing the task, not to stop on every intervention. Report a refusal or fallback, preserve the work and allow the client's automatic fallback to continue under herdr-core's guidance. Handle any remaining blocker in the leadership session or report it. Attribute work to the model that did it; do not repeatedly rephrase a blocked request. Focused briefs reduce unnecessary context, but cannot guarantee that safeguards never trigger.
+- Send feedback to the same agent so it keeps its context. For subagents, use the harness's native subagent tools. For workers, use its [cross-session communication](../herdr-core/references/communication.md); Herdr owns their terminals and processes while native sessions carry task messages and results.
+- Check the actual model as well as the result. The owner's preference is to reduce avoidable safeguard interruptions while completing the task, not to stop on every intervention. Report a refusal or fallback, preserve the work and allow the client's automatic fallback to continue the authorized task. Handle any remaining blocker in the leadership session or report it. Attribute work to the model that did it; do not repeatedly rephrase a blocked request. Focused briefs reduce unnecessary context, but cannot guarantee that safeguards never trigger.
 - A worker with its own branch that needs the target's changes merges the target into its branch; rebasing a pushed branch would need a force-push.
 - For page changes, report visual acceptance apart from functional checks: screenshot the page as the preview skill describes, or give the user its preview link and say that visual acceptance is pending.
 - Merge in dependency order under implement's [merge rules](../implement/SKILL.md#merge): on your own at a low risk score, otherwise when the user asks. Merge an MR yourself while its target hasn't moved since its review, so a worker can be closed once its MR is ready-for-merge and accepted. Each merge moves the target: recheck the next MR against it, and merge that MR through a worker in its worktree (the original, or a new one given the MR link) that runs the checks on the integrated result. Work merged into a feature branch reaches the default branch only through that branch's own MR.

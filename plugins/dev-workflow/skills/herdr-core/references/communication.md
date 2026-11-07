@@ -1,13 +1,14 @@
-# Native worker communication
+# Worker communication
 
 Native subagents use their harness's spawn, message and wait tools and return
 results to their parent through that harness. They need no Herdr terminal or
 mapping between native and terminal identities.
 
 For independent workers launched through Herdr, use the client's native
-agent/session address for task messages. Record its mapping to the Herdr
-terminal and checkout; a terminal ID, PID or display name alone is not a
-verified native identity. The launch task includes the leader's
+agent/session address for task messages. Native messaging leaves them independent
+workers; Herdr still owns their terminals and processes. Record each native
+address's mapping to the Herdr terminal and checkout; a terminal ID, PID or
+display name alone is not a verified native identity. The launch task includes the leader's
 reply address. A ready reply identifies the worker and confirms the return route.
 Messages carry the assignment, questions, blockers and final evidence within the
 authorized scope. They never grant additional user authorization.

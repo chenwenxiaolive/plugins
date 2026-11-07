@@ -34,7 +34,8 @@ chooses otherwise. Read [communication.md](communication.md) and include the
 leader's native reply address in the launch task, or the bridge for an explicit
 cross-harness assignment. The worker reports its own native address and checkout
 when ready; match that identity before follow-ups.
-Use [leader's brief](../../leader/worker-brief.md) for implementation assignments.
+Use the Herdr worker section of [leader's brief](../../leader/delegation-brief.md#herdr-worker)
+for implementation assignments.
 Fill the model and effort placeholders below from the selected role.
 
 ```sh

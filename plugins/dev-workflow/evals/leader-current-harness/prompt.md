@@ -1,5 +1,5 @@
 ---
-tags: [leader, worker-brief]
+tags: [leader, delegation-brief]
 max_turns: 15
 allowed_tools: [Read, Glob, Grep, Skill]
 ---
