@@ -2,11 +2,21 @@
 
 ## Control machine (this one)
 
-- Ubuntu 22.04, root, about 80 GB disk; the [validation scope](remote-workflow.md#validation-scope) says what runs here.
+- Ubuntu 22.04, root, 4 vCPU / 4 GiB RAM, no GPU, UTC, about 80 GB disk; the [validation scope](remote-workflow.md#validation-scope) says what runs here.
 - Tools: Python 3.10 without `pip`, `ensurepip` or `gcc`; `uv` in `~/.local/bin`; `git`, `curl`, `jq`, `rsync`, Docker CLI, `gh`, `glab`. Use gate's `rclone`. Docker builds go to the build host (docker-build skill). `glab` came from GitLab's release `.deb`: update it by installing a newer `.deb` checked against `checksums.txt`.
 - Its `/volume/.bashrc`, `/volume/.ssh` and `/volume/.config` are saved gate deployment inputs (gate.md), not this machine's configuration; don't source them here.
 
 ## GPU nodes and gates
+
+Nodes and gates are k8s pods in CST, reached through aliases in `~/.ssh/config`
+that change as pods come and go. Each cluster shares its own `/volume` among its
+nodes and gate; the control machine has a separate local disk.
+
+| Cluster aliases | GPUs per node | Shared storage | Gate |
+| --- | --- | --- | --- |
+| `sh-<n>` | 8 H200 | GPFS | `sh-gate` |
+| `zg-<n>` | 8 H20-3e | CPFS | `zg-gate` |
+| `th-<n>` | 8 B200 | GPFS | None |
 
 Identify nodes and gates by alias, not hostname, and check a node's driver, cores,
 memory and tools on the node itself (`nvidia-smi`, the image). Each GPU has 141 GB
