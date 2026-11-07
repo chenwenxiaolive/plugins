@@ -3,12 +3,13 @@
 ## Validation scope
 
 - The control machine runs only light static checks with the tools it has: syntax, metadata, documentation links, Git refs. It installs no project dependencies and starts no project services.
+- Read-only agent and skill evals may also run here with the existing signed-in clients. Their isolated workspaces do not authorize local project tests or dependency installation.
 - Project tests (small unit tests included), builds, benchmarks, training, formatters and linters run in the node checkout's environment. Work without GPUs may run on any reachable node of the cluster.
 - Report results so they can be reproduced from the committed SHA.
 
 ## Checkouts
 
-- Read the project instructions locally and, before the first remote command, in the remote checkout: `AGENTS.override.md` over `AGENTS.md`, plus `CLAUDE.md` and what they reference.
+- Read the project instructions locally and, before the first remote command, in the remote checkout: `AGENTS.override.md` over `AGENTS.md`, plus `CLAUDE.md`. Follow referenced material when it applies to the operation.
 - For requested remote testing of a herdr worktree, create its missing remote counterpart through Git (a clone, or a worktree of an existing clone of the same repository) at the same path. If something already exists there, inspect it and reuse or report it; never replace it.
 
 ## Development and Git synchronization

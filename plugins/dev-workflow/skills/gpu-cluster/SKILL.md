@@ -1,6 +1,6 @@
 ---
 name: gpu-cluster
-description: "Holds the facts about this setup's GPU nodes, gates, shared /volume storage and internal GitLab, and how work runs there. Use before a task's first ssh or remote command, a remote checkout sync, a remote run or background job, GPU use, a /volume temporary file, a GitLab API or glab call, a push to the internal GitLab, or gate work."
+description: "Guides this environment's cluster and internal GitLab operations. Use before SSH, remote checkout work, GPU or background jobs, /volume temporary files, GitLab calls or pushes, and gate changes."
 ---
 
 # GPU cluster operations

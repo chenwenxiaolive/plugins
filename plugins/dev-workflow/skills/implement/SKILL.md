@@ -1,13 +1,14 @@
 ---
 name: implement
-description: "Implements an assigned issue or agreed development task in the selected checkout, through validation, an MR or PR, its review and its merge, which is automatic at a low risk score, under this user's rules for branches, execution records, which review findings to fix or reject, risk scores and merge guards. Use it for any question about this user's issues, MRs or PRs: starting, resuming or claiming an issue, checking whether one is free or proposing it as next work, reusing a worktree, reviewing an MR or acting on its codex review findings, and merging, including after a failed or timed-out merge."
+description: "Implements development tasks and manages issue ownership, PR/MR reviews and merges in the selected checkout. Use for task execution, issue availability, review findings or merge requests."
 ---
 
 # Implement
 
-Own the assigned task through its MR and review outcome, in the checkout the user
-selected. Read its project instructions. On GitHub, `gh` does the same steps: a pull
-request is the MR. The project's own rules come first.
+Handle the requested operation in the selected checkout under its project rules.
+A status or availability question does not claim an issue or start implementation.
+An implementation task continues through validation, MR/PR and review, then merge
+when authorized by the [merge rules](#merge). On GitHub, use `gh` for the same work.
 
 ## Start or resume
 
@@ -18,23 +19,8 @@ request is the MR. The project's own rules come first.
 
 ## Execution record
 
-An implemented issue carries one editable comment that says who works on it:
-
-```markdown
-<!-- coder-execution-record -->
-### Execution record
-
-| Field | Value |
-|---|---|
-| Worktree | <absolute checkout path, or Released (last used: <path>)> |
-| Branch | <development branch> |
-| MR | <MR URL, or Not opened> |
-| Status | active / blocked / needs-human / ready-for-merge / merged / paused, with context |
-| Updated | <UTC timestamp> |
-```
-
-- Another active worktree owns the issue until it is released or the user reassigns it.
-- Create or edit it with `glab api` (or `gh`) when you claim the task, open the MR, get blocked, reach `ready-for-merge` or `merged`, or release the worktree. Keep one record per issue and never overwrite another coder's.
+Read [issue ownership](references/issue-ownership.md) before proposing or claiming
+an issue and when updating its execution record.
 
 ## Implement and validate
 
@@ -47,34 +33,14 @@ Push the branch and open the MR with the project's template: behavior, issue
 links, validation evidence and limitations. Use a closing reference only when the
 MR completes the issue.
 
-Then review it yourself:
-
-1. Round 0: in the clean checkout at the MR source commit, run `codex review --base <target-sha> < /dev/null > <run_dir>/review-0.md 2> <run_dir>/review-0.log` (minutes; run it in the background). Separately check the change against the issue's requirements, which `codex review` does not see.
-2. A pass means the requirements are met with evidence, no actionable finding is left and the checks pass on the current commit. An actionable defect needs a reachable condition, a violated requirement or contract, and a concrete consequence; missing defensive code or tests alone is not a defect. Fix defects in scope with the smallest change; reject style preferences and unsupported scenarios with a one-line reason in the MR.
-3. Otherwise fix, push, rerun affected checks and review again: at most three corrective rounds. If round 3 still fails, stop, set `needs-human` and report what remains. After that, follow the user's feedback; further automatic rounds need their explicit allowance.
-4. Record each round's commit, checks and outcome in a review-status section of the MR description, so that the count survives interruptions. A later merge recheck uses the remaining rounds and never resets them.
-
-A standalone review the user requests uses a detached checkout at the MR's source
-commit, the same command, and a verdict in chat; post it to the MR only when asked.
+For the implementation's review or a requested standalone review, read
+[review.md](references/review.md): the review command, finding criteria, corrective
+round limit and status record. A standalone review ends with a verdict in chat;
+post it to the MR only when asked.
 
 ## Merge
 
-Once the review passes, score the MR's risk and record the score and its reasons
-beside the review status. Start at 1 and add, up to 10:
-
-- 1 for every full 200 changed lines of non-test code, up to 3;
-- 2 when changed runtime code has no test covering the change;
-- 1 for each corrective review round used;
-- 1 for a behavior change users will notice;
-- 4 when it touches CI, build, deployment, dependencies, credentials, data migrations or stored formats, public interfaces (APIs, CLI flags, config formats), or skills and agent instructions.
-
-At 3 or below, merge it yourself without asking and report the merge, unless the
-project's instructions opt out of automatic merges. Above 3, set the execution
-record to `needs-human` with the score, tell the user, and merge only when they ask.
-
-Every merge:
-
-- Recheck the MR, its source SHA and the current target. If either moved since the passing review, reassess what changed, using a remaining round if a new review is needed.
-- Merge with the reviewed SHA as a guard: `glab mr merge <iid> --sha <sha>` or `gh pr merge <n> --merge --match-head-commit <sha>`. While a pipeline runs, `glab` schedules an auto-merge instead: wait until the MR shows merged before the next step. After an error or timeout, read the MR and target back before retrying. A 504 can still merge: if the target already holds a merge of the reviewed SHA while the MR stays open, close the MR with a note naming that commit instead of merging again.
-- If the forge's rebase leaves a checkout diverged only by that rebase, rename its old branch to an archive name with `git branch -m` and recreate the branch at the new SHA.
-- Confirm the merge commit, then set the execution record to `merged` and delete the merged source branch on the forge.
+After review passes, or when the user requests a merge, read
+[merge.md](references/merge.md) for the risk score, authorization, current-commit
+checks, guarded merge and recovery after a timeout. Do not treat a pending merge
+as completed.
