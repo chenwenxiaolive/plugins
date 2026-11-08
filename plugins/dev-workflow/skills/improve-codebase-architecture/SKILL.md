@@ -11,4 +11,4 @@ performance work hard, starting from the module the user names or else from rece
 changes and issues.
 
 - Propose the few strongest changes, each with its evidence from the code (files, real callers, a concrete example), how to validate it and its tradeoffs.
-- Report in chat by default. Issues follow [to-tickets](../to-tickets/SKILL.md) (read its file; only the user can invoke it as a skill), implementation through [implement](../implement/SKILL.md), when the user asks.
+- Report in chat by default. Issues follow [to-tickets](../to-tickets/SKILL.md), implementation through [implement](../implement/SKILL.md), when the user asks.
