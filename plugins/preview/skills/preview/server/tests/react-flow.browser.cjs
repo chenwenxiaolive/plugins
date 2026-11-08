@@ -324,11 +324,11 @@ async function main() {
     };
     const canvas = await page.locator('.react-flow').boundingBox();
     await expectView('pan', async () => {
-      await page.mouse.move(canvas.x + 30, canvas.y + 30);
+      await page.mouse.move(canvas.x + canvas.width - 60, canvas.y + 30);
       await page.mouse.down();
-      await page.mouse.move(canvas.x + 150, canvas.y + 110, { steps: 8 });
+      await page.mouse.move(canvas.x + canvas.width - 180, canvas.y + 110, { steps: 8 });
       await page.mouse.up();
-    }, (before, after) => assert.ok(Math.abs(after.tx - before.tx - 120) < 2 && Math.abs(after.ty - before.ty - 80) < 2));
+    }, (before, after) => assert.ok(Math.abs(after.tx - before.tx + 120) < 2 && Math.abs(after.ty - before.ty - 80) < 2));
     await expectView('ctrl+wheel zoom', async () => {
       await page.mouse.move(canvas.x + canvas.width / 2, canvas.y + 300);
       await page.keyboard.down('Control');
