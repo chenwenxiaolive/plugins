@@ -15,7 +15,8 @@ project the user names, else the selected checkout's: GitLab
 - Check for equivalent issues first. Link dependent issues to their prerequisites with native blocking links when available. Use existing labels only.
 - After an interrupted or timed-out publish, check what was created before retrying.
 
-Follow the project's template, or:
+Give every issue, drafts and any you could not publish included, the project's
+template or these sections:
 
 ```markdown
 ## Goal and context
