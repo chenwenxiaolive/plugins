@@ -63,26 +63,29 @@
   }
 
   function computeLayout(graph, sizes) {
+    // Graphlib keeps nodes in plain objects, so it gets index names rather than IDs such as "constructor".
+    const names = new Map(graph.nodes.map((node, index) => [node.id, 'n' + index]));
+    const edgeName = (edge, index) => ({ v: names.get(edge.source), w: names.get(edge.target), name: 'e' + index });
     const g = new dagre.graphlib.Graph({ multigraph: true });
     g.setGraph({ rankdir: graph.direction, nodesep: 48, ranksep: 36, edgesep: 24, marginx: 24, marginy: 24 });
-    for (const node of graph.nodes) g.setNode(node.id, { ...sizes.get('node:' + node.id) });
-    for (const edge of graph.edges) {
+    for (const node of graph.nodes) g.setNode(names.get(node.id), { ...sizes.get('node:' + node.id) });
+    graph.edges.forEach((edge, index) => {
       const label = edge.label === undefined ? { width: 0, height: 0 } : sizes.get('edge:' + edge.id);
-      g.setEdge(edge.source, edge.target, { ...label, labelpos: 'c' }, edge.id);
-    }
+      g.setEdge(edgeName(edge, index), { ...label, labelpos: 'c' });
+    });
     dagre.layout(g);
     // Round node corners to whole pixels for crisp text, and route edges against the rounded boxes.
     const positions = new Map();
     const boxes = new Map();
     for (const node of graph.nodes) {
-      const { x, y, width, height } = g.node(node.id);
+      const { x, y, width, height } = g.node(names.get(node.id));
       const position = { x: Math.round(x - width / 2), y: Math.round(y - height / 2) };
       positions.set(node.id, position);
       boxes.set(node.id, { x: position.x + width / 2, y: position.y + height / 2, width, height });
     }
     const routes = new Map();
-    for (const edge of graph.edges) {
-      const { points, x, y } = g.edge({ v: edge.source, w: edge.target, name: edge.id });
+    graph.edges.forEach((edge, index) => {
+      const { points, x, y } = g.edge(edgeName(edge, index));
       const source = boxes.get(edge.source);
       const target = boxes.get(edge.target);
       const inner = points.slice(1, -1);
@@ -92,7 +95,7 @@
         boundary(graph.lookup.get(edge.target).kind, target, inner.at(-1) ?? source),
       ];
       routes.set(edge.id, { path: basisPath(route), label: { x, y } });
-    }
+    });
     const { width, height } = g.graph();
     return { positions, routes, width, height };
   }

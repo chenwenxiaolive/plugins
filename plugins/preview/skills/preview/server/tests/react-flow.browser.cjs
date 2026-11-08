@@ -205,11 +205,14 @@ async function main() {
       }
       return route.continue();
     });
-    page = await context.newPage();
-    page.on('pageerror', (error) => errors.push(error.message));
-    page.on('console', (message) => {
-      if (['error', 'warning'].includes(message.type())) errors.push(`${message.type()}: ${message.text()}`);
-    });
+    const watch = (target) => {
+      target.on('pageerror', (error) => errors.push(error.message));
+      target.on('console', (message) => {
+        if (['error', 'warning'].includes(message.type())) errors.push(`${message.type()}: ${message.text()}`);
+      });
+      return target;
+    };
+    page = watch(await context.newPage());
     const diagram = () => page.evaluate(readDiagram);
     const settle = async (layouts) => {
       await page.waitForFunction((expected) => {
@@ -347,15 +350,29 @@ async function main() {
     assert.deepEqual(labelTexts(final), translated, 'theme change lost translated text');
 
     // Invalid input is reported at the model boundary instead of rendering a partial diagram.
-    const invalid = await context.newPage();
-    invalid.on('pageerror', (error) => errors.push(error.message));
-    await invalid.route('**/infg-statechart.json', (route) => route.fulfill({
+    const other = watch(await context.newPage());
+    await other.route('**/infg-statechart.json', (route) => route.fulfill({
       contentType: 'application/json',
       body: JSON.stringify({ nodes: [{ id: 'a', kind: 'start' }], edges: [{ id: 'a-b', source: 'a', target: 'b' }] }),
     }));
-    await invalid.goto(base + '/index.html');
-    assert.match(await invalid.locator('[role="alert"]').textContent(), /Edge a-b must connect two existing nodes/);
-    assert.equal(await invalid.locator('.react-flow').count(), 0);
+    await other.goto(base + '/index.html');
+    assert.match(await other.locator('[role="alert"]').textContent(), /Edge a-b must connect two existing nodes/);
+    assert.equal(await other.locator('.react-flow').count(), 0);
+    // IDs are free text, including names that plain objects already have.
+    await other.unroute('**/infg-statechart.json');
+    await other.route('**/infg-statechart.json', (route) => route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        nodes: [{ id: 'constructor', kind: 'start' }, { id: 'hasOwnProperty', kind: 'state', label: 'State' }],
+        edges: [{ id: 'toString', source: 'constructor', target: 'hasOwnProperty', label: 'valueOf' }],
+      }),
+    }));
+    await other.goto(base + '/index.html');
+    await other.waitForFunction(() => document.querySelector('.flow:not(.pending)')?.dataset.layouts === '1');
+    const odd = await other.evaluate(readDiagram);
+    assert.deepEqual(Object.keys(odd.nodes).sort(), ['constructor', 'hasOwnProperty']);
+    assert.ok(onShape(odd.nodes.constructor, odd.edges.toString.start)
+      && onShape(odd.nodes.hasOwnProperty, odd.edges.toString.end), 'edge between object-named nodes is misplaced');
 
     assert.deepEqual(external, []);
     assert.deepEqual(errors, []);
