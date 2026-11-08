@@ -34,7 +34,6 @@
   --dots: #2c3b50;
 }
 * { box-sizing: border-box; }
-html { scrollbar-gutter: stable; }
 body { margin: 0; }
 header { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; padding: 12px 24px; background: var(--header-background); color: var(--header-text); }
 h1 { margin: 0; font-size: 17px; font-weight: 650; }
