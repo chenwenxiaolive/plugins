@@ -61,7 +61,8 @@ svg.defs { position: absolute; }
 .react-flow__attribution a { color: var(--muted); }
 /* Keep the first layout and fit out of sight. */
 .pending .react-flow__viewport { opacity: 0; }
-/* Edges follow the layout's routes, so the handles only satisfy React Flow's edge model. */
+/* React Flow turns pointer events off for nodes that cannot be selected or dragged; labels need them for text selection.
+   Edges follow the layout's routes, so the handles only satisfy React Flow's edge model. */
 .react-flow__handle { opacity: 0; }
 
 .node.state {
@@ -75,6 +76,7 @@ svg.defs { position: absolute; }
   line-height: 1.4;
   text-align: center;
   overflow-wrap: anywhere;
+  pointer-events: auto;
   cursor: text;
   user-select: text;
 }
