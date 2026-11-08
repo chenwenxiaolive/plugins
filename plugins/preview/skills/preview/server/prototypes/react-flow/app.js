@@ -18,7 +18,7 @@
     const nodes = new Map();
     for (const node of graph.nodes) {
       if (!text(node?.id) || nodes.has(node.id)) fail(`Node IDs must be unique non-empty strings: ${JSON.stringify(node?.id)}.`);
-      if (!(node.kind in SHAPES)) fail(`Node ${node.id} has an unknown kind: ${JSON.stringify(node.kind)}.`);
+      if (!Object.hasOwn(SHAPES, node.kind)) fail(`Node ${node.id} has an unknown kind: ${JSON.stringify(node.kind)}.`);
       if (node.kind === 'state' ? !text(node.label) : node.label !== undefined) {
         fail(`Node ${node.id}: state nodes need a label; ${node.kind} nodes have none.`);
       }
@@ -229,7 +229,7 @@
         onMoveStart: (event) => { if (event) moved(); },
       },
       h(Background, { gap: 24, size: 1.5 }),
-      h(Controls, { position: 'top-left', showInteractive: false, showFitView: false, onZoomIn: moved, onZoomOut: moved },
+      layout && h(Controls, { position: 'top-left', showInteractive: false, showFitView: false, onZoomIn: moved, onZoomOut: moved },
         h(ControlButton, {
           className: 'react-flow__controls-fitview', title: 'fit view', 'aria-label': 'fit view',
           onClick: () => { userMoved.current = false; showAll(false); },
