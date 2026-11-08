@@ -1,0 +1,56 @@
+[
+  {
+    "file": "react.production.min.js",
+    "url": "https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js",
+    "sha256": "d949f1c3687aedadcedac85261865f29b17cd273997e7f6b2bfc53b2f9d4c4dd",
+    "bytes": 10751
+  },
+  {
+    "file": "react.LICENSE",
+    "url": "https://cdn.jsdelivr.net/npm/react@18.3.1/LICENSE",
+    "sha256": "52412d7bc7ce4157ea628bbaacb8829e0a9cb3c58f57f99176126bc8cf2bfc85",
+    "bytes": 1086
+  },
+  {
+    "file": "react-dom.production.min.js",
+    "url": "https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js",
+    "sha256": "35f4f974f4b2bcd44da73963347f8952e341f83909e4498227d4e26b98f66f0d",
+    "bytes": 131835
+  },
+  {
+    "file": "react-dom.LICENSE",
+    "url": "https://cdn.jsdelivr.net/npm/react-dom@18.3.1/LICENSE",
+    "sha256": "52412d7bc7ce4157ea628bbaacb8829e0a9cb3c58f57f99176126bc8cf2bfc85",
+    "bytes": 1086
+  },
+  {
+    "file": "xyflow-react.umd.js",
+    "url": "https://cdn.jsdelivr.net/npm/@xyflow/react@12.12.0/dist/umd/index.js",
+    "sha256": "c418896c3d0cc63498e724df7ed9698532c58523c04d30ebcd3ff7fa0bf3ecff",
+    "bytes": 188484
+  },
+  {
+    "file": "xyflow-react.css",
+    "url": "https://cdn.jsdelivr.net/npm/@xyflow/react@12.12.0/dist/style.css",
+    "sha256": "7ed5ae87a6c9bd664fce1802ce33fbe84faaefe33e21c82be35529df06e0c686",
+    "bytes": 18596
+  },
+  {
+    "file": "xyflow-react.LICENSE",
+    "url": "https://cdn.jsdelivr.net/npm/@xyflow/react@12.12.0/LICENSE",
+    "sha256": "023119ac20fb1c8c9930abe0bcd196989a1960388529a96fc43cebf96f07c9ff",
+    "bytes": 1073
+  },
+  {
+    "file": "dagre.min.js",
+    "url": "https://cdn.jsdelivr.net/npm/@dagrejs/dagre@3.1.3/dist/dagre.min.js",
+    "sha256": "54a503e346f93ca0bb10abe7999587e037262935687aca45eb4e4b0f64bbb578",
+    "bytes": 49326
+  },
+  {
+    "file": "dagre.LICENSE",
+    "url": "https://cdn.jsdelivr.net/npm/@dagrejs/dagre@3.1.3/LICENSE",
+    "sha256": "6a349742a6cb219d5a2fc8d0844f6d89a6efc62e20c664450d884fc7ff2d6015",
+    "bytes": 1062
+  }
+]

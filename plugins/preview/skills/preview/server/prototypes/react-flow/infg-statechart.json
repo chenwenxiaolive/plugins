@@ -1,0 +1,26 @@
+{
+  "direction": "TB",
+  "nodes": [
+    { "id": "begin", "kind": "start" },
+    { "id": "Form", "kind": "choice" },
+    { "id": "Prefix", "kind": "state", "label": "Pass 1 on prompt tokens 1 … P−1" },
+    { "id": "Start", "kind": "state", "label": "Decode-form on prompt token P\nInject the previous representation\nRead mixed KV; update carry" },
+    { "id": "All", "kind": "state", "label": "Pass 1 on all prompt tokens 1 … P\nWrite mixed KV\nCarry = final pass-1 representation" },
+    { "id": "Sample", "kind": "state", "label": "Sample and emit a token" },
+    { "id": "Stop", "kind": "choice" },
+    { "id": "Decode", "kind": "state", "label": "Decode-form on the emitted token\nUpdate KV and carry" },
+    { "id": "finish", "kind": "end" }
+  ],
+  "edges": [
+    { "id": "begin-Form", "source": "begin", "target": "Form" },
+    { "id": "Form-Prefix", "source": "Form", "target": "Prefix", "label": "prefill-1" },
+    { "id": "Form-All", "source": "Form", "target": "All", "label": "prefill-1-nofuse-start" },
+    { "id": "Prefix-Start", "source": "Prefix", "target": "Start", "label": "Write mixed prefix KV" },
+    { "id": "Start-Sample", "source": "Start", "target": "Sample", "label": "First token: decode-form logits" },
+    { "id": "All-Sample", "source": "All", "target": "Sample", "label": "First token: pass-1 logits" },
+    { "id": "Sample-Stop", "source": "Sample", "target": "Stop" },
+    { "id": "Stop-finish", "source": "Stop", "target": "finish", "label": "EOS / stop / length limit" },
+    { "id": "Stop-Decode", "source": "Stop", "target": "Decode", "label": "Continue" },
+    { "id": "Decode-Sample", "source": "Decode", "target": "Sample", "label": "Next-token logits" }
+  ]
+}
