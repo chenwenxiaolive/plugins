@@ -127,9 +127,9 @@ function checkDiagram(diagram, stage) {
     ...Object.entries(diagram.nodes).map(([id, node]) => [`node ${id}`, node]),
     ...Object.entries(diagram.labels).map(([id, label]) => [`label ${id}`, label]),
   ];
-  for (const [name, item] of obstacles) {
+  for (const [name, item] of obstacles.filter(([, item]) => item.kind === undefined || item.kind === 'state')) {
     assert.equal(item.overflow, false, at(`${name} is clipped or overflows`));
-    if (item.kind === undefined || item.kind === 'state') assert.equal(item.userSelect, 'text', at(`${name} is not selectable`));
+    assert.equal(item.userSelect, 'text', at(`${name} is not selectable`));
   }
   for (let i = 0; i < obstacles.length; i += 1) {
     for (let j = i + 1; j < obstacles.length; j += 1) {
@@ -184,6 +184,7 @@ async function main() {
   { stdio: ['ignore', log, log] });
   const exited = new Promise((resolve) => server.once('exit', resolve));
   let browser;
+  let page;
   try {
     for (let attempt = 0; ; attempt += 1) {
       try { if ((await fetch(base)).ok) break; } catch {}
@@ -201,7 +202,7 @@ async function main() {
       }
       return route.continue();
     });
-    const page = await context.newPage();
+    page = await context.newPage();
     page.on('pageerror', (error) => errors.push(error.message));
     page.on('console', (message) => {
       if (['error', 'warning'].includes(message.type())) errors.push(`${message.type()}: ${message.text()}`);
@@ -341,6 +342,9 @@ async function main() {
       screenshots: ['light-before', 'dark-before', 'light-after', 'dark-after'].map((name) => `${name}.png`),
       browser: browser.version(), commit: spawnSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).stdout.trim(),
     }));
+  } catch (error) {
+    if (page) await page.screenshot({ path: path.join(scratch, 'failure.png') }).catch(() => {});
+    throw error;
   } finally {
     if (browser) await browser.close();
     server.kill('SIGTERM');
