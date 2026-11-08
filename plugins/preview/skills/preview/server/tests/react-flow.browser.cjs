@@ -306,11 +306,10 @@ async function main() {
     const viewed = ['wheel scroll'];
     const expectView = async (name, action, check) => {
       const before = await diagram();
+      const previous = await page.locator('.react-flow__viewport').evaluate((element) => element.style.transform);
       await action();
-      await page.waitForFunction((previous) => {
-        const transform = document.querySelector('.react-flow__viewport').style.transform;
-        return transform !== previous;
-      }, await page.locator('.react-flow__viewport').evaluate((element) => element.style.transform));
+      await page.waitForFunction((value) =>
+        document.querySelector('.react-flow__viewport').style.transform !== value, previous);
       await page.waitForTimeout(400);
       const after = await diagram();
       assert.equal(after.layouts, 3, `${name} caused a layout`);
