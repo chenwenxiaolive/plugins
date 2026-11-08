@@ -2,5 +2,5 @@
 type: llm
 ---
 
-PASS if it treats the request as authorization to publish one issue in the plugins repository on GitHub, in Chinese or English: it checks for an equivalent existing issue first (by searching, or by stating that search as the step before creating), then publishes the issue or, since it cannot write from here, gives the issue and the command it would run, without asking again whether to publish; and the issue covers goal and context, scope, acceptance criteria, validation and dependencies.
-FAIL if it skips the duplicate check, stops at a draft and asks whether to publish, leaves out one of those sections, or claims the issue or starts implementing it.
+PASS if it writes one issue for the plugins repository on GitHub, in Chinese or English, with goal and context, scope, acceptance criteria, validation and dependencies, and treats the request as authorization to publish it: it publishes after checking for an equivalent existing issue or, without forge access here, reports that nothing was filed and that it would check for duplicates before creating the issue. Asking for the missing forge access is fine; asking whether to publish at all is not.
+FAIL if a section is missing, it publishes without a duplicate check, it leaves publication as the user's decision (a draft plus a question whether to file it), or it claims the issue or starts implementing it.
