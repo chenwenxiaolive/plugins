@@ -16,4 +16,4 @@ An implemented issue carries one editable comment that says who works on it:
 ```
 
 - Another active worktree owns the issue until it is released or the user reassigns it.
-- Create or edit it with `glab api` (or `gh`) when you claim the task, open the MR, get blocked, reach `ready-for-merge` or `merged`, or release the worktree. Keep one record per issue and never overwrite another coder's.
+- Create or edit it with `glab api` (or `gh`) when you claim the task, open the MR, change its status (including back to `active` when work resumes) or release the worktree. Keep one record per issue and never overwrite another coder's.

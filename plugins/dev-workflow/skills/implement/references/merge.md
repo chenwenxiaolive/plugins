@@ -12,6 +12,7 @@ beside the review status. Start at 1 and add, up to 10:
 At 3 or below, merge it yourself without asking and report the merge, unless the
 project's instructions opt out of automatic merges. Above 3, set the execution
 record to `needs-human` with the score, tell the user, and merge only when they ask.
+A request covers the source SHA it was made for; a later commit needs a new request.
 
 Every merge:
 
