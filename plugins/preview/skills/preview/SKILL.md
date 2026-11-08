@@ -15,4 +15,5 @@ has this machine's root, browser base URL and token, and how to restart the serv
 - Publish only content meant for the user: anyone with the token can read the whole root, over plain HTTP.
 - The link is the browser base URL plus the URL-encoded path below the root (no `/preview` prefix). Check it with `curl` and the access token as service.md shows: the status, the content type and some of this page's text; Markdown must come back as `text/html`, never as Markdown source.
 - When the layout matters (charts, wide tables, dark mode), screenshot the page at desktop width with the headless browser service.md names and fix what you see before returning the link; the user doesn't view pages on a phone.
+- In Mermaid `stateDiagram-v2`, literal `;` in transition labels can end the statement and turn the remaining words into disconnected states. Use commas or rephrase, and inspect for unintended states even when no parser error appears. A corrected preview copy does not correct the source MR/PR; state which artifact was fixed.
 - If the service is down, restart it as service.md says and check again; if it still fails, report the file's path and the failed check.
