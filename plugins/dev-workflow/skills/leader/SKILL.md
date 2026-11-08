@@ -54,8 +54,8 @@ on that commit and remains responsible for its implement delivery and review.
 Each delegated agent reads its task, not this skill. Build its assignment from
 [delegation-brief.md](delegation-brief.md), choosing the native subagent or Herdr
 worker instructions. A worker's assignment names whether it owns an MR or returns
-commits for the leader's existing delivery, and includes the reply route under
-[worker communication](../herdr-core/references/communication.md).
+commits for the leader's existing delivery, and includes the reply route and a
+route nonce under [worker communication](../herdr-core/references/communication.md).
 Send the assignment and necessary evidence, not the leader's whole conversation
 or unrelated project documents. Follow repository instructions and the issue's
 execution record as usual. First reads are entry points, not a restriction on
@@ -67,7 +67,8 @@ agents would write into yours; record what is worth keeping yourself.
 
 ## Follow through
 
-- Send feedback to the same agent so it keeps its context. For subagents, use the harness's native subagent tools. For workers, use its [cross-session communication](../herdr-core/references/communication.md); Herdr owns their terminals and processes while native sessions carry task messages and results.
+- Send feedback to the same agent so it keeps its context. For subagents, use the harness's native subagent tools. For workers, use its [cross-session communication](../herdr-core/references/communication.md) once the route check has passed; Herdr owns their terminals and processes while native sessions carry task messages and results.
+- Keep each worker's owner, phase and head current in the issue's execution record. After you accept a worker's result or its MR reaches ready-for-merge, a late message from that task, such as an old ready report, a rejected diagnosis, an obsolete commit or a launch instruction, changes nothing: no branch switch, edit, job or review rerun, merge or renewed approval request. Tell the user about such a backlog once; act only on a message newer than the record.
 - Check the actual model as well as the result. The owner's preference is to reduce avoidable safeguard interruptions while completing the task, not to stop on every intervention. Report a refusal or fallback, preserve the work and allow the client's automatic fallback to continue the authorized task. Handle any remaining blocker in the leadership session or report it. Attribute work to the model that did it; do not repeatedly rephrase a blocked request. Focused briefs reduce unnecessary context, but cannot guarantee that safeguards never trigger.
 - A worker with its own branch that needs the target's changes merges the target into its branch; rebasing a pushed branch would need a force-push.
 - For page changes, report visual acceptance apart from functional checks: screenshot the page as the preview skill describes, or give the user its preview link and say that visual acceptance is pending.

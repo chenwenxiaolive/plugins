@@ -34,9 +34,10 @@ task sets what they and their local native subagents may change.
 
 Use the leader's harness, model and reasoning effort unless the user explicitly
 chooses otherwise. Read [communication.md](communication.md) and include the
-leader's native reply address in the launch task, or the bridge for an explicit
-cross-harness assignment. The worker reports its own native address and checkout
-when ready; match that identity before follow-ups.
+leader's native reply address and a route nonce in the launch task, or the bridge
+for an explicit cross-harness assignment. The worker's ready report returns the
+nonce with its own native address and checkout; match that identity and finish
+the [route check](communication.md#route-check) before follow-ups.
 Use the Herdr worker section of [leader's brief](../../leader/delegation-brief.md#herdr-worker)
 for implementation assignments.
 Fill the model and effort placeholders below from the selected role.
@@ -60,4 +61,5 @@ hc run --bg --name <name> --cwd <dir> \
 - `--no-daemon` keeps Codex's execution backend under the Herdr terminal; the shared daemon would execute commands outside hc's process ownership. Native `codex queue` still works. Don't pass Codex `--worktree`: it ignores `-c` for its root and leaves `<root>/<hex>/<repo>` checkouts behind. Prepare the checkout under the project's worktree rules and pass it as `--cwd`.
 - The native reply address works whether or not the leader is in an hc terminal; do not use `$HC_TERMINAL_ID` as a native session address.
 - The `herdr.space=<id>` label puts the worker's live terminal in that Herdr space, naming a new one after its folder. Give every worker its own new id, as above: a shared id opens the workers as panes of one space, which this owner never wants. Unlabeled workers appear only under their parent. Closing a placed terminal's space or pane in the app ends it.
-- A new folder triggers a trust prompt that blocks the task. `hc read <name>` shows Claude Code's "Is this a project you trust?"; for a folder the user owns or approved, `hc keys <name> down enter` answers yes. Otherwise, or if it stays stuck, tell the user.
+- A new folder triggers a trust prompt that blocks the task. `hc read <name>` shows Claude Code's "Is this a project you trust?" or Codex's "Trust this folder?"; for a folder the user owns or approved, `hc keys <name> down enter` answers Claude Code and `hc keys <name> enter` Codex (its first option, "Trust and continue", is selected). Otherwise, or if it stays stuck, tell the user.
+- A worker's own `hc run --bg` programs are its children: they end when it ends unless started with `--outlive-parent`, and their exit note starts its next turn.
