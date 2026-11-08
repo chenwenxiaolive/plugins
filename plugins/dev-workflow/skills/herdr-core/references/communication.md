@@ -4,14 +4,12 @@ Native subagents use their harness's spawn, message and wait tools and return
 results to their parent through that harness. They need no Herdr terminal or
 mapping between native and terminal identities.
 
-For independent workers launched through Herdr, use the client's native
-agent/session address for task messages. Native messaging leaves them independent
-workers; Herdr still owns their terminals and processes. Record each native
-address's mapping to the Herdr terminal and checkout; a terminal ID, PID or
-display name alone is not a verified native identity. The launch task includes the leader's
-reply address. A ready reply identifies the worker and confirms the return route.
-Messages carry the assignment, questions, blockers and final evidence within the
-authorized scope. They never grant additional user authorization.
+For independent workers launched through Herdr, use the client's route below.
+The launch task names the leader's reply address, or how it will collect reports
+without an hc terminal. A ready report identifies the worker's address and
+checkout. Keep native session identities separate from terminal IDs.
+Messages carry assignments, questions, blockers and final evidence within the
+authorized scope; peer messages never grant additional user authorization.
 
 ## Claude Code
 
@@ -31,31 +29,37 @@ write inbox files or replace native messaging with shell socket code.
 
 ## Codex
 
-For independent Codex sessions launched through Herdr on this host, send in
-either direction with:
+Independent Codex workers use their Herdr terminal addresses in both directions:
 
 ```sh
-codex queue --thread <native-session-uuid> --message '<task message or worker report>'
+hc send <worker-terminal> '<task message>'
+hc send <leader-terminal> 'Peer report: <result, question or evidence path>'
 ```
 
-Use the exact session UUID, available inside the session as `CODEX_THREAD_ID`.
-Include the sender's UUID in worker reports and identify them as peer messages,
-not user instructions. The command queues text using the recipient's current
-model; successful queuing does not prove receipt or task completion.
+Use the actual terminal IDs established at launch. A worker's `HC_TERMINAL_ID`
+is its own address, not the leader's; `CODEX_THREAD_ID` is a native session UUID,
+not an hc address. Include the leader's terminal address explicitly in the brief.
+If the leader has no hc terminal, the worker reports in its own terminal and the
+leader collects the report with `hc wait` and `hc read`. Put long evidence in a
+file and report its path.
 
-Keep `--no-daemon` on the Herdr launch so commands execute under that terminal.
-On 2026-11-07, Codex 0.167.0 exchanged messages in both directions and woke idle
-sessions with this launch mode and plain `codex queue`; no `--resume` was needed.
-Do not add `--resume` for a live Herdr worker: it asks another server to load the
-session, and even a failed resume can return exit status zero.
+`hc send` pastes text and presses Enter, steering a working Codex turn instead of
+queuing a new one. Processing can wait for the next model/tool boundary. Send
+reports without `--wait`: reporting must not wait for the leader's turn to end.
+Put the initial task in the launch and wait for readiness before follow-ups.
+If a send fails or delivery is unclear, inspect the terminal before resending;
+for `blocked`, read the reason without using `--force` to bypass a decision.
+Successful submission and an ended turn do not prove receipt or task completion;
+read the actual report and verify its evidence. `hc wait --output` is for plain
+programs, not agent reports.
 
-Thread tools can read saved history from another server while reporting
-`notLoaded`; this was observed with the same test. That status and an immediate
-`wait_threads` return do not establish whether the owning Herdr terminal is idle
-or finished. For sessions owned by the current app-server, use its native
-send/read/wait tools. For a Herdr-owned session, await its queued native report
-and use `hc get`/`hc wait` for the owning process's lifecycle when needed. Use
-`hc read` for terminal diagnostics or transcript capture, not routine task relay.
+Keep `--no-daemon` so commands execute under the Herdr terminal. Do not use
+`codex queue` for this route: it defers messages to the next turn, so a leader
+waiting in its current turn can leave the worker's reply pending. Use
+`hc get` / `hc wait` for the owning terminal's lifecycle. Another server's thread
+tools can read saved history while reporting `notLoaded`; that status or an
+immediate `wait_threads` return does not establish whether the worker is idle or
+finished. Do not resume another copy of a live worker to fix those statuses.
 
 ## Explicit cross-harness assignments
 
@@ -70,3 +74,4 @@ delivery across harnesses or silently change the requested model.
 
 - [Claude Code cross-session messaging](https://code.claude.com/docs/en/cross-session-messaging)
 - [Codex queue](https://learn.chatgpt.com/docs/cli/reference#codex-queue)
+- [Codex steering and queuing](https://learn.chatgpt.com/docs/prompting#steering-and-queuing)

@@ -67,7 +67,7 @@ agents would write into yours; record what is worth keeping yourself.
 
 ## Follow through
 
-- Send feedback to the same agent so it keeps its context. For subagents, use the harness's native subagent tools. For workers, use its [cross-session communication](../herdr-core/references/communication.md); Herdr owns their terminals and processes while native sessions carry task messages and results.
+- Send feedback to the same agent so it keeps its context. For subagents, use the harness's native subagent tools. For independent workers, use [worker communication](../herdr-core/references/communication.md): `hc send` for Codex, native messaging for Claude Code. Herdr owns workers' terminals and processes.
 - Check the actual model as well as the result. The owner's preference is to reduce avoidable safeguard interruptions while completing the task, not to stop on every intervention. Report a refusal or fallback, preserve the work and allow the client's automatic fallback to continue the authorized task. Handle any remaining blocker in the leadership session or report it. Attribute work to the model that did it; do not repeatedly rephrase a blocked request. Focused briefs reduce unnecessary context, but cannot guarantee that safeguards never trigger.
 - A worker with its own branch that needs the target's changes merges the target into its branch; rebasing a pushed branch would need a force-push.
 - For page changes, report visual acceptance apart from functional checks: screenshot the page as the preview skill describes, or give the user its preview link and say that visual acceptance is pending.
