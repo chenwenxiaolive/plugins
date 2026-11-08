@@ -77,9 +77,11 @@ it loaded:
   turn, and the owner's screen shows nothing pending. Codex also accepts it
   while no session owns the thread; the next owner runs it before any other
   input.
-- A thread on your own app-server, one it created or adopted:
-  `send_message_to_thread`, with `read_thread` and `wait_threads`. A message to
-  an active turn steers it; an idle thread starts a turn.
+- A thread on your own app-server, one it created with `create_thread` or
+  adopted: `send_message_to_thread`, with `read_thread` and `wait_threads`. A
+  message to an active turn steers it; an idle thread starts a turn. These
+  thread tools are not the native subagent tools (`spawn_agent` and its
+  message and wait tools).
 
 Queued text uses the recipient's current model. On 2026-11-08, Codex 0.167.0
 `--no-daemon` owners started a queued message within 10 s when idle or when their
