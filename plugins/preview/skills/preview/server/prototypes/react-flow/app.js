@@ -229,7 +229,7 @@
         onMoveStart: (event) => { if (event) moved(); },
       },
       h(Background, { gap: 24, size: 1.5 }),
-      h(Controls, { showInteractive: false, showFitView: false, onZoomIn: moved, onZoomOut: moved },
+      h(Controls, { position: 'top-left', showInteractive: false, showFitView: false, onZoomIn: moved, onZoomOut: moved },
         h(ControlButton, {
           className: 'react-flow__controls-fitview', title: 'fit view', 'aria-label': 'fit view',
           onClick: () => { userMoved.current = false; showAll(false); },
