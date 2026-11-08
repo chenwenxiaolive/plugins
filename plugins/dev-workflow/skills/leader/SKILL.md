@@ -11,9 +11,16 @@ understanding, planning, splitting, integration and the final review.
 
 Here, a subagent is a child agent created and managed by the current harness's
 native tools. A worker is an independent interactive CLI session launched
-through Herdr. Agent is the common term for both. Creation and lifecycle
-ownership determine the term; checkout placement and message transport are
-separate choices. A worker using native cross-session messages remains a worker.
+through Herdr. Agent is the common term for both. A worker using native
+cross-session messages remains a worker.
+
+Each working directory has one independent session: the leader or a worker.
+That session may create multiple native subagents in its own directory. For code
+work, this boundary is the checkout/worktree root; working in its subdirectories
+stays within the boundary. Never assign a subagent to another working directory
+or worktree, including through a native worktree-isolation option. Work in another
+directory belongs to an independent worker there, which may create its own local
+subagents.
 
 Keep the current leader's harness, model and reasoning effort. Subagents and
 workers inherit those settings unless the user explicitly chooses otherwise.
@@ -24,8 +31,8 @@ a fixed model pairing.
 ## Plan and delegate
 
 - Make small changes yourself under [implement](../implement/SKILL.md), even across several files. For scoped work in the current checkout, including code changes, prefer native subagents (Codex's `spawn_agent`, Claude Code's Agent tool). Invoking this skill authorizes that delegation. Frontend assignments include layout, visuals and interactions.
-- Use [herdr-core](../herdr-core/SKILL.md) for an independently watchable or steerable session or a task with its own branch/MR. An explicit request for a model in another harness, such as Opus from a Codex leader, overrides the same-harness default. Preserve that choice and use the explicit cross-harness communication route.
-- Herdr workers get a directory where no other Claude Code or Codex instance runs, your checkout included. A code worker gets a worktree slot such as `/volume/worktree/<repo>/dev-1`, reused under the [worktree rules](../implement/SKILL.md#start-or-resume); prefer a free slot whose remote counterpart already has its environment, since a first build is slow. A Herdr worker that changes no repository files, such as a deployment, also gets its own directory, such as a free slot, and its brief names the remote paths it needs instead of using them as its cwd. Invoking this skill authorizes creating worktrees, their branches and, when remote checks are needed, their remote counterparts; native subagents need no new worktree.
+- Use [herdr-core](../herdr-core/SKILL.md) for work in another directory/worktree, an independently watchable or steerable session, or a task with its own branch/MR. An explicit request for a model in another harness, such as Opus from a Codex leader, overrides the same-harness default. Preserve that choice and use the explicit cross-harness communication route.
+- Herdr workers get a directory where no other independent Claude Code or Codex session runs, your checkout included. A code worker gets a worktree slot such as `/volume/worktree/<repo>/dev-1`, reused under the [worktree rules](../implement/SKILL.md#start-or-resume); prefer a free slot whose remote counterpart already has its environment, since a first build is slow. A Herdr worker that changes no repository files, such as a deployment, also gets its own directory, such as a free slot, and its brief names the remote paths it needs instead of using them as its cwd. Invoking this skill authorizes creating worktrees, their branches and, when remote checks are needed, their remote counterparts. Native subagents stay with their parent session.
 - Assign disjoint files to the leader, subagents and workers, naming new files too. Independent MRs must not touch the same files; a task that builds on another starts from that task's branch.
 - Explain the split briefly, then start independent tasks in parallel. A Herdr worker grows to about 500 MB (measured 2026-11-02) and a fresh one doesn't show in `free -m` yet, so start them in batches that keep about 500 MB available.
 - Give each agent its own GPUs, or a whole node when the project's validation needs one; never the same GPUs to two agents.
@@ -33,13 +40,14 @@ a fixed model pairing.
 
 ## Shared checkout
 
-Native subagents may edit their assigned files in the leader's checkout. No other
-agent, including the leader, edits those files until the assignment returns.
-The leader alone stages, commits, switches branches, integrates, pushes and
-manages the MR. Wait for all writers to finish before changing HEAD or integrating.
-Commit the accepted changes before validation; keep the validation checkout clean
-and idle at that SHA until checks finish. The leader may delegate checks on that
-commit and remains responsible for the full implement delivery and review.
+Native subagents may edit their assigned files in their parent's checkout.
+No other agent, including the parent, edits those files until the assignment
+returns. The independent session in that checkout, whether leader or worker,
+alone stages, commits, switches branches, integrates, pushes and manages its
+assigned delivery. Wait for all local writers to finish before changing HEAD or
+integrating. Commit the accepted changes before validation; keep the checkout
+clean and idle at that SHA until checks finish. The parent may delegate checks
+on that commit and remains responsible for its implement delivery and review.
 
 ## Brief each assignment
 

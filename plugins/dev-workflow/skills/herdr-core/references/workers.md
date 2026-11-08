@@ -17,17 +17,20 @@ user to sign in only if that client's authentication is missing.
 
 ## Start a worker
 
-These launch and exclusive-directory rules apply to external Herdr workers.
-Native subagents share their leader's checkout under
+Each working directory has one independent session. A worker may create native
+subagents in its own working directory/checkout under
 [leader's shared-checkout rules](../../leader/SKILL.md#shared-checkout).
+Never place a native subagent in another working directory or worktree; arrange
+an independent worker there instead. For code work, subdirectories within the
+same checkout/worktree are part of the same boundary.
 
 Give each Herdr worker its own `--name`, an exact scope and the whole task in the
-launch (a message to a booting agent can be lost), and a `--cwd` where no other Claude
-Code or Codex instance runs: instances in one directory share its working tree,
-Git index and HEAD, uncommitted files, and per-directory session state and
-settings. Set the model and effort explicitly; if unavailable, tell the user
+launch (a message to a booting agent can be lost), and a `--cwd` where no other
+independent Claude Code or Codex session runs: sessions in one directory share
+its working tree, Git index and HEAD, uncommitted files, and per-directory session
+state and settings. Set the model and effort explicitly; if unavailable, tell the user
 instead of substituting. Both run with full access and no approval prompts, so the
-task sets what they may change and whether they may start other agents.
+task sets what they and their local native subagents may change.
 
 Use the leader's harness, model and reasoning effort unless the user explicitly
 chooses otherwise. Read [communication.md](communication.md) and include the

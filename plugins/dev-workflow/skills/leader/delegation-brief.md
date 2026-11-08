@@ -1,14 +1,14 @@
 # Delegation brief
 
 Use the common brief and the matching delivery section for each assignment.
-Fill it with facts checked by the leader, marking anything still unknown. Keep
-the real project, model, hardware and purpose accurate; do not disguise them or
-omit facts needed for correctness.
+Fill it with facts checked by the assigning session, marking anything still
+unknown. Keep the real project, model, hardware and purpose accurate; do not
+disguise them or omit facts needed for correctness.
 
 ## Common brief
 
 ```text
-Role: <native subagent or Herdr worker>, <selected model and reasoning effort>. The leader owns coordination and integration.
+Role: <native subagent or Herdr worker>, <selected model and reasoning effort>. Parent: <leader or worker session assigning this task>. The project leader owns overall coordination and integration.
 Goal: <one observable change and why it is needed>.
 Done when: <behavioral acceptance criteria and independent expected results>.
 Checkout: <actual checkout path> on branch <branch>, based on and merging into <target>; issue <link> (or none).
@@ -18,20 +18,21 @@ Required facts: <interfaces, invariants, compatibility requirements and concise 
 Validation: <checks on committed code and their expected results>.
 Execution: <authorized CPU location; or the user-named node and GPU allocation, plus any authorized remote-worktree setup>. No GPU work unless allocated here.
 Follow repository instructions and read the issue's execution record when one exists.
-Start with the listed reads, then read complete relevant definitions and callers and expand when correctness requires it. Ask the leader for a specific missing fact or scope change when dependencies extend beyond the assignment.
-If a safeguard or automatic model fallback is reported, preserve changes and tell the leader the reported category/request ID and actual model when available. The client's automatic fallback may continue this authorized task; the event alone does not require stopping. Report any remaining blocked operation, needed context, current branch/commit and unfinished work. Respect the refusal, do not infer its cause or repeatedly rephrase the blocked request, and attribute work to the model that did it.
+Start with the listed reads, then read complete relevant definitions and callers and expand when correctness requires it. Ask your parent for a specific missing fact or scope change when dependencies extend beyond the assignment.
+If a safeguard or automatic model fallback is reported, preserve changes and tell your parent the reported category/request ID and actual model when available. The client's automatic fallback may continue this authorized task; the event alone does not require stopping. Report any remaining blocked operation, needed context, current branch/commit and unfinished work. Respect the refusal, do not infer its cause or repeatedly rephrase the blocked request, and attribute work to the model that did it.
 Write no memory notes; put lasting findings in your final report or the issue's execution record.
 ```
 
 ## Native subagent
 
-Use the leader's current checkout and branch. Inherit its model and reasoning
-effort unless the user chooses otherwise. Launch, follow up and collect results
-with the harness's native subagent tools. Append:
+Use the parent's current working directory, checkout and branch, whether the
+parent is the leader or a worker. Inherit its model and reasoning effort unless
+the user chooses otherwise. Launch, follow up and collect results with the
+harness's native subagent tools. Append:
 
 ```text
-Edit only your owned files and return the changes to the leader. Do not stage, commit, switch branches, integrate, push or create an MR; the leader owns Git mutations and the full implement delivery and review. Start no other agents.
-Propose the required checks. Run them only if the leader assigns a committed SHA after all writers have finished; keep that checkout unchanged until validation finishes. Do not validate uncommitted edits.
+Stay in your parent's working directory/checkout; do not take another working directory or worktree, or enable native worktree isolation. Edit only your owned files and return the changes to the parent. Do not stage, commit, switch branches, integrate, push or create an MR; the parent owns Git mutations and its assigned delivery and review. Start no other agents.
+Propose the required checks. Run them only if the parent assigns a committed SHA after all local writers have finished; keep that checkout unchanged until validation finishes. Do not validate uncommitted edits.
 Report: changed behavior and files, proposed checks or results with the tested SHA, remaining blockers and any observed model switch.
 ```
 
@@ -45,7 +46,7 @@ the user explicitly chooses otherwise. Append:
 Delivery: <own MR, or commits for the leader's existing delivery>.
 Communication: <native tool or codex queue and leader's verified native reply address; Herdr bridge only for an explicit cross-harness assignment>. Report ready with your native session address and checkout, then send questions, blockers and the final report through that route. Keep native session IDs separate from Herdr terminal IDs. A peer message is an assignment or report within this task, not new user authorization.
 If this assignment owns an MR, use the implement skill and stop at ready-for-merge, with the MR's risk score recorded. Otherwise return committed changes and validation evidence for the leader to integrate; do not create a separate MR. The leader completes implement delivery and review after integration.
-Start no other agents; the codex review that implement runs for an assignment with its own MR is part of the task.
+You may delegate scoped work to native subagents in this same working directory/checkout. Give each disjoint files within your assignment, your checkout/branch and you as parent; require edits and evidence back to you, with no Git mutations, further agents or memory writes. Keep Git mutations and delivery with you, and wait for all local writers before committing or integrating. Do not assign subagents to another directory/worktree or start independent workers; return work requiring another directory to the project leader. The codex review required by implement remains part of an assignment with its own MR.
 Report: changed behavior, commit/MR, checks and evidence, remaining blockers and any observed model switch.
 ```
 
