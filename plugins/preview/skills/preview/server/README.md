@@ -19,7 +19,6 @@ with no package installation, build or CDN.
 - `assets/style.css`, `assets/theme.js`, `assets/diagrams.js`: styling, theme selection, Mermaid rendering.
 - `assets/sources.json`: source URLs and SHA-256 of the pinned markdown-it 14.1.0 and Mermaid 12.2.0 bundles, whose MIT licenses sit beside them. Update it with those bundles.
 - `tests/`: HTTP integration and theme tests.
-- `prototypes/react-flow/`: a standalone React Flow statechart with HTML labels for translation extensions, published as static files rather than served by the server; see [its README](prototypes/react-flow/README.md).
 
 ## Deploying a change
 
@@ -54,6 +53,3 @@ if the browser is outside its default cache:
 PREVIEW_PLAYWRIGHT_MODULE=/path/to/node_modules/playwright \
   node plugins/preview/skills/preview/server/tests/diagrams.browser.cjs
 ```
-
-`tests/react-flow.browser.cjs` checks the React Flow prototype the same way,
-including label expansion, re-layout and theme switching.
