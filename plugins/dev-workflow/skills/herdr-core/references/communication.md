@@ -29,11 +29,12 @@ Repeat the check after any change of owner.
 ## Headers and late messages
 
 Start every task message and report with a header such as
-`[#71 seq 4 validate issue-71-fix@3f410e3 from <sender address>]`: task,
-the sender's own sequence number, phase, branch and head, and sender. A reply
-names the seq it answers, so the unanswered seqs are the messages that may still
-arrive. The issue's execution record holds the current phase and head; no other
-store is needed.
+`[#71 seq 4 validate issue-71-fix@3f410e3 2026-11-08T14:20Z from <sender address>]`:
+task, the sender's own sequence number, phase, branch and head, UTC send time
+and sender. A reply names the seq it answers, so the unanswered seqs are the
+messages that may still arrive. The issue's execution record holds the current
+phase and head, and the seqs the leader has superseded; no other store is
+needed.
 
 Delivery can lag by turns or by owners, so judge each message against the
 current record, not by when it arrives. A message is stale when its seq is below
@@ -43,7 +44,9 @@ report, a rejected diagnosis, an obsolete commit, a launch instruction for a
 dropped experiment. A stale message changes nothing: no branch switch, edit, job
 or review rerun, merge or renewed approval request. Mention a stale backlog
 once, in the next report or record update. A message newer than the record still
-advances the task.
+advances the task. Before acting on one that arrives more than ten minutes after
+its send time, check the execution record or ask the sender: it may have been
+superseded while it waited.
 
 ## Claude Code
 
@@ -116,10 +119,10 @@ it passes the route check.
 
 A thread has one live owner. To move it:
 
-1. List the seqs the worker has not answered. They reach the successor before anything else, its resume prompt included.
+1. List the seqs the worker has not answered and mark the superseded ones in the execution record. They reach the successor before anything else, its resume prompt included, so the prompt cannot cancel them.
 2. Keep running work alive: the worker is idle, its jobs run outside its process (hc terminals with `--outlive-parent`, or detached remote runs), and its checkout stays at their revision until they finish. Its hc children started without `--outlive-parent` end with it; wait for them first.
 3. End the owner with `hc kill <worker>` and confirm `hc get` reports `finished`.
-4. Start one successor with the same UUID in the same checkout, normally in a new Herdr terminal. Its prompt gives the current phase, head and last valid seq, and which unanswered seqs are superseded:
+4. Start one successor with the same UUID in the same checkout, normally in a new Herdr terminal. Its prompt gives the current phase, head and last valid seq:
 
    ```sh
    hc run --bg --name <name> --cwd <checkout> \
