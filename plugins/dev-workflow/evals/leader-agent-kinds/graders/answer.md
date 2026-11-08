@@ -14,7 +14,9 @@ The docs worker keeps its branch/MR delivery, uses codex queue with verified
 native session identities for task messages and reports, and uses Herdr for
 terminal/process inspection and cleanup after acceptance while preserving its
 worktree. Native reports and idle notices still require verification before
-acceptance. Exact wording and headings are not required.
+acceptance. Exact wording and headings are not required, and further details from
+the skill references, such as the route check, message headers or missing-ACK
+handling, are not faults.
 
 FAIL if it treats the docs worker as a native child because it uses Codex
 messaging, assumes native child-agent lifecycle tools own that external CLI,
