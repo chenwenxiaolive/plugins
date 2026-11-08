@@ -14,5 +14,6 @@ worktree, perhaps using native worktree isolation? If that does not fit our
 rules, give the appropriate arrangement, including where any subagents belong,
 who owns Git in each checkout and when a worker with active local subagents may
 commit or integrate. Explain how results reach the leader. Keep the current
-harness/model/effort and prefer native messaging. Explain the plan only; do not
+harness/model/effort and use the configured communication route for each agent
+kind. The leader's Herdr terminal is t3. Explain the plan only; do not
 launch agents, run shell commands or edit files. Reading skill references is fine.
