@@ -155,13 +155,16 @@ function labelTexts(diagram) {
   };
 }
 
-// Change label text in the DOM the way a translation extension does, outside React.
+// Change label text in the DOM outside React, as a translation extension does: replace it with a longer
+// translation, or restore it and add a translation below it.
 function translate(mode) {
+  const suffix = ' – längere übersetzte Beschriftung';
   const targets = document.querySelectorAll('.node.state p, .edge-label');
   for (const element of targets) {
     if (mode === 'longer') {
-      element.firstChild.nodeValue += ' – längere übersetzte Beschriftung';
+      element.firstChild.nodeValue += suffix;
     } else {
+      element.firstChild.nodeValue = element.firstChild.nodeValue.replace(suffix, '');
       const translation = document.createElement('font');
       translation.className = 'simulated-translation';
       translation.append(document.createElement('br'), '双语译文：' + '较长的中文翻译文本'.repeat(2));
@@ -218,18 +221,23 @@ async function main() {
       assert.equal(result.layouts, layouts, 'layout repeated without a size change');
       return result;
     };
-    const fitted = (result) => [...Object.values(result.nodes), ...Object.values(result.labels)]
-      .every((item) => inside(item.box, result.canvas));
+    // The default view shows the whole layout at natural size inside a canvas as tall as the layout.
+    const shownInFull = (result, stage) => {
+      assert.equal(result.viewport.k, 1, `${stage}: text is scaled`);
+      for (const [id, item] of [...Object.entries(result.nodes), ...Object.entries(result.labels)]) {
+        assert.ok(inside(item.box, result.canvas), `${stage}: ${id} is outside the canvas`);
+      }
+    };
     const theme = async (value) => {
       await page.selectOption('#theme-select', value);
       await page.waitForFunction((expected) => document.documentElement.dataset.theme === expected, value);
     };
-    const shot = (name) => page.screenshot({ path: path.join(scratch, `${name}.png`) });
+    const shot = (name) => page.screenshot({ path: path.join(scratch, `${name}.png`), fullPage: true });
 
     await page.goto(base + '/index.html');
     const initial = await settle(1);
     checkDiagram(initial, 'initial');
-    assert.ok(fitted(initial), 'initial layout is not fitted to the view');
+    shownInFull(initial, 'initial');
     for (const [id, [, label]] of Object.entries(NODES)) {
       if (label) assert.deepEqual(initial.nodes[id].lines, label.split('\n'), `${id} label`);
     }
@@ -262,11 +270,10 @@ async function main() {
       await page.evaluate(() => window.getSelection().removeAllRanges());
     }
 
-    const changed = await page.evaluate(translate, 'longer');
-    assert.equal(changed, 18);
+    assert.equal(await page.evaluate(translate, 'longer'), 18);
     const longer = await settle(2);
     checkDiagram(longer, 'longer');
-    assert.ok(fitted(longer), 'longer layout is not fitted to the view');
+    shownInFull(longer, 'longer');
     assert.ok(longer.nodes.Start.box.height > initial.nodes.Start.box.height, 'longer node labels did not wrap');
     assert.ok(longer.labels['Start-Sample'].box.height > initial.labels['Start-Sample'].box.height,
       'longer edge labels did not wrap');
@@ -274,17 +281,29 @@ async function main() {
     await page.evaluate(translate, 'bilingual');
     const bilingual = await settle(3);
     checkDiagram(bilingual, 'bilingual');
-    assert.ok(fitted(bilingual), 'bilingual layout is not fitted to the view');
-    assert.ok(bilingual.nodes.Start.box.height > longer.nodes.Start.box.height, 'bilingual node labels missing');
+    shownInFull(bilingual, 'bilingual');
+    assert.ok(bilingual.nodes.Start.box.height > initial.nodes.Start.box.height, 'bilingual node labels missing');
+    assert.ok(bilingual.canvas.height > initial.canvas.height, 'canvas did not grow with the layout');
     const translated = labelTexts(bilingual);
-    assert.match(translated.nodes.Sample[0], /längere übersetzte Beschriftung\s*双语译文/);
-    assert.match(translated.labels['Stop-Decode'], /^Continue – längere übersetzte Beschriftung\s*双语译文/);
+    assert.match(translated.nodes.Sample[0], /^Sample and emit a token双语译文/);
+    assert.match(translated.labels['Stop-Decode'], /^Continue双语译文/);
     await shot('light-after');
     await theme('dark');
     await shot('dark-after');
 
+    // The wheel scrolls the page; the diagram keeps its view, layout and text.
+    const canvasTop = (await page.locator('.react-flow').boundingBox()).y;
+    await page.mouse.move(720, 450);
+    await page.mouse.wheel(0, 300);
+    await page.waitForFunction(() => window.scrollY > 0);
+    const scrolled = await diagram();
+    assert.deepEqual(scrolled.viewport, bilingual.viewport, 'the wheel moved the diagram');
+    assert.deepEqual(labelTexts(scrolled), translated, 'scrolling lost translated text');
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.waitForFunction((top) => document.querySelector('.react-flow').getBoundingClientRect().y === top, canvasTop);
+
     // Viewing changes move or scale the diagram without another layout or any text loss.
-    const viewed = [];
+    const viewed = ['wheel scroll'];
     const expectView = async (name, action, check) => {
       const before = await diagram();
       await action();
@@ -301,7 +320,7 @@ async function main() {
         assert.ok(Math.abs(after.nodes[id].box.x - before.nodes[id].box.x) < 0.5
           && Math.abs(after.nodes[id].box.y - before.nodes[id].box.y) < 0.5, `${name} moved node ${id}`);
       }
-      check?.(before.viewport, after.viewport, after);
+      check(before.viewport, after.viewport, after);
       viewed.push(name);
     };
     const canvas = await page.locator('.react-flow').boundingBox();
@@ -311,14 +330,18 @@ async function main() {
       await page.mouse.move(canvas.x + 150, canvas.y + 110, { steps: 8 });
       await page.mouse.up();
     }, (before, after) => assert.ok(Math.abs(after.tx - before.tx - 120) < 2 && Math.abs(after.ty - before.ty - 80) < 2));
-    await expectView('wheel zoom', async () => {
-      await page.mouse.move(canvas.x + canvas.width / 2, canvas.y + canvas.height / 2);
-      await page.mouse.wheel(0, -400);
+    await expectView('ctrl+wheel zoom', async () => {
+      await page.mouse.move(canvas.x + canvas.width / 2, canvas.y + 300);
+      await page.keyboard.down('Control');
+      await page.mouse.wheel(0, -200);
+      await page.keyboard.up('Control');
     }, (before, after) => assert.ok(after.k > before.k));
     await expectView('zoom out', () => page.click('.react-flow__controls-zoomout'),
       (before, after) => assert.ok(after.k < before.k));
-    await expectView('fit view', () => page.click('.react-flow__controls-fitview'),
-      (before, after, result) => assert.ok(fitted(result)));
+    await expectView('fit view', () => page.click('.react-flow__controls-fitview'), (before, after, result) => {
+      assert.deepEqual(after, bilingual.viewport);
+      shownInFull(result, 'fit view');
+    });
     await theme('light');
     const final = await diagram();
     assert.equal(final.layouts, 3, 'theme change caused a layout');

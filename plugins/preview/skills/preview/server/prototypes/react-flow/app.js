@@ -2,7 +2,7 @@
 (() => {
   const { createContext, createElement: h, memo, useContext, useEffect, useMemo, useRef, useState } = React;
   const {
-    ReactFlow, ReactFlowProvider, Handle, Position, BaseEdge, EdgeLabelRenderer, Controls, Background,
+    ReactFlow, ReactFlowProvider, Handle, Position, BaseEdge, EdgeLabelRenderer, Controls, ControlButton, Background,
     useNodesState, useReactFlow,
   } = window.ReactFlow;
 
@@ -93,7 +93,8 @@
       ];
       routes.set(edge.id, { path: basisPath(route), label: { x, y } });
     }
-    return { positions, routes };
+    const { width, height } = g.graph();
+    return { positions, routes, width, height };
   }
 
   const Measure = createContext(null);
@@ -128,7 +129,16 @@
   }
 
   const nodeTypes = { shape: ShapeNode };
+  // React Flow's own fit-view icon, which its Controls do not export.
+  const FIT_ICON = 'M3.692 4.63c0-.53.4-.938.939-.938h5.215V0H4.708C2.13 0 0 2.054 0 4.63v5.216h3.692V4.631zM27.354 0h-5.2v3.692h5.17c.53 0 .984.4.984.939v5.215H32V4.631A4.624 4.624 0 0027.354 0zm.954 24.83c0 .532-.4.94-.939.94h-5.215v3.768h5.215c2.577 0 4.631-2.13 4.631-4.707v-5.139h-3.692v5.139zm-23.677.94c-.531 0-.939-.4-.939-.94v-5.138H0v5.139c0 2.577 2.13 4.707 4.708 4.707h5.138V25.77H4.631z';
   const edgeTypes = { routed: RoutedEdge };
+
+  // The canvas takes the layout's height at up to natural size, so longer labels lengthen the page instead of shrinking text.
+  function defaultView(layout) {
+    const width = document.getElementById('diagram').clientWidth;
+    const zoom = Math.min(1, width / layout.width);
+    return { viewport: { x: (width - layout.width * zoom) / 2, y: 0, zoom }, height: Math.ceil(layout.height * zoom) };
+  }
 
   function Diagram({ graph }) {
     const flow = useReactFlow();
@@ -136,7 +146,7 @@
     const [nodes, setNodes, onNodesChange] = useNodesState(useMemo(() => graph.nodes.map((node) => ({
       id: node.id, type: 'shape', position: { x: 0, y: 0 }, data: node,
     })), [graph]));
-    const [visible, setVisible] = useState(false);
+    const [height, setHeight] = useState(null);
     const userMoved = useRef(false);
 
     // One observer measures every label; a layout runs only after a measured size actually changes.
@@ -188,29 +198,38 @@
       data: { label: edge.label, route: layout?.routes.get(edge.id) },
     })), [graph, layout]);
 
-    // Fit each new layout until the viewer pans or zooms; the fit-view control resumes fitting.
+    // Show each new layout in full until the viewer pans or zooms; the fit-view control resumes that.
+    const showAll = (moved) => {
+      const view = defaultView(layout);
+      setHeight(view.height);
+      if (!moved) flow.setViewport(view.viewport);
+    };
     useEffect(() => {
-      if (!layout || userMoved.current) return;
-      flow.fitView({ padding: 0.08 }).then(() => setVisible(true));
+      if (layout) showAll(userMoved.current);
     }, [layout]);
+    const moved = () => { userMoved.current = true; };
 
     return h(Measure.Provider, { value: measure },
-      h('div', { className: visible ? 'flow' : 'flow pending', 'data-layouts': layout?.version ?? 0, style: { height: '100%' } },
-        h(ReactFlow, {
-          nodes, edges, nodeTypes, edgeTypes, onNodesChange,
-          nodesDraggable: false, nodesConnectable: false, elementsSelectable: false,
-          nodesFocusable: false, edgesFocusable: false,
-          minZoom: 0.2, maxZoom: 4,
-          onMoveStart: (event) => { if (event) userMoved.current = true; },
-        },
-        h(Background, { gap: 24, size: 1.5 }),
-        h(Controls, {
-          showInteractive: false,
-          fitViewOptions: { padding: 0.08 },
-          onZoomIn: () => { userMoved.current = true; },
-          onZoomOut: () => { userMoved.current = true; },
-          onFitView: () => { userMoved.current = false; },
-        }))));
+      h('div', {
+        className: height === null ? 'flow pending' : 'flow',
+        'data-layouts': layout?.version ?? 0,
+        style: { height: height ?? '80vh' },
+      },
+      h(ReactFlow, {
+        nodes, edges, nodeTypes, edgeTypes, onNodesChange,
+        nodesDraggable: false, nodesConnectable: false, elementsSelectable: false,
+        nodesFocusable: false, edgesFocusable: false,
+        // The wheel scrolls the page; pinch, Ctrl+wheel and the controls zoom.
+        zoomOnScroll: false, preventScrolling: false,
+        minZoom: 0.2, maxZoom: 4,
+        onMoveStart: (event) => { if (event) moved(); },
+      },
+      h(Background, { gap: 24, size: 1.5 }),
+      h(Controls, { showInteractive: false, showFitView: false, onZoomIn: moved, onZoomOut: moved },
+        h(ControlButton, {
+          className: 'react-flow__controls-fitview', title: 'fit view', 'aria-label': 'fit view',
+          onClick: () => { userMoved.current = false; showAll(false); },
+        }, h('svg', { viewBox: '0 0 32 30' }, h('path', { d: FIT_ICON })))))));
   }
 
   const main = document.getElementById('diagram');

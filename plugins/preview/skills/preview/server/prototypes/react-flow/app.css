@@ -34,14 +34,14 @@
   --dots: #2c3b50;
 }
 * { box-sizing: border-box; }
-html, body { height: 100%; }
-body { margin: 0; display: flex; flex-direction: column; }
+html { scrollbar-gutter: stable; }
+body { margin: 0; }
 header { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; padding: 12px 24px; background: var(--header-background); color: var(--header-text); }
 h1 { margin: 0; font-size: 17px; font-weight: 650; }
 header label { display: flex; align-items: center; gap: 8px; font-size: 13px; }
 select { font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 7px; padding: 5px 8px; cursor: pointer; }
 select:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-main { position: relative; flex: 1; min-height: 0; }
+main { position: relative; }
 .error { margin: 24px; }
 svg.defs { position: absolute; }
 #arrow path { fill: var(--edge); }
@@ -61,13 +61,12 @@ svg.defs { position: absolute; }
 .react-flow__attribution a { color: var(--muted); }
 /* Keep the first layout and fit out of sight. */
 .pending .react-flow__viewport { opacity: 0; }
-/* React Flow turns pointer events off for nodes that cannot be selected or dragged; labels need them for text selection.
-   Edges follow the layout's routes, so the handles only satisfy React Flow's edge model. */
+/* Edges follow the layout's routes, so the handles only satisfy React Flow's edge model. */
 .react-flow__handle { opacity: 0; }
 
 .node.state {
   width: max-content;
-  max-width: 20rem;
+  max-width: 24rem;
   padding: 9px 14px;
   border: 1px solid var(--node-border);
   border-radius: 10px;
@@ -76,6 +75,7 @@ svg.defs { position: absolute; }
   line-height: 1.4;
   text-align: center;
   overflow-wrap: anywhere;
+  /* React Flow turns pointer events off for nodes that cannot be selected or dragged. */
   pointer-events: auto;
   cursor: text;
   user-select: text;
@@ -88,7 +88,7 @@ svg.defs { position: absolute; }
 .edge-label {
   position: absolute;
   width: max-content;
-  max-width: 15rem;
+  max-width: 16rem;
   padding: 2px 6px;
   border-radius: 6px;
   background: var(--background);
