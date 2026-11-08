@@ -1,6 +1,6 @@
 ---
 name: preview
-description: "Publishes standalone HTML and Markdown pages through this machine's preview server, checks them, screenshots them when the layout matters (the headless browser is on sh-gate) and returns their links; also restarts the service. Use when the user wants a page, report or preview to view in a browser, or asks about an existing /preview page, including how it looks on a phone or in dark mode. Not for tracked repository documentation, which stays where it is."
+description: "Publishes standalone HTML and Markdown pages through this machine's preview server, checks them, screenshots them when the layout matters (the headless browser is on sh-gate) and returns their links; also restarts the service. Use when the user wants a page, report or preview to view in a browser, or asks about an existing /preview page, including how it looks in dark mode. Not for tracked repository documentation, which stays where it is."
 ---
 
 # Preview
@@ -14,5 +14,5 @@ has this machine's root, browser base URL and token, and how to restart the serv
 - Tracked repository docs stay where they are; to preview one, copy it in and call it a snapshot.
 - Publish only content meant for the user: anyone with the token can read the whole root, over plain HTTP.
 - The link is the browser base URL plus the URL-encoded path below the root (no `/preview` prefix). Check it with `curl` and the access token as service.md shows: the status, the content type and some of this page's text; Markdown must come back as `text/html`, never as Markdown source.
-- When the layout matters (charts, wide tables, phone width, dark mode), screenshot the page with the headless browser service.md names and fix what you see before returning the link.
+- When the layout matters (charts, wide tables, dark mode), screenshot the page at desktop width with the headless browser service.md names and fix what you see before returning the link; the user doesn't view pages on a phone.
 - If the service is down, restart it as service.md says and check again; if it still fails, report the file's path and the failed check.
