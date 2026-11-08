@@ -33,6 +33,11 @@ Push the branch and open the MR with the project's template: behavior, issue
 links, validation evidence and limitations. Use a closing reference only when the
 MR completes the issue.
 
+In Mermaid state diagrams, use commas instead of literal `;` in transition labels:
+the parser can turn the remaining words into disconnected states without an error.
+When asked to fix a published diagram, correct the MR/PR's Mermaid source as well
+as any preview copy.
+
 For the implementation's review or a requested standalone review, read
 [review.md](references/review.md): the review command, finding criteria, corrective
 round limit and status record. A standalone review ends with a verdict in chat;
