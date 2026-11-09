@@ -1,0 +1,3 @@
+interface:
+  display_name: "SiFlow AI Platform"
+  short_description: "Inspect SiFlow AI platform tasks, logs and resources"
