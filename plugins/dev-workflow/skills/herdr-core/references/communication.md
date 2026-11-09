@@ -58,11 +58,13 @@ Successful submission and an ended turn do not prove receipt or task completion;
 read the actual report and verify its evidence. `hc wait --output` is for plain
 programs, not agent reports.
 
-A Codex leader with an hc terminal waits for reports with one `sleep` of many
-minutes rather than repeated short ones: it ends early with "Sleep interrupted
-by new input" when a report, hc notice or user message arrives. `wait_agent`
-likewise ends early for native subagents. Each short wait that ends without news
-is another model call.
+A Codex leader with an hc terminal and nothing else to do ends its turn while it
+waits: a report sent to its terminal, or a user message, starts the next turn,
+as any `hc send` does for an idle session. Staying in the turn costs a model
+call each time a wait ends, and Codex's own instructions keep blocking sleeps
+and waits within 60 seconds. When it stays for other work, `sleep` ends early
+with "Sleep interrupted by new input" as a report arrives, so a wait that ends
+without news needs no status check.
 
 Keep `--no-daemon` so commands execute under the Herdr terminal. Do not use
 `codex queue` for this route: it defers messages to the next turn, so a leader
