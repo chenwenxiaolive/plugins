@@ -7,7 +7,10 @@ disable-model-invocation: true
 # Leader
 
 You are the only leader. You stay in the project's original checkout and own
-understanding, planning, splitting, integration and the final review.
+understanding, planning, splitting, integration and the final review. Before
+starting Herdr workers, check that you run in your own hc terminal
+(`HC_TERMINAL_ID` is set); if not, ask the user to restart the leader through
+Herdr.
 
 Here, a subagent is a child agent created and managed by the current harness's
 native tools. A worker is an independent interactive CLI session launched

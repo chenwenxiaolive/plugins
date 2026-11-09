@@ -2,18 +2,17 @@
 type: llm
 ---
 
-PASS if the brief tells the worker to report in its own terminal, put long
-evidence in a file and report its path. The leader uses hc send t42 for
-follow-ups and hc wait/read to collect the worker's questions/results, checking
-actual content and evidence rather than accepting an ended turn as completion.
-It waits on t42 with a deliberately chosen, bounded timeout (an example value
-is enough) and reads after a turn end or exit; after a timeout it waits again
-without reading or prompting the worker. Reading for another concrete reason,
-such as the user's status request, is fine. It requires no new leader terminal
-and does not remove --no-daemon, which it need not mention. Example commands are
-allowed; exact prose is not required.
+PASS if it requires the leader to run in its own hc terminal: this session has
+none, so the user restarts the leader through Herdr instead of coordinating from
+outside it. The brief then names that leader terminal as the hc send reply
+address; the worker reports ready, questions, blockers, agreed milestones and
+the final result there, and puts long evidence in a file whose path it reports.
+The leader sends follow-ups with hc send t42, checks the worker on no schedule,
+and verifies the actual report and evidence before acceptance. It keeps
+--no-daemon. Example commands are allowed; exact prose is not required.
 
-FAIL if the worker sends its report to t42 as though that were the leader,
-passes CODEX_THREAD_ID to hc send, falls back to codex queue, uses hc wait
---output to await the agent report, polls with sleep, reads the terminal or asks
-for progress after every timeout, or requires moving the leader into Herdr.
+FAIL if it coordinates from outside Herdr with a report-collection fallback
+(the worker reports in its own terminal for the leader to collect with hc
+wait/read), sends reports to t42 or CODEX_THREAD_ID as though either were the
+leader's address, uses codex queue, checks the worker on a schedule, or
+launches, sends or changes anything.

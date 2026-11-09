@@ -13,7 +13,9 @@ independent session, which may have multiple native subagents there; another
 working directory needs its own independent worker.
 
 Independent workers and persistent programs run as hc terminals while the
-conversation stays in this session, which need not be an hc terminal.
+conversation stays in this session. A session that coordinates workers runs in
+its own hc terminal, whose `HC_TERMINAL_ID` is its address; without one, ask the
+user to start it through Herdr before launching workers.
 `hc --skill` prints the full manual (commands, other
 machines and files, recovery, exit codes); read the relevant sections for
 operations not covered here or in the worker reference.
@@ -30,8 +32,8 @@ Workers normally use the leader's harness, model and reasoning effort.
 
 Independent Codex workers use `hc send` for task instructions, questions and
 results. Claude Code workers use native `ListAgents` / `SendMessage`.
-Read [communication.md](references/communication.md) for addresses, delivery,
-waiting and reports when the leader has no hc terminal. Herdr manages workers'
+Read [communication.md](references/communication.md) for addresses, delivery
+and waiting. Herdr manages workers'
 terminals and processes; native subagents keep their harness's own tools.
 
 - Workers report on their own: ready, questions and blockers, milestones agreed in the brief, and the final result. Between reports, do other useful work or wait for them through the route; a leader whose reports arrive as input, through native messages or `hc send` to its terminal, can end its turn until the next one. Handle the reports already in hand together, questions and blockers first, without waiting for other workers to finish. Reply with an answer, decision or instruction, not an acknowledgement.

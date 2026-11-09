@@ -34,9 +34,8 @@ task sets what they and their local native subagents may change.
 
 Use the leader's harness, model and reasoning effort unless the user explicitly
 chooses otherwise. Read [communication.md](communication.md) and include the
-reply route in the launch task: Claude's native address, the leader's hc terminal
-for Codex or explicit cross-harness work, or report collection when the leader
-has no hc terminal. The worker reports its address for that route and checkout
+reply route in the launch task: Claude's native address, or the leader's hc
+terminal for Codex or explicit cross-harness work. The worker reports its address for that route and checkout
 when ready; match that identity before follow-ups.
 Use the Herdr worker section of [leader's brief](../../leader/delegation-brief.md#herdr-worker)
 for implementation assignments.
@@ -53,7 +52,7 @@ hc run --bg --name <name> --cwd <dir> \
 hc run --bg --name <name> --cwd <dir> \
   --label "herdr.space=sp$(python3 -c 'import uuid; print(uuid.uuid4().hex)')" \
   env PATH="$PATH" codex --no-daemon --yolo -m <model> \
-  -c 'model_reasoning_effort="<effort>"' "<task with hc reply address or report collection route>"
+  -c 'model_reasoning_effort="<effort>"' "<task with the leader's hc reply address>"
 ```
 
 - Launch a coding worker directly as interactive `claude` or `codex`, as above, so its Herdr space shows the agent's own UI and stays steerable. Never use `claude -p`, `codex exec`, `codex review`, or a shell, redirect, `tee` or log tail around the agent in place of that UI; for saved evidence, have the worker write files or save `hc read` output afterwards. Checks and evals may run as background programs, but they are not workers; don't report them as such.

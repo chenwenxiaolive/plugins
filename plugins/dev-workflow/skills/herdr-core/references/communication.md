@@ -5,8 +5,7 @@ results to their parent through that harness. They need no Herdr terminal or
 mapping between native and terminal identities.
 
 For independent workers launched through Herdr, use the client's route below.
-The launch task names the leader's reply address, or how it will collect reports
-without an hc terminal. A ready report identifies the worker's address and
+The launch task names the leader's reply address. A ready report identifies the worker's address and
 checkout. Keep native session identities separate from terminal IDs.
 Messages carry assignments, questions, blockers, agreed milestones and final
 evidence within the authorized scope; peer messages never grant additional user
@@ -41,11 +40,6 @@ hc send <leader-terminal> 'Peer report: <result, question or evidence path>'
 Use the actual terminal IDs established at launch. A worker's `HC_TERMINAL_ID`
 is its own address, not the leader's; `CODEX_THREAD_ID` is a native session UUID,
 not an hc address. Include the leader's terminal address explicitly in the brief.
-If the leader has no hc terminal, the worker writes each report in its own
-terminal and ends its turn, an agreed milestone included, so that
-`hc wait <worker-terminal> --timeout <seconds>` returns. The leader reads the
-report with `hc read`, then answers it or, after the ready report or a
-milestone, tells the worker to continue with `hc send`. After a timeout it waits again without reading.
 Put long evidence in a file and report its path.
 
 `hc send` pastes text and presses Enter, steering a working Codex turn instead of
@@ -58,7 +52,7 @@ Successful submission and an ended turn do not prove receipt or task completion;
 read the actual report and verify its evidence. `hc wait --output` is for plain
 programs, not agent reports.
 
-A Codex leader with an hc terminal and nothing else to do ends its turn while it
+A Codex leader with nothing else to do ends its turn while it
 waits: a report sent to its terminal, or a user message, starts the next turn,
 as any `hc send` does for an idle session. Staying in the turn costs a model
 call each time a wait ends, and Codex's own instructions keep blocking sleeps
@@ -79,8 +73,7 @@ finished. Do not resume another copy of a live worker to fix those statuses.
 Only an explicit user choice overrides the same-harness default. Claude and
 Codex native addresses do not share a messaging protocol. For such an assignment,
 name the Herdr bridge in the brief: `hc send` carries task messages and replies;
-use the actual leader terminal ID, when one exists. Without a leader terminal,
-collect the worker's report with `hc wait` and `hc read`. Do not claim native
+use the leader's actual terminal ID. Do not claim native
 delivery across harnesses or silently change the requested model.
 
 ## Sources

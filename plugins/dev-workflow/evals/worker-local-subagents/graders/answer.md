@@ -19,9 +19,7 @@ ready-for-merge, waits for all local writers, and validates only the committed
 SHA with the checkout unchanged, possibly delegating checks on that SHA; the
 leader may still merge under implement's
 merge rules. Subagents report through native tools to the worker; the worker
-reports committed evidence through the leader's reply route: hc send to the
-leader's terminal, or its own terminal for collection with hc wait/read when
-the leader has none. Naming the route that fits is enough.
+reports committed evidence through hc send to the leader's terminal.
 
 FAIL if it bans the worker's local native subagents, puts either subagent in the
 leader's checkout or a new worktree, starts another independent CLI in dev-1,
