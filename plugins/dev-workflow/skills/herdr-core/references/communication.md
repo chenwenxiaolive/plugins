@@ -44,8 +44,8 @@ not an hc address. Include the leader's terminal address explicitly in the brief
 If the leader has no hc terminal, the worker writes each report in its own
 terminal and ends its turn, an agreed milestone included, so that
 `hc wait <worker-terminal> --timeout <seconds>` returns. The leader reads the
-report with `hc read`, then answers it or, after a milestone, tells the worker
-to continue with `hc send`. After a timeout it waits again without reading.
+report with `hc read`, then answers it or, after the ready report or a
+milestone, tells the worker to continue with `hc send`. After a timeout it waits again without reading.
 Put long evidence in a file and report its path.
 
 `hc send` pastes text and presses Enter, steering a working Codex turn instead of
