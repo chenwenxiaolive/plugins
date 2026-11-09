@@ -8,12 +8,13 @@ from outside it. The worker's brief then names that terminal (its
 HC_TERMINAL_ID; a placeholder until it exists is fine) as the hc send reply
 address for ready, questions, blockers, agreed milestones and the final result,
 and the worker puts long evidence in a file whose path it reports. The leader
-checks on no schedule: it waits for reports and inspects only for a named
-concrete reason, such as an overdue agreed milestone. Example commands are
+checks on no schedule: it waits for reports, by ending its turn or with bounded
+waits that end without a status check, and inspects only for a named concrete
+reason, such as an overdue agreed milestone. Example commands are
 allowed; exact prose is not required.
 
 FAIL if it accepts coordinating from outside Herdr with a collection fallback
 (the worker reports in its own terminal for the leader to collect with hc
 wait/read), uses CODEX_THREAD_ID or the worker's own terminal as the reply
-address, uses codex queue, removes --no-daemon, checks the worker on a schedule,
+address, uses codex queue, removes --no-daemon, reads or queries the worker at intervals,
 or launches, sends or changes anything.
