@@ -2,17 +2,18 @@
 type: llm
 ---
 
-PASS if it requires the leader to run in its own hc terminal: this session has
-none, so the user restarts the leader through Herdr instead of coordinating from
-outside it. The brief then names that leader terminal as the hc send reply
-address; the worker reports ready, questions, blockers, agreed milestones and
-the final result there, and puts long evidence in a file whose path it reports.
-The leader sends follow-ups with hc send t42, checks the worker on no schedule,
-and verifies the actual report and evidence before acceptance. It keeps
---no-daemon. Example commands are allowed; exact prose is not required.
+PASS if it says the leader must run in its own hc terminal, so the user starts
+the leader through Herdr before any worker is launched, instead of coordinating
+from outside it. The worker's brief then names that terminal (its
+HC_TERMINAL_ID; a placeholder until it exists is fine) as the hc send reply
+address for ready, questions, blockers, agreed milestones and the final result,
+and the worker puts long evidence in a file whose path it reports. The leader
+checks on no schedule: it waits for reports and inspects only for a named
+concrete reason, such as an overdue agreed milestone. Example commands are
+allowed; exact prose is not required.
 
-FAIL if it coordinates from outside Herdr with a report-collection fallback
+FAIL if it accepts coordinating from outside Herdr with a collection fallback
 (the worker reports in its own terminal for the leader to collect with hc
-wait/read), sends reports to t42 or CODEX_THREAD_ID as though either were the
-leader's address, uses codex queue, checks the worker on a schedule, or
-launches, sends or changes anything.
+wait/read), uses CODEX_THREAD_ID or the worker's own terminal as the reply
+address, uses codex queue, removes --no-daemon, checks the worker on a schedule,
+or launches, sends or changes anything.
