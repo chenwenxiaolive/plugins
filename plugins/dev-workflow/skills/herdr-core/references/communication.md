@@ -41,11 +41,12 @@ hc send <leader-terminal> 'Peer report: <result, question or evidence path>'
 Use the actual terminal IDs established at launch. A worker's `HC_TERMINAL_ID`
 is its own address, not the leader's; `CODEX_THREAD_ID` is a native session UUID,
 not an hc address. Include the leader's terminal address explicitly in the brief.
-If the leader has no hc terminal, the worker writes its reports in its own
-terminal and ends its turn for a question, blocker or final report. The leader
-collects them with `hc wait <worker-terminal> --timeout <seconds>` and reads with
-`hc read` after a turn end or exit; after a timeout it waits again without
-reading. Put long evidence in a file and report its path.
+If the leader has no hc terminal, the worker writes each report in its own
+terminal and ends its turn, an agreed milestone included, so that
+`hc wait <worker-terminal> --timeout <seconds>` returns. The leader reads the
+report with `hc read`, then answers it or, after a milestone, tells the worker
+to continue with `hc send`. After a timeout it waits again without reading.
+Put long evidence in a file and report its path.
 
 `hc send` pastes text and presses Enter, steering a working Codex turn instead of
 queuing a new one. Processing can wait for the next model/tool boundary. Send
@@ -56,6 +57,12 @@ for `blocked`, read the reason without using `--force` to bypass a decision.
 Successful submission and an ended turn do not prove receipt or task completion;
 read the actual report and verify its evidence. `hc wait --output` is for plain
 programs, not agent reports.
+
+A Codex leader with an hc terminal waits for reports with one `sleep` of many
+minutes rather than repeated short ones: it ends early with "Sleep interrupted
+by new input" when a report, hc notice or user message arrives. `wait_agent`
+likewise ends early for native subagents. Each short wait that ends without news
+is another model call.
 
 Keep `--no-daemon` so commands execute under the Herdr terminal. Do not use
 `codex queue` for this route: it defers messages to the next turn, so a leader

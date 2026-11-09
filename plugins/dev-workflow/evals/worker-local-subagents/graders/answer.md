@@ -13,11 +13,13 @@ the leader's checkout nor another worktree is a valid assignment for this
 worker's subagents. The tests brief identifies the dev-1 worker as its parent,
 keeps fix-config-errors/main and the test file scope, inherits the parent's
 settings, and forbids Git mutations, further agents and memory writes. The
-worker alone owns local commits, branch changes and MR delivery, waits for all
-local writers, and validates only the committed SHA with the checkout unchanged.
-Subagents report through native tools to the worker; the worker reports committed
-evidence through hc send to the leader's verified terminal, or through its own
-terminal for leader collection with hc wait/read when no leader terminal exists.
+worker alone owns local commits, branch changes and MR delivery through
+ready-for-merge, waits for all local writers, and validates only the committed
+SHA with the checkout unchanged; the leader may still merge under implement's
+merge rules. Subagents report through native tools to the worker; the worker
+reports committed evidence through the leader's reply route: hc send to the
+leader's terminal, or its own terminal for collection with hc wait/read when
+the leader has none. Naming the route that fits is enough.
 
 FAIL if it bans the worker's local native subagents, puts either subagent in the
 leader's checkout or a new worktree, starts another independent CLI in dev-1,
