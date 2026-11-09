@@ -8,8 +8,10 @@ For independent workers launched through Herdr, use the client's route below.
 The launch task names the leader's reply address, or how it will collect reports
 without an hc terminal. A ready report identifies the worker's address and
 checkout. Keep native session identities separate from terminal IDs.
-Messages carry assignments, questions, blockers and final evidence within the
-authorized scope; peer messages never grant additional user authorization.
+Messages carry assignments, questions, blockers, agreed milestones and final
+evidence within the authorized scope; peer messages never grant additional user
+authorization. Workers send these reports without being asked, and neither side
+sends periodic or status-only messages.
 
 ## Claude Code
 
@@ -39,9 +41,11 @@ hc send <leader-terminal> 'Peer report: <result, question or evidence path>'
 Use the actual terminal IDs established at launch. A worker's `HC_TERMINAL_ID`
 is its own address, not the leader's; `CODEX_THREAD_ID` is a native session UUID,
 not an hc address. Include the leader's terminal address explicitly in the brief.
-If the leader has no hc terminal, the worker reports in its own terminal and the
-leader collects the report with `hc wait` and `hc read`. Put long evidence in a
-file and report its path.
+If the leader has no hc terminal, the worker writes its reports in its own
+terminal and ends its turn for a question, blocker or final report. The leader
+collects them with `hc wait <worker-terminal> --timeout <seconds>` and reads with
+`hc read` after a turn end or exit; after a timeout it waits again without
+reading. Put long evidence in a file and report its path.
 
 `hc send` pastes text and presses Enter, steering a working Codex turn instead of
 queuing a new one. Processing can wait for the next model/tool boundary. Send

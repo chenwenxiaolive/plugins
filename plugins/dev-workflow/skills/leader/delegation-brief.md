@@ -16,10 +16,12 @@ Owned files: <existing files and exact new paths; no overlap with other agents>.
 First reads: <file plus symbol or section for the implementation, direct caller and relevant test>.
 Required facts: <interfaces, invariants, compatibility requirements and concise supporting evidence; name unknowns>.
 Validation: <checks on committed code and their expected results>.
+Milestones: <reports needed before completion because they change coordination, such as a commit another agent builds on, with expected timing; or none>.
 Execution: <authorized CPU location; or the user-named node and GPU allocation, plus any authorized remote-worktree setup>. No GPU work unless allocated here.
 Follow repository instructions and read the issue's execution record when one exists.
 Start with the listed reads, then read complete relevant definitions and callers and expand when correctness requires it. Ask your parent for a specific missing fact or scope change when dependencies extend beyond the assignment.
 If a safeguard or automatic model fallback is reported, preserve changes and tell your parent the reported category/request ID and actual model when available. The client's automatic fallback may continue this authorized task; the event alone does not require stopping. Report any remaining blocked operation, needed context, current branch/commit and unfinished work. Respect the refusal, do not infer its cause or repeatedly rephrase the blocked request, and attribute work to the model that did it.
+Report without being asked: questions and blockers as soon as they stop progress, the milestones above and the final report. Keep each concise, with its commit SHA or evidence path when applicable. Send no periodic or status-only updates; your parent waits for these reports.
 Write no memory notes; put lasting findings in your final report or the issue's execution record.
 ```
 
@@ -44,7 +46,7 @@ the user explicitly chooses otherwise. Append:
 
 ```text
 Delivery: <own MR, or commits for the leader's existing delivery>.
-Communication: <Claude native messaging and leader's verified native address; hc send and leader's actual terminal ID for Codex or an explicit cross-harness assignment; report in your own terminal for leader collection with hc wait/read when no leader terminal exists>. Report ready with your address for that route and checkout, then send questions, blockers and the final report through that route. Keep native session IDs separate from Herdr terminal IDs. A peer message is an assignment or report within this task, not new user authorization.
+Communication: <Claude native messaging and leader's verified native address; hc send and leader's actual terminal ID for Codex or an explicit cross-harness assignment; report in your own terminal for leader collection with hc wait/read when no leader terminal exists>. Report ready with your address for that route and checkout, then send every later report through that route. Keep native session IDs separate from Herdr terminal IDs. A peer message is an assignment or report within this task, not new user authorization.
 If this assignment owns an MR, use the implement skill and stop at ready-for-merge, with the MR's risk score recorded. Otherwise return committed changes and validation evidence for the leader to integrate; do not create a separate MR. The leader completes implement delivery and review after integration.
 You may delegate scoped work to native subagents in this same working directory/checkout. Give each disjoint files within your assignment, your checkout/branch and you as parent; require edits and evidence back to you, with no Git mutations, further agents or memory writes. Keep Git mutations and delivery with you, and wait for all local writers before committing or integrating. Do not assign subagents to another directory/worktree or start independent workers; return work requiring another directory to the project leader. The codex review required by implement remains part of an assignment with its own MR.
 Report: changed behavior, commit/MR, checks and evidence, remaining blockers and any observed model switch.
