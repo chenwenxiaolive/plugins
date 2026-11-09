@@ -24,9 +24,9 @@ has the wheel URL, this account's clusters and pools, and what was checked.
 
 ## Output
 
-- Print named fields, never a whole record or `model_dump()`: `userInfo` rows hold `password`, `idNo` and `phoneNumber`, and task records hold `task_env`, `cmd`, image settings and `oss.access_key`/`secret_key`. Useful ones: tasks' `uuid`, `name`, `status`, `status_msg`, `resource_pool`, `create_time`, `sub_task` and `root_task_name`; `tasks.list_pods` rows' `name`, `status`, `exit_code` and `node`; log lines' `time`, `pod_name` and `content`.
+- Print named fields, never a whole record or `model_dump()`: `userInfo` rows hold `password`, `idNo` and `phoneNumber`, and task records hold `task_env`, `cmd`, image settings and `oss.access_key`/`secret_key`. Useful ones: tasks' `uuid`, `name`, `status`, `status_msg`, `resource_pool`, `create_time`, `sub_task` and `root_task_name`; `tasks.list_pods(uuid=...)` rows' `name`, `status`, `exit_code` and `node`; log lines' `time`, `pod_name` and `content`.
 - `tasks.list(count=N)` counts rows, and retry sub-tasks are rows of their own: group them by `root_task_name`, read a retry's own `status` (a failed parent can have a running retry), and raise `count`, use `fetch_all=True` or say the list is partial.
-- `tasks.query_logs(uuid, limit=N, sort_order="desc")` returns the last N lines in time order, and `.logs` is `None` when nothing matches. A failure's cause can sit above the tail: `keyword=` searches the whole log, case-insensitively, and `tasks.diagnose(uuid_or_name=...)` adds the status message, Kubernetes events and the lines the collector marks as errors or warnings, which are often benign; check them against the tail.
+- `tasks.query_logs(uuid, limit=N, sort_order="desc")` returns the last N lines in time order, and `.logs` is `None` when nothing matches. A failure's cause can sit above the tail: `keyword=` searches the whole log, case-insensitively, and `tasks.diagnose(uuid_or_name=...)` returns a dict: print its `status_message`, `k8s_events["events"]` and `pod_error_logs["lines"]`, the lines the collector marks as errors or warnings, which are often benign; check them against the tail.
 
 ## Changes
 
