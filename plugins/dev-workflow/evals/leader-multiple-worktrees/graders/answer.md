@@ -13,8 +13,9 @@ those other worktrees or use native worktree isolation to do so. Each worker
 retains its local Git ownership, waits for its local writers before committing
 or integrating, and returns committed changes/evidence through hc send to the
 leader's terminal t3 for its existing delivery. Separate MRs are not
-required merely because separate workers are used. Inherit the current settings
-and reuse the existing slots.
+required merely because separate workers are used; worker branches may start
+from the leader's delivery branch. Inherit the current settings and reuse the
+existing slots.
 
 FAIL if native children of the leader work in dev-1/dev-2, native worktree
 isolation bypasses the directory boundary, independent sessions share a checkout,

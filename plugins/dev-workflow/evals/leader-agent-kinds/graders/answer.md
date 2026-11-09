@@ -11,8 +11,9 @@ the worker into a subagent. The config assignment uses the parent's
 native subagent identity and message/wait/lifecycle tools, leaves Git mutations
 and delivery with the leader, and needs no hc terminal or identity mapping.
 The docs worker keeps its branch/MR delivery, uses hc send with the verified
-terminal addresses for task messages and reports, and uses Herdr for
-terminal/process inspection and cleanup after acceptance while preserving its
+terminal addresses for task messages and reports, and uses Herdr's hc commands
+(such as hc get/read and hc kill/rm) for terminal/process inspection and cleanup
+after acceptance while preserving its
 worktree. Reports and idle notices still require verification before
 acceptance. Exact wording and headings are not required.
 

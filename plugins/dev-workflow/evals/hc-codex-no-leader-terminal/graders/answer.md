@@ -2,13 +2,19 @@
 type: llm
 ---
 
-PASS if the brief tells the worker to report in its own terminal, put long
-evidence in a file and report its path. The leader uses hc send t42 for
-follow-ups and hc wait/read to collect the worker's questions/results, checking
-actual content and evidence rather than accepting an ended turn as completion.
-It requires no new leader terminal and retains --no-daemon. Example commands
-are allowed; exact prose is not required.
+PASS if it says the leader must run in its own hc terminal, so the user starts
+the leader through Herdr before any worker is launched, instead of coordinating
+from outside it. The worker's brief then names that terminal (its
+HC_TERMINAL_ID; a placeholder until it exists is fine) as the hc send reply
+address for ready, questions, blockers, agreed milestones and the final result,
+and the worker puts long evidence in a file whose path it reports. The leader
+checks on no schedule: it waits for reports, by ending its turn or with bounded
+waits that end without a status check, and inspects only for a named concrete
+reason, such as an overdue agreed milestone. Example commands are
+allowed; exact prose is not required.
 
-FAIL if the worker sends its report to t42 as though that were the leader,
-passes CODEX_THREAD_ID to hc send, falls back to codex queue, uses hc wait
---output to await the agent report, or requires moving the leader into Herdr.
+FAIL if it accepts coordinating from outside Herdr with a collection fallback
+(the worker reports in its own terminal for the leader to collect with hc
+wait/read), uses CODEX_THREAD_ID or the worker's own terminal as the reply
+address, uses codex queue, removes --no-daemon, reads or queries the worker at intervals,
+or launches, sends or changes anything.

@@ -7,7 +7,10 @@ disable-model-invocation: true
 # Leader
 
 You are the only leader. You stay in the project's original checkout and own
-understanding, planning, splitting, integration and the final review.
+understanding, planning, splitting, integration and the final review. Before
+starting Herdr workers, check that you run in your own hc terminal
+(`HC_TERMINAL_ID` is set); if not, ask the user to restart the leader through
+Herdr.
 
 Here, a subagent is a child agent created and managed by the current harness's
 native tools. A worker is an independent interactive CLI session launched
@@ -68,6 +71,7 @@ agents would write into yours; record what is worth keeping yourself.
 ## Follow through
 
 - Send feedback to the same agent so it keeps its context. For subagents, use the harness's native subagent tools. For independent workers, use [worker communication](../herdr-core/references/communication.md): `hc send` for Codex, native messaging for Claude Code. Herdr owns workers' terminals and processes.
+- While agents work, continue your own work or wait through their route: native wait/result tools for subagents, [herdr-core](../herdr-core/SKILL.md#communicate-with-workers) for workers, which covers ending the turn until the next report and when a terminal needs inspection. Elapsed time or a timed-out wait is no reason to ask for progress or read a transcript. Handle the reports already in hand together, answering questions and blockers first without waiting for other agents, and send no acknowledgement-only replies. An ended turn, idle notice or exit is lifecycle status: accept work only after checking its final report, source revision and required checks.
 - Check the actual model as well as the result. The owner's preference is to reduce avoidable safeguard interruptions while completing the task, not to stop on every intervention. Report a refusal or fallback, preserve the work and allow the client's automatic fallback to continue the authorized task. Handle any remaining blocker in the leadership session or report it. Attribute work to the model that did it; do not repeatedly rephrase a blocked request. Focused briefs reduce unnecessary context, but cannot guarantee that safeguards never trigger.
 - A worker with its own branch that needs the target's changes merges the target into its branch; rebasing a pushed branch would need a force-push.
 - For page changes, report visual acceptance apart from functional checks: screenshot the page as the preview skill describes, or give the user its preview link and say that visual acceptance is pending.
