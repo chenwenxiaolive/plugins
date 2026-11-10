@@ -35,8 +35,8 @@ task sets what they and their local native subagents may change.
 Use the leader's harness, model and reasoning effort unless the user explicitly
 chooses otherwise. Read [communication.md](communication.md) and include the
 reply route in the launch task: Claude's native address, or the leader's hc
-terminal for Codex or explicit cross-harness work. The worker reports its address for that route and checkout
-when ready; match that identity before follow-ups.
+terminal for Codex or explicit cross-harness work. The worker sends one final
+report through that route.
 Use the Herdr worker section of [leader's brief](../../leader/delegation-brief.md#herdr-worker)
 for implementation assignments.
 Fill the model and effort placeholders below from the selected role.

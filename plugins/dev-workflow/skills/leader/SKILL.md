@@ -1,29 +1,23 @@
 ---
 name: leader
-description: "Coordinates native subagents in the project's checkout and independent workers through herdr-core, checks their work and verifies integration. Runs only when the user invokes it."
+description: "Launches self-contained native subagents and independent Herdr workers, reviews their final results and verifies integration. Runs only when the user invokes it."
 disable-model-invocation: true
 ---
 
 # Leader
 
-You are the only leader. You stay in the project's original checkout and own
-understanding, planning, splitting, integration and the final review. Before
-starting Herdr workers, check that you run in your own hc terminal
-(`HC_TERMINAL_ID` is set); if not, ask the user to restart the leader through
-Herdr.
+You are the only leader. Stay in the original checkout and own understanding,
+splitting, launch, integration and review. Before Herdr work, check for your own
+hc terminal (`HC_TERMINAL_ID`); otherwise ask the user to restart through Herdr.
 
-Here, a subagent is a child agent created and managed by the current harness's
-native tools. A worker is an independent interactive CLI session launched
-through Herdr. Agent is the common term for both. A worker using native
-cross-session messages remains a worker.
+Delegation is one-shot. Give each agent a complete brief, launch it, then collect
+one final report. Do not exchange readiness, progress, milestone or
+acknowledgement messages. Only a blocked worker or one late correctness fact
+gets a single message before it continues.
 
-Each working directory has one independent session: the leader or a worker.
-That session may create multiple native subagents in its own directory. For code
-work, this boundary is the checkout/worktree root; working in its subdirectories
-stays within the boundary. Never assign a subagent to another working directory
-or worktree, including through a native worktree-isolation option. Work in another
-directory belongs to an independent worker there, which may create its own local
-subagents.
+A subagent is a native child; a worker is an independent CLI session. One
+session/checkout may have native children. Another directory needs a worker
+there; never move a subagent, including through native worktree isolation.
 
 Keep the current leader's harness, model and reasoning effort. Subagents and
 workers inherit those settings unless the user explicitly chooses otherwise.
@@ -33,24 +27,20 @@ a fixed model pairing.
 
 ## Plan and delegate
 
-- Make small changes yourself under [implement](../implement/SKILL.md), even across several files. For scoped work in the current checkout, including code changes, prefer native subagents (Codex's `spawn_agent`, Claude Code's Agent tool). Invoking this skill authorizes that delegation. Frontend assignments include layout, visuals and interactions.
-- Use [herdr-core](../herdr-core/SKILL.md) for work in another directory/worktree, an independently watchable or steerable session, or a task with its own branch/MR. An explicit request for a model in another harness, such as Opus from a Codex leader, overrides the same-harness default. Preserve that choice and use the explicit cross-harness communication route.
-- Herdr workers get a directory where no other independent Claude Code or Codex session runs, your checkout included. A code worker gets a worktree slot such as `/volume/worktree/<repo>/dev-1`, reused under the [worktree rules](../implement/SKILL.md#start-or-resume); prefer a free slot whose remote counterpart already has its environment, since a first build is slow. A Herdr worker that changes no repository files, such as a deployment, also gets its own directory, such as a free slot, and its brief names the remote paths it needs instead of using them as its cwd. Invoking this skill authorizes creating worktrees, their branches and, when remote checks are needed, their remote counterparts. Native subagents stay with their parent session.
+- Make small changes yourself under [implement](../implement/SKILL.md). For scoped work in the current checkout, including code and frontend work, use a native subagent. Use [herdr-core](../herdr-core/SKILL.md) only for another directory/worktree, a task with its own branch/MR, or a watchable/steerable session. An explicit different-harness model overrides the default and uses the cross-harness route.
+- A Herdr worker gets a directory with no other independent session, normally a free worktree slot under the [worktree rules](../implement/SKILL.md#start-or-resume) with its remote environment already prepared. A worker that changes no files gets such a directory too and is given the remote paths instead of using them as cwd. This skill authorizes worktrees, branches and needed remote counterparts.
 - Assign disjoint files to the leader, subagents and workers, naming new files too. Independent MRs must not touch the same files; a task that builds on another starts from that task's branch.
 - Explain the split briefly, then start independent tasks in parallel. A Herdr worker grows to about 500 MB (measured 2026-11-02) and a fresh one doesn't show in `free -m` yet, so start them in batches that keep about 500 MB available.
 - Give each agent its own GPUs, or a whole node when the project's validation needs one; never the same GPUs to two agents.
-- Keep project-wide discovery, architecture decisions, task selection and integration with the leader. Give each agent one coherent deliverable, the verified facts it needs and concrete starting points in the code. Necessary dependencies still belong in its scope; do not split a correctness-critical change merely to shorten a prompt.
+- Keep project-wide discovery, architecture, task selection and integration. Give each agent one coherent deliverable, necessary facts and code entry points; dependencies stay in scope. Do not split a correctness-critical change just to shorten a prompt.
 
 ## Shared checkout
 
 Native subagents may edit their assigned files in their parent's checkout.
-No other agent, including the parent, edits those files until the assignment
-returns. The independent session in that checkout, whether leader or worker,
-alone stages, commits, switches branches, integrates, pushes and manages its
-assigned delivery. Wait for all local writers to finish before changing HEAD or
-integrating. Commit the accepted changes before validation; keep the checkout
-clean and idle at that SHA until checks finish. The parent may delegate checks
-on that commit and remains responsible for its implement delivery and review.
+No other agent edits those files until the assignment returns. The independent
+session alone handles Git and delivery. Wait for all writers before changing
+HEAD, then commit before validation and keep the SHA untouched while checks run.
+The parent runs checks or starts a fresh validation subagent, and owns review.
 
 ## Brief each assignment
 
@@ -59,20 +49,18 @@ Each delegated agent reads its task, not this skill. Build its assignment from
 worker instructions. A worker's assignment names whether it owns an MR or returns
 commits for the leader's existing delivery, and includes the reply route under
 [worker communication](../herdr-core/references/communication.md).
-Send the assignment and necessary evidence, not the leader's whole conversation
-or unrelated project documents. Follow repository instructions and the issue's
-execution record as usual. First reads are entry points, not a restriction on
-evidence needed for correctness.
+Send the assignment and necessary evidence, not the whole conversation or
+unrelated documents. Always name the target branch because docs may say `main`
+while work goes elsewhere. First reads are entry points, not a context limit.
+Claude Code memory is per repository, so delegated agents write into yours;
+record what is worth keeping yourself.
 
-Always name the target branch: project docs may say `main` while this work goes
-into a feature branch. Claude Code keeps memory per repository, so delegated
-agents would write into yours; record what is worth keeping yourself.
+## Collect and review
 
-## Follow through
-
-- Send feedback to the same agent so it keeps its context. For subagents, use the harness's native subagent tools. For independent workers, use [worker communication](../herdr-core/references/communication.md): `hc send` for Codex, native messaging for Claude Code. Herdr owns workers' terminals and processes.
-- While agents work, continue your own work or wait through their route: native wait/result tools for subagents, [herdr-core](../herdr-core/SKILL.md#communicate-with-workers) for workers, which covers ending the turn until the next report and when a terminal needs inspection. Elapsed time or a timed-out wait is no reason to ask for progress or read a transcript. Handle the reports already in hand together, answering questions and blockers first without waiting for other agents, and send no acknowledgement-only replies. An ended turn, idle notice or exit is lifecycle status: accept work only after checking its final report, source revision and required checks.
-- Check the actual model as well as the result. The owner's preference is to reduce avoidable safeguard interruptions while completing the task, not to stop on every intervention. Report a refusal or fallback, preserve the work and allow the client's automatic fallback to continue the authorized task. Handle any remaining blocker in the leadership session or report it. Attribute work to the model that did it; do not repeatedly rephrase a blocked request. Focused briefs reduce unnecessary context, but cannot guarantee that safeguards never trigger.
+- After launching all independent work, continue your own work or end the turn. Collect native subagents with their result/wait tool and let an independent worker's report start the next turn. Do not poll progress or send receipts.
+- On a final report, inspect the source, commit/MR and checks before accepting. A blocked report names what it needs; answer once from the plan and existing authorization, or ask the user. Then let it finish.
+- A failed review gets one concrete correction to the same agent or a small fix by the leader. Do not narrate review.
+- Check the actual model. Preserve work and let an automatic model fallback continue the task; attribute work to the model that did it, and do not repeatedly rephrase a refusal. Focused briefs reduce context but cannot prevent safeguards.
 - A worker with its own branch that needs the target's changes merges the target into its branch; rebasing a pushed branch would need a force-push.
-- For page changes, report visual acceptance apart from functional checks: screenshot the page as the preview skill describes, or give the user its preview link and say that visual acceptance is pending.
-- Merge in dependency order under implement's [merge rules](../implement/SKILL.md#merge): on your own at a low risk score, otherwise when the user asks. Merge an MR yourself while its target hasn't moved since its review, so a worker can be closed once its MR is ready-for-merge and accepted. Each merge moves the target: recheck the next MR against it, and merge that MR through a worker in its worktree (the original, or a new one given the MR link) that runs the checks on the integrated result. Work merged into a feature branch reaches the default branch only through that branch's own MR.
+- For a page, report visual acceptance apart from functional checks: take the preview screenshot or give the user the preview link and say visual acceptance is pending.
+- Merge in dependency order under implement's [merge rules](../implement/SKILL.md#merge), on your own at low risk or when asked. Recheck each remaining MR after the target moves and run integrated checks in its worker before merging.

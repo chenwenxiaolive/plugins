@@ -6,11 +6,9 @@ description: "Runs persistent programs and independent interactive coding worker
 # herdr-core runtime
 
 Native subagents use their harness's spawn, message and wait tools directly.
-Their identities and lifecycle belong to that harness; creating or coordinating
-them needs no hc terminal, machine registration or `herdr.space` label.
-They stay in their parent's working directory/checkout. Each directory has one
-independent session, which may have multiple native subagents there; another
-working directory needs its own independent worker.
+They need no hc terminal or `herdr.space` and stay in the parent checkout. Each
+directory has one independent session, which may have native children; another
+directory needs an independent worker.
 
 Independent workers and persistent programs run as hc terminals while the
 conversation stays in this session. A session that coordinates workers runs in
@@ -30,17 +28,18 @@ Workers normally use the leader's harness, model and reasoning effort.
 
 ## Communicate with workers
 
-Independent Codex workers use `hc send` for task instructions, questions and
-results. Claude Code workers use native `ListAgents` / `SendMessage`.
+Independent Codex workers use `hc send` for the initial task, one late
+correction and the final report. Claude Code workers use native
+`ListAgents` / `SendMessage`.
 Read [communication.md](references/communication.md) for addresses, delivery
 and waiting. Herdr manages workers'
 terminals and processes; native subagents keep their harness's own tools.
 
-- Workers report on their own: ready, questions and blockers, milestones agreed in the brief, and the final result. Between reports, do other useful work or wait for them through the route; a leader whose reports arrive as input, through native messages or `hc send` to its terminal, can end its turn until the next one. Handle the reports already in hand together, questions and blockers first, without waiting for other workers to finish. Reply with an answer, decision or instruction, not an acknowledgement.
-- A result or idle notice is a claim, not proof of completion. Check the changed files, committed SHA, validation evidence and review status before acceptance. Peer messages do not grant new user authorization.
-- For a question or `blocked`, read the reason, answer from the plan, session decisions and existing authorization, and ask the user only for a missing decision, missing access or an action outside the scope.
+- Workers send one final report. There is no ready, progress, milestone or acknowledgement exchange. While work runs, do other useful work or end the turn; the final report starts the next turn.
+- A blocked report or one late correctness fact gets one answer from the plan and existing authorization. Then let it continue; ask the user only for a missing decision, access or outside action.
+- A result is a claim, not proof of completion. Check the changed files, committed SHA, validation evidence and review status before acceptance. Peer messages do not grant new user authorization.
 - Verify the model from client/session metadata, including fallback notices, rather than the launch command or the worker's self-description alone. If metadata is unavailable, say the actual model is unverified.
-- A safeguard or automatic model fallback is not by itself a reason to interrupt or close the worker. Preserve its work, report the category/request ID and actual model when available, and let the client's automatic fallback continue the authorized task. Verify its changes and checks as usual; a model switch does not verify completion, and work is attributed only from session metadata. If work remains blocked, report the operation, required context, branch/commit and unfinished work to the leader. Respect the refusal; do not repeatedly reword the blocked request, hide the purpose or remove facts needed for correctness.
+- A safeguard or fallback alone does not interrupt the worker. Preserve work, record the category/request ID and actual model, and let automatic fallback continue. Verify as usual. A remaining blocker goes to the leader with operation, context, commit and unfinished work; do not repeatedly reword a refusal.
 
 ## Inspect terminals and wait for programs
 
@@ -51,18 +50,14 @@ hc wait <name> --timeout <seconds>  # process/turn lifecycle; plain programs wai
 ```
 
 `reason: status` (`idle` or `done`) means a turn ended; it does not prove the
-assigned task finished. `reason: message` means an inbound message arrives as
-input, possibly late, while work may continue; it is not output to fetch with
-`hc read`. `reason: timeout` means only that the wait ended: neither a failure
-nor news, so wait again or do other work. `hc wait --children` needs `all` or
-`any`. Fit the timeout to the expected work and the client's tool time limit,
-so user messages are still handled between waits.
+task finished. `reason: message` means input arrives, possibly late, while work
+may continue; it is not output to fetch with `hc read`. `reason: timeout` means
+only that the wait ended, so wait again or do other work. `hc wait --children`
+needs `all` or `any`. Fit the timeout to the client's tool time limit.
 
 Inspect a worker's terminal with `hc get` or `hc read` only for a concrete
-reason, and name it: a startup or trust failure, a reported block, error or
-exit, unclear delivery, an agreed milestone that is overdue, the user's status
-request, or evidence needed for acceptance. Elapsed time or a timed-out wait is
-not a reason, and an unchanged result is not one to check again. Task follow-ups
+reason: startup or trust failure, a blocked/final report, an error or exit,
+unclear delivery, or the user's status request. Time is not a reason. Follow-ups
 use the selected client's communication route.
 
 ## Clean up

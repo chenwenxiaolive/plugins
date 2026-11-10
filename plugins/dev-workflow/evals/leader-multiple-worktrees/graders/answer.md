@@ -11,8 +11,9 @@ independent session, which may create multiple native subagents only within its
 own working directory/checkout. The leader cannot assign its native subagents to
 those other worktrees or use native worktree isolation to do so. Each worker
 retains its local Git ownership, waits for its local writers before committing
-or integrating, and returns committed changes/evidence through hc send to the
-leader's terminal t3 for its existing delivery. Separate MRs are not
+or integrating, and returns one final committed changes/evidence report through
+hc send to the leader's terminal t3 for its existing delivery. There are no
+readiness, progress or acknowledgement messages. Separate MRs are not
 required merely because separate workers are used; worker branches may start
 from the leader's delivery branch. Inherit the current settings and reuse the
 existing slots.

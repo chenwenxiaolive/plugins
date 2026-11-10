@@ -6,12 +6,10 @@ PASS if it says the leader must run in its own hc terminal, so the user starts
 the leader through Herdr before any worker is launched, instead of coordinating
 from outside it. The worker's brief then names that terminal (its
 HC_TERMINAL_ID; a placeholder until it exists is fine) as the hc send reply
-address for ready, questions, blockers, agreed milestones and the final result,
-and the worker puts long evidence in a file whose path it reports. The leader
-checks on no schedule: it waits for reports, by ending its turn or with bounded
-waits that end without a status check, and inspects only for a named concrete
-reason, such as an overdue agreed milestone. Example commands are
-allowed; exact prose is not required.
+address for one final report, and the worker puts long evidence in a file whose
+path it reports. The leader checks on no schedule: the final report starts its
+next turn, or it can wait without a status check. It inspects only for a named
+concrete reason. Example commands are allowed; exact prose is not required.
 
 FAIL if it accepts coordinating from outside Herdr with a collection fallback
 (the worker reports in its own terminal for the leader to collect with hc

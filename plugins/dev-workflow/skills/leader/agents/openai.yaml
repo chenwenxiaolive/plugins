@@ -1,5 +1,5 @@
 interface:
   display_name: "Leader"
-  short_description: "Coordinate native subagents and independent Herdr workers"
+  short_description: "Launch self-contained agents and review their results"
 policy:
   allow_implicit_invocation: false
