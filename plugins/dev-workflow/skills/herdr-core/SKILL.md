@@ -58,7 +58,8 @@ waits.
 Wait for a plain program through `hc wait` rather than a sleep loop, and read its
 exit status and output with `hc read`. For a worker, inspect its terminal only
 for a concrete reason, and name it: a startup, trust or exit failure at launch,
-or the user's request. Elapsed time is not a reason.
+the user's request, or evidence they asked to keep, such as saving a finished
+worker's transcript. Elapsed time is not a reason.
 
 ## Clean up
 
