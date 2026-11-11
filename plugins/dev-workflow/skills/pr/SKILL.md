@@ -23,7 +23,7 @@ Behavior, a view of it, evidence, risk and limitations, in that order.
 - Behavior: what changes for someone using the code, in the owner's words, with the issue link. A closing reference only when the request completes the issue.
 - A view, when a sentence cannot carry the change: the smallest one that makes the point. Behavior moving between states already owes its statechart, written under implement's [rule for `;` in labels](../implement/SKILL.md#deliver-and-review); reach gets a call or file tree, and a changed shape gets a short diff. A view that restates the prose earns nothing.
 - Evidence: which checks ran, on which commit, and what they returned, with a path to the full logs instead of their contents. A page change adds its preview link or screenshot as the preview skill describes, and reports visual acceptance apart from the functional checks.
-- Risk: the score and the reasons behind it from implement's [merge rules](../implement/references/merge.md), with whatever [risk.md](references/risk.md) finds that the score does not see.
+- Risk: the score and the reasons behind it from implement's [merge rules](../implement/references/merge.md), as a number rather than a placeholder, with whatever [risk.md](references/risk.md) finds that the score does not see. If those rules cannot be read, say that instead of leaving a gap in the body.
 - Limitations: what is unverified, out of scope or deferred. A reviewer should not have to find it in the diff.
 
 ## Judging a request
