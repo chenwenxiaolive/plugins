@@ -1,5 +1,5 @@
 interface:
   display_name: "Leader"
-  short_description: "Coordinate native subagents and independent Herdr workers"
+  short_description: "Plan, split and launch independent Herdr workers"
 policy:
   allow_implicit_invocation: false

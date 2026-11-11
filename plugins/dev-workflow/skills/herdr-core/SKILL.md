@@ -13,9 +13,8 @@ independent session, which may have multiple native subagents there; another
 working directory needs its own independent worker.
 
 Independent workers and persistent programs run as hc terminals while the
-conversation stays in this session. A session that coordinates workers runs in
-its own hc terminal, whose `HC_TERMINAL_ID` is its address; without one, ask the
-user to start it through Herdr before launching workers.
+conversation stays in this session. Launching a worker needs no hc terminal of
+your own: a worker owns its task and reports to the user in its own terminal.
 `hc --skill` prints the full manual (commands, other
 machines and files, recovery, exit codes); read the relevant sections for
 operations not covered here or in the worker reference.
@@ -26,21 +25,20 @@ Window commands are in `herdr-app --skill` on the machine running the Herdr app.
 Before launching a Claude Code or Codex worker through Herdr, read
 [workers.md](references/workers.md) for the selected client's checks, exact
 interactive launch, model choices, working directory and Herdr space rules.
-Workers normally use the leader's harness, model and reasoning effort.
+Workers normally use the launching session's harness, model and reasoning effort.
 
-## Communicate with workers
+## Workers run on their own
 
-Independent Codex workers use `hc send` for task instructions, questions and
-results. Claude Code workers use native `ListAgents` / `SendMessage`.
-Read [communication.md](references/communication.md) for addresses, delivery
-and waiting. Herdr manages workers'
-terminals and processes; native subagents keep their harness's own tools.
+A worker gets its whole task in the launch, owns one issue end to end and
+reports to the user in its own terminal. Do not message it, wait for it, poll
+it or read its terminal for progress; the user watches it in its Herdr space and
+[steers it there](references/steering.md). After launching, confirm the worker
+started and cleared any trust prompt, tell the user what runs where, and end the
+turn.
 
-- Workers report on their own: ready, questions and blockers, milestones agreed in the brief, and the final result. Between reports, do other useful work or wait for them through the route; a leader whose reports arrive as input, through native messages or `hc send` to its terminal, can end its turn until the next one. Handle the reports already in hand together, questions and blockers first, without waiting for other workers to finish. Reply with an answer, decision or instruction, not an acknowledgement.
-- A result or idle notice is a claim, not proof of completion. Check the changed files, committed SHA, validation evidence and review status before acceptance. Peer messages do not grant new user authorization.
-- For a question or `blocked`, read the reason, answer from the plan, session decisions and existing authorization, and ask the user only for a missing decision, missing access or an action outside the scope.
-- Verify the model from client/session metadata, including fallback notices, rather than the launch command or the worker's self-description alone. If metadata is unavailable, say the actual model is unverified.
-- A safeguard or automatic model fallback is not by itself a reason to interrupt or close the worker. Preserve its work, report the category/request ID and actual model when available, and let the client's automatic fallback continue the authorized task. Verify its changes and checks as usual; a model switch does not verify completion, and work is attributed only from session metadata. If work remains blocked, report the operation, required context, branch/commit and unfinished work to the leader. Respect the refusal; do not repeatedly reword the blocked request, hide the purpose or remove facts needed for correctness.
+- A result or idle notice is a claim, not proof of completion, and a peer message grants no new user authorization. The user checks the changed files, committed SHA, validation evidence and review status.
+- Verify a worker's model from client/session metadata, including fallback notices, rather than the launch command or the worker's self-description. If metadata is unavailable, say the actual model is unverified.
+- A safeguard or automatic model fallback is not by itself a reason to interrupt or close a worker. Preserve its work, report the category/request ID and actual model when available, and let the client's automatic fallback continue the authorized task. A model switch does not verify completion, and work is attributed only from session metadata. Respect the refusal; do not repeatedly reword a blocked request, hide the purpose or remove facts needed for correctness.
 
 ## Inspect terminals and wait for programs
 
@@ -51,23 +49,20 @@ hc wait <name> --timeout <seconds>  # process/turn lifecycle; plain programs wai
 ```
 
 `reason: status` (`idle` or `done`) means a turn ended; it does not prove the
-assigned task finished. `reason: message` means an inbound message arrives as
-input, possibly late, while work may continue; it is not output to fetch with
-`hc read`. `reason: timeout` means only that the wait ended: neither a failure
-nor news, so wait again or do other work. `hc wait --children` needs `all` or
-`any`. Fit the timeout to the expected work and the client's tool time limit,
-so user messages are still handled between waits.
+assigned task finished. `reason: timeout` means only that the wait ended:
+neither a failure nor news, so wait again or do other work.
+`hc wait --children` needs `all` or `any`. Fit the timeout to the expected work
+and the client's tool time limit, so user messages are still handled between
+waits.
 
-Inspect a worker's terminal with `hc get` or `hc read` only for a concrete
-reason, and name it: a startup or trust failure, a reported block, error or
-exit, unclear delivery, an agreed milestone that is overdue, the user's status
-request, or evidence needed for acceptance. Elapsed time or a timed-out wait is
-not a reason, and an unchanged result is not one to check again. Task follow-ups
-use the selected client's communication route.
+Wait for a plain program through `hc wait` rather than a sleep loop, and read its
+exit status and output with `hc read`. For a worker, inspect its terminal only
+for a concrete reason, and name it: a startup, trust or exit failure at launch,
+or the user's request. Elapsed time is not a reason.
 
 ## Clean up
 
-Once a worker's work is accepted and recorded, `hc kill <name>` and `hc rm <name>`.
-Clean up only workers you started, keep their worktrees and environments
-([worktree rules](../implement/SKILL.md#start-or-resume)), and never stop or
-restart the user's core unless asked.
+Leave a worker's terminal, worktree and Herdr space for the user; they close it
+when the work is accepted, or ask for `hc kill <name>` and `hc rm <name>`.
+Remove only the program terminals you started, and never stop or restart the
+user's core unless asked.

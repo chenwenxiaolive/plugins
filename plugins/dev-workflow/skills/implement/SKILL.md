@@ -14,7 +14,7 @@ when authorized by the [merge rules](#merge). On GitHub, use `gh` for the same w
 
 - Read the issue, its discussions and any existing MR. An agreed task needs no issue.
 - Name a new issue branch `issue-<iid>-<2-4 words>`, e.g. `issue-42-fix-cache`, created from the fetched target branch; base it on another unmerged branch only for an intended dependency.
-- Create a worktree with `git worktree add --no-track -b <branch> <path> origin/<target>`. Before switching one to another task, its work must be committed and pushed, and no process may be working in it, here or on the nodes sharing its remote counterpart. Never remove a worktree unless the user asks.
+- One issue gets one worktree and one branch, for that issue alone: create it with `git worktree add --no-track -b <branch> /volume/worktree/<repo>/issue-<iid> origin/<target>`, and leave it to its own task rather than switching it to the next one. Never remove a worktree unless the user asks.
 - If the MR was already merged, update the execution record and report; don't recreate its branch.
 
 ## Execution record
@@ -31,7 +31,9 @@ an issue and when updating its execution record.
 
 Push the branch and open the MR with the project's template: behavior, issue
 links, validation evidence and limitations. Use a closing reference only when the
-MR completes the issue.
+MR completes the issue. When the target branch moves under a pushed MR, merge the
+target into the branch, resolve it there and rerun the affected checks; rebasing
+or resetting a pushed branch would need a force-push.
 
 In Mermaid state diagrams, use commas instead of literal `;` in transition labels:
 the parser can turn the remaining words into disconnected states without an error.
