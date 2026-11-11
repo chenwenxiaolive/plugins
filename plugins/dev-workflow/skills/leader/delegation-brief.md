@@ -11,7 +11,7 @@ correctness.
 Role: independent Herdr worker, <selected model and reasoning effort>. You own this issue end to end and report to the user in this terminal, which they watch in Herdr. There is no coordinating session to report to or ask.
 Goal: <one observable change and why it is needed>.
 Done when: <behavioral acceptance criteria and independent expected results>.
-Checkout: <worktree path for this issue> on branch <branch>, based on and merging into <target>; issue <link> (or none).
+Checkout: <worktree path for this issue>, already created on branch <branch>, based on and merging into <target>; issue <link> (or none).
 Owned files: <existing files and exact new paths; no overlap with other workers>.
 First reads: <file plus symbol or section for the implementation, direct caller and relevant test>.
 Required facts: <interfaces, invariants, compatibility requirements and concise supporting evidence; name unknowns>.
@@ -22,7 +22,7 @@ Follow repository instructions and read the issue's execution record when one ex
 Start with the listed reads, then read complete relevant definitions and callers and expand when correctness requires it. Decide open questions from the issue, this brief and existing authorization. When something still blocks you, keep the unblocked work moving and ask the user here, naming the decision, access or fact you need; they steer this terminal through Herdr.
 If a safeguard or automatic model fallback is reported, preserve your changes and tell the user the reported category/request ID and actual model when available. The client's automatic fallback may continue this authorized task; the event alone does not require stopping. Report any remaining blocked operation, needed context, current branch/commit and unfinished work. Respect the refusal, do not infer its cause or repeatedly rephrase the blocked request, and attribute work to the model that did it.
 Subagents: you may delegate scoped work to native subagents in this checkout, each with disjoint files from your assignment and its edits and evidence returned to you, making no Git mutations, no further agents and no memory notes. Wait for every local writer to finish before you commit, switch branches or integrate, and validate only a committed SHA in an unchanged checkout.
-Do not start other independent workers, assign a subagent to another directory or worktree, take another working directory, or pick up another issue when this one is done.
+Do not start other independent workers, assign a subagent to another directory or worktree, take another working directory, or pick up another issue on your own when this one is done. The user's instructions in this terminal come first.
 Write no memory notes; put lasting findings in your final report or the issue's execution record.
 ```
 
@@ -39,11 +39,8 @@ Propose the required checks. Run them only if the parent assigns a committed SHA
 Report: changed behavior and files, proposed checks or results with the tested SHA, remaining blockers and any observed model switch.
 ```
 
-The worker keeps Git mutations and delivery, and waits for every local writer to
-finish before committing, switching branches or integrating. It may delegate
-checks on a committed SHA, and remains responsible for its MR and review. It
-never assigns a subagent to another directory or worktree; work that needs
-another directory goes back to the user.
+Work that needs another directory goes back to the user, who decides whether it
+becomes its own worker.
 
 ## Scope and evidence
 
