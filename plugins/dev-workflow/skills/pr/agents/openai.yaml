@@ -1,0 +1,3 @@
+interface:
+  display_name: "Pull and Merge Requests"
+  short_description: "Write a PR or MR description and judge its merge risk"

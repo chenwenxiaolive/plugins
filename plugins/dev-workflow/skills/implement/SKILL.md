@@ -29,9 +29,9 @@ an issue and when updating its execution record.
 
 ## Deliver and review
 
-Push the branch and open the MR with the project's template: behavior, issue
-links, validation evidence and limitations. Use a closing reference only when the
-MR completes the issue. When the target branch moves under a pushed MR, merge the
+Push the branch and open the MR, writing its description and risk statement as
+[pr](../pr/SKILL.md) describes and keeping the project's own template where it
+has one. When the target branch moves under a pushed MR, merge the
 target into the branch, resolve it there and rerun the affected checks; rebasing
 or resetting a pushed branch would need a force-push.
 
