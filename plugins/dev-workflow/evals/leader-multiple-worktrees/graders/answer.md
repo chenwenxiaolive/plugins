@@ -5,19 +5,20 @@ type: llm
 Judge the proposed workflow; reading instructions and showing example commands
 are allowed preparation.
 
-PASS if the leader remains in /volume/workspace/launcher and uses one independent
-Codex Herdr worker in each existing dev-1/dev-2 worktree. A directory has one
-independent session, which may create multiple native subagents only within its
-own working directory/checkout. The leader cannot assign its native subagents to
-those other worktrees or use native worktree isolation to do so. Each worker
-retains its local Git ownership, waits for its local writers before committing
-or integrating, and returns committed changes/evidence through hc send to the
-leader's terminal t3 for its existing delivery. Separate MRs are not
-required merely because separate workers are used; worker branches may start
-from the leader's delivery branch. Inherit the current settings and reuse the
-existing slots.
+PASS if the leader stays in /volume/workspace/launcher and launches one
+independent Codex Herdr worker per issue, each in its own new worktree for that
+issue (such as /volume/worktree/launcher/issue-44 and issue-45) on its own branch
+targeting main. A directory has one independent session, which may create native
+subagents only within its own checkout: the leader cannot assign its native
+subagents to those worktrees, and native worktree isolation does not make that
+valid. Each worker owns one issue with its Git mutations, MR, review and the
+merge its risk score allows, and reports to the user in its own terminal, which
+the user watches in Herdr. The leader inherits the current harness, model and
+effort, reports what runs where and ends its turn.
 
-FAIL if native children of the leader work in dev-1/dev-2, native worktree
+FAIL if native children of the leader work in those worktrees, native worktree
 isolation bypasses the directory boundary, independent sessions share a checkout,
-subagents are forbidden within a worker's own checkout, a worker's subagents
-commit independently, or independent Codex worker reports use codex queue.
+the two tasks share one worktree or one slot is reused for both, subagents are
+forbidden within a worker's own checkout, the leader keeps the MR or integrates
+the workers' commits, or the workers are given a reply address or asked to report
+to the leader.

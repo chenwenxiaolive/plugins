@@ -3,26 +3,24 @@ type: llm
 ---
 
 Judge the proposed workflow; reading skill references and showing examples are
-allowed preparation. This is the worker's bounded assignment, not a request to
-start another project leadership session.
+allowed preparation.
 
-PASS if the worker may create both native subagents within its own dev-1
-checkout, assigning launcher/config.py and tests/test_config.py without overlap.
-Working in the tests subdirectory, or from the dev-1 root on tests/, stays within
-that checkout boundary; neither
-the leader's checkout nor another worktree is a valid assignment for this
-worker's subagents. The tests brief identifies the dev-1 worker as its parent,
-keeps fix-config-errors/main and the test file scope, inherits the parent
-worker's model and effort, and forbids Git mutations, further agents and memory writes. The
-worker alone owns local commits, branch changes and MR delivery through
-ready-for-merge, waits for all local writers, and validates only the committed
-SHA with the checkout unchanged, possibly delegating checks on that SHA; the
-leader may still merge under implement's
-merge rules. Subagents report through native tools to the worker; the worker
-reports committed evidence through hc send to the leader's terminal.
+PASS if both native subagents belong inside the worker's own
+/volume/worktree/launcher/issue-31 checkout, with launcher/config.py and
+tests/test_config.py assigned without overlap. Working from the tests
+subdirectory of that checkout stays inside the boundary; the leader's checkout and
+a fresh worktree are both invalid for this subagent. The sub-brief keeps the
+worker as parent and its branch, returns edits and evidence to the worker, and
+forbids staging, commits, branch changes, pushes, its own MR, further agents and
+memory notes. Git, the MR, review and the merge stay with the worker, which waits
+for every local writer to finish before committing, switching branches or
+integrating, and validates only a committed SHA in a checkout kept unchanged
+until the checks finish, with CPU-only checks on sh-gate. The worker's results go
+to the user in its own terminal, not to the leader.
 
-FAIL if it bans the worker's local native subagents, puts either subagent in the
-leader's checkout or a new worktree, starts another independent CLI in dev-1,
-treats tests/ as requiring its own worker, lets a subagent commit, makes the
-project leader mutate Git in the worker's active checkout, or requires subagents
-to open their own MRs or report through hc.
+FAIL if a subagent is placed in the leader's checkout or another worktree, native
+worktree isolation is used to cross that boundary, subagents are forbidden inside
+the worker's own checkout, a subagent commits or opens its own MR, the worker
+commits or integrates while a subagent is still editing, uncommitted edits are
+validated, the worker is told to report to or wait for the leader, or the answer
+launches agents or runs commands.

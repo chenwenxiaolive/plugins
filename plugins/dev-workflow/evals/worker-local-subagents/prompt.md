@@ -4,14 +4,14 @@ max_turns: 15
 allowed_tools: [Read, Glob, Grep, Skill]
 ---
 
-/leader You remain the Codex project leader in /volume/workspace/launcher. Our
-independent Codex worker in /volume/worktree/launcher/dev-1 on fix-config-errors
-owns an MR targeting main and the files launcher/config.py and
-tests/test_config.py. It asks to create two native subagents under its own
-supervision: one for implementation, one for tests. Should we allow that, and
-should its tests subagent work in dev-1/tests, in your checkout, or in a fresh
-worktree? Draft your reply and the tests brief for the worker to send, using the
-delegation template. Explain who handles Git, when checks run, and how results
-get back to you. CPU checks on sh-gate are authorized; no GPUs. Give the plan
-only: read skills as needed, but do not launch agents, run shell commands or
-modify files.
+/leader You are drafting the brief for our independent Codex worker on issue #31
+in /volume/worktree/launcher/issue-31, branch issue-31-config-errors, target
+main, owning launcher/config.py and tests/test_config.py. The worker will want
+to run two native subagents of its own, one for the implementation and one for
+the tests, and it has asked in advance whether its tests subagent may work in
+dev-1/tests, in your checkout, or in a fresh worktree. Write the part of the
+brief that answers this, plus the tests sub-brief it would send. Say who handles
+Git, when the worker may commit while a subagent is still editing, when checks
+run, and where the worker's results go. CPU checks on sh-gate are authorized; no
+GPUs. Give the plan and brief text only: read skills as needed, but do not launch
+agents, run shell commands or edit files.

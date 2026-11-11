@@ -2,5 +2,14 @@
 type: llm
 ---
 
-PASS if the deployment goes to a Herdr worker whose `--cwd` is a directory where no other independent instance runs (such as a free worktree slot, not the leader's checkout /volume/workspace/mini-vllm), with the remote paths it needs named in its brief, and the diagnosis goes to a native subagent or the leader itself rather than to a Herdr worker. A diagnosis subagent stays in the leader's checkout.
-FAIL if a Herdr worker's `--cwd` is the leader's checkout or another independent instance's directory, or the diagnosis gets a Herdr worker of its own.
+PASS if each job goes to its own independent Herdr worker in its own directory,
+neither of them the leader's checkout /volume/workspace/mini-vllm and neither
+shared with another independent instance: the deployment worker's brief names the
+remote paths it needs on sh-1 instead of working in them, and the diagnosis
+worker gets a directory of its own. The leader takes neither job itself and
+spawns no native subagent for them; it reports what runs where and stops.
+
+FAIL if a worker's `--cwd` is the leader's checkout or another independent
+instance's directory, both jobs share one directory, the leader runs the
+diagnosis itself or through a native subagent in its checkout, or the workers are
+asked to report back to the leader.
