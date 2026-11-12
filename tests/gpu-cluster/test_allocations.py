@@ -1,5 +1,6 @@
 """Exercise the allocation CLI against isolated files, without GPU or SSH access."""
 
+import fcntl
 import os
 from pathlib import Path
 import subprocess
@@ -16,7 +17,8 @@ class AllocationsTest(unittest.TestCase):
         self.directory = tempfile.TemporaryDirectory(dir=os.environ["GPU_ALLOCATION_TEST_TMPDIR"])
         self.addCleanup(self.directory.cleanup)
         self.root = Path(self.directory.name)
-        self.command = [sys.executable, str(SCRIPT), "--database", str(self.root / "allocations.sqlite3")]
+        self.records = self.root / "allocations"
+        self.command = [sys.executable, str(SCRIPT), "--directory", str(self.records)]
         self.env = dict(os.environ, HC_TERMINAL_ID="worker-a")
 
     def run_cli(self, *args):
@@ -26,6 +28,8 @@ class AllocationsTest(unittest.TestCase):
         self.assertEqual(self.run_cli("list").stdout.strip(), "NODE\tWORKER")
         for _ in range(2):
             self.assertEqual(self.run_cli("claim", "sh-1").returncode, 0)
+        self.assertEqual((self.records / "sh-1").read_text(), "worker-a\n")
+        self.assertEqual(sorted(p.name for p in self.records.iterdir()), [".lock", "sh-1"])
         conflict = self.run_cli("claim", "sh-1", "--worker", "worker-b")
         self.assertEqual(conflict.returncode, 1)
         self.assertIn("registered to worker-a", conflict.stderr)
@@ -33,12 +37,50 @@ class AllocationsTest(unittest.TestCase):
 
     def test_release_matches_owner_and_does_not_remove_a_replacement(self):
         self.assertEqual(self.run_cli("claim", "sh-1").returncode, 0)
+        lock_inode = (self.records / ".lock").stat().st_ino
         self.assertEqual(self.run_cli("release", "sh-1", "--worker", "worker-b").returncode, 1)
         self.assertEqual(self.run_cli("release", "sh-1").returncode, 0)
+        self.assertFalse((self.records / "sh-1").exists())
         self.assertEqual(self.run_cli("release", "sh-1").returncode, 0)
         self.assertEqual(self.run_cli("claim", "sh-1", "--worker", "worker-b").returncode, 0)
         self.assertEqual(self.run_cli("release", "sh-1").returncode, 1)
         self.assertIn("sh-1\tworker-b", self.run_cli("list").stdout)
+        self.assertEqual((self.records / ".lock").stat().st_ino, lock_inode)
+
+    def test_updates_wait_for_the_fixed_file_lock(self):
+        self.records.mkdir()
+        with (self.records / ".lock").open("a") as lock:
+            fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+            process = subprocess.Popen(
+                self.command + ["claim", "sh-1"], cwd=self.root, env=self.env,
+                text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            )
+            try:
+                with self.assertRaises(subprocess.TimeoutExpired):
+                    process.communicate(timeout=0.2)
+                self.assertFalse((self.records / "sh-1").exists())
+            finally:
+                fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
+                output = process.communicate(timeout=20)
+        self.assertEqual(process.returncode, 0, output)
+        self.assertEqual((self.records / "sh-1").read_text(), "worker-a\n")
+
+    def test_incomplete_temporary_file_is_not_an_allocation(self):
+        self.records.mkdir()
+        (self.records / ".owner.tmp").write_text("unfinished")
+        self.assertEqual(self.run_cli("list").stdout.strip(), "NODE\tWORKER")
+        self.assertEqual(self.run_cli("claim", "sh-1").returncode, 0)
+        self.assertEqual((self.records / "sh-1").read_text(), "worker-a\n")
+        self.assertFalse((self.records / ".owner.tmp").exists())
+
+    def test_invalid_owner_file_is_not_treated_as_free(self):
+        self.records.mkdir()
+        record = self.records / "sh-1"
+        record.write_text("")
+        result = self.run_cli("claim", "sh-1")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("Invalid owner record", result.stderr)
+        self.assertEqual(record.read_text(), "")
 
     def test_simultaneous_claims_have_one_winner(self):
         processes = [
@@ -80,7 +122,7 @@ class AllocationsTest(unittest.TestCase):
         self.assertEqual(self.run_cli("claim", "sh-1").returncode, 2)
         invalid = self.run_cli("claim", "sh-01", "--worker", "worker-a")
         self.assertEqual(invalid.returncode, 2)
-        self.assertFalse((self.root / "allocations.sqlite3").exists())
+        self.assertFalse(self.records.exists())
 
 
 if __name__ == "__main__":
