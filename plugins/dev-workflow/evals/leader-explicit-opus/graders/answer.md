@@ -9,7 +9,9 @@ cannot supply Opus. The worker owns the issue through implement and reports to t
 user in its own terminal, which the user watches and steers in Herdr. Its
 one-line delivery report reaches the Codex leader with hc send to the leader's hc
 terminal, which works across harnesses, so no native message between Claude and
-Codex is needed.
+Codex is needed. The leader creates the worktree before launch, and on a report
+it may check the MR's state on the forge and tell the user what it unblocks,
+without reviewing the work.
 
 FAIL if it substitutes a native Codex subagent for Opus, claims the native Codex
 spawn tool can launch Claude Opus, runs the independent Claude Code process in

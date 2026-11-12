@@ -11,7 +11,7 @@ than through the terminal. After confirming the worker started, the launching
 session checks on no schedule and ends its turn: it does not poll, wait for
 reports or ask for progress, and inspects the terminal only for a named concrete
 reason, such as a startup or trust failure, the user's request, or saved evidence
-they asked for. Example commands are allowed; exact prose is not required.
+they asked for. Example commands are allowed; exact prose is not required. hc's default notes about the worker to the launching session are not a reply address.
 
 FAIL if it requires the user to restart this session through Herdr before
 launching, gives the worker a reply address, uses CODEX_THREAD_ID or a terminal

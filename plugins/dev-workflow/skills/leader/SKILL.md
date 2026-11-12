@@ -16,9 +16,10 @@ A worker is an independent interactive CLI session launched through Herdr, with
 its own checkout, branch and MR. It owns its issue's implementation and
 delivery, reports to the user in its own terminal, which the user watches and
 steers in Herdr, and sends you one line whenever its delivery state changes. You
-own the plan, its dependencies and the next launches: do not steer workers, poll
-them, read their terminals for progress, verify their results, integrate their
-commits or merge their MRs.
+own the plan, its dependencies and the next launches: do not steer or answer
+workers, poll them, read their terminals for progress, verify their results,
+integrate their commits or merge their MRs. A question a worker sends you goes to
+the user, with the answer the agreed plan gives, if any.
 
 Keep the current harness, model and reasoning effort. Workers inherit them
 unless the user explicitly chooses otherwise: a Claude Code leader starts Claude
