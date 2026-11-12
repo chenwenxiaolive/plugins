@@ -12,6 +12,7 @@ project the user names, else the selected checkout's: GitLab
 - The user's request decides publication, not this skill being loaded. A request to create, file or raise issues, or the user invoking this skill, authorizes publishing the issues it covers; a request for drafts gets drafts and no forge write. A design discussion, a question about existing issues or a mention that something could become an issue authorizes neither: answer, and offer the issue if it helps.
 - Make each issue one independently verifiable result for one branch and MR. Split by behavior or a concrete technical result, not by layer: include any needed docs and test changes in the issue they support ([implement](../implement/SKILL.md#implement-and-validate)).
 - Ask only about missing decisions that change scope, acceptance or dependencies.
+- Failure handling, retries or recovery enter an issue only when a requirement needs them; otherwise errors propagate ([implement](../implement/SKILL.md#implement-and-validate)), with no failure matrix or resilience work added.
 - Check for equivalent issues first. Link dependent issues to their prerequisites with native blocking links when available. Use existing labels only.
 - After an interrupted or timed-out publish, check what was created before retrying.
 
