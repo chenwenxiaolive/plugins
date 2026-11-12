@@ -1,4 +1,0 @@
-schema_version: "1.1"
-name: grill-reads-decisions
-context:
-  scaffold_script: setup.sh
