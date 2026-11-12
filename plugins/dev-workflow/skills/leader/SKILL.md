@@ -74,7 +74,7 @@ tasks need a new invocation, and stop.
 
 - After launching, report what runs where and what waits on what, then end your turn. A worker's delivery report, or hc's note when a worker is blocked, errors or exits, arrives as your next input. Keep those notes: add `--no-notify` or `--no-parent` only when the user asks for silence.
 - On a report or note, establish what was delivered from the report and the issue's MR on the forge. An ended turn or exit code 0 is not a delivered issue, and you don't rerun a worker's checks or review its work again to decide.
-- A task is ready when its prerequisites meet the plan's acceptance rule, such as their MRs merged into the plan's target branch. Launch every newly ready task as resources allow, without waiting for unrelated workers.
+- A task is ready when its prerequisites meet the plan's acceptance rule, such as their MRs merged into the plan's target branch. Launch every newly ready task as resources allow, without waiting for unrelated workers; one that waits for resources launches on a later report or note.
 - When a prerequisite waits for the user's merge or decision, tell the user what it blocks and keep other ready work moving.
 - Dispatching adds no scope or authority: merges, deployments and resources stay as the user authorized them.
 - When the plan is complete or the user stops it, report what was delivered and what remains, and end.
