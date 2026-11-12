@@ -27,9 +27,11 @@ reports to the user in its own terminal. Do not message it, wait for it, poll
 it or read its terminal for progress; the user watches it in its Herdr space and
 [steers it there](references/steering.md). After launching, confirm the worker
 started and cleared any trust prompt, tell the user what runs where, and end the
-turn. hc types a note into the launching session when a worker is blocked, errors
-or exits, and a leader's workers also send it delivery reports; each arrives as
-input, and neither an ended turn nor an exit shows that the task is done.
+turn. When the launching session runs in an hc terminal, it is the worker's
+parent: hc types a note into it when the worker is blocked, errors or exits, and
+a leader's workers also send it delivery reports. Each arrives as input, and
+neither an ended turn nor an exit shows that the task is done. A session outside
+an hc terminal gets neither; the user follows the worker in Herdr.
 
 ## Assess a worker's result
 
