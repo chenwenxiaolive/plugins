@@ -65,10 +65,14 @@ python3 ~/.agents/skills/gpu-cluster/scripts/allocations.py release sh-1
   checks confirmation and job completion; the script neither probes nor stops
   processes. Enter existing assignments with their owners when first adopting it.
 
-The control-machine file is `~/.local/state/gpu-cluster/allocations.sqlite3`, a
-single SQLite table with atomic updates. `--database <path>` isolates tests;
-normal workers use the default. An absent entry never establishes that GPUs are
-idle. Use canonical `sh-<n>`, `zg-<n>` and `th-<n>` aliases from [machines.md](machines.md).
+The control-machine directory is `~/.local/state/gpu-cluster/allocations/`.
+Each machine has a plain file named after its canonical alias, containing its
+worker ID. The script holds `flock` on the fixed `.lock` file only while reading
+or changing records; it publishes complete owner files by rename. Keep `.lock`
+in place. An available file lock does not mean a machine is unallocated: its
+owner file persists until release. `--directory <path>` isolates tests; normal
+workers use the default. An absent entry never establishes that GPUs are idle.
+Use canonical `sh-<n>`, `zg-<n>` and `th-<n>` aliases from [machines.md](machines.md).
 
 ### GPU checks
 

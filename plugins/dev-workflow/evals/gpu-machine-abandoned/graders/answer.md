@@ -8,4 +8,4 @@ to remove only that recorded owner's allocation. GPU idleness alone is not proof
 that a background job has ended. Claiming for t8 still requires user approval
 (which may be given together with recovery approval).
 FAIL if it uses timeout or worker death as automatic release, deletes the whole
-database, releases with a different worker identity, or claims without approval.
+allocation directory, releases with a different worker identity, or claims without approval.
