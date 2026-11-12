@@ -18,9 +18,10 @@ A worker is an independent interactive CLI session launched through Herdr, with
 its own checkout, branch and MR. Workers report to the user in their own
 terminals, which the user watches and steers in Herdr. Nothing reports to you:
 do not wait for workers, ask for progress, read their terminals, verify their
-results, integrate their commits or merge their MRs. Act on a report that
-reaches you anyway only by passing it to the user. You need no hc terminal of
-your own.
+results, integrate their commits or merge their MRs. hc's default notes about
+your workers stay on. Pass a note or report that reaches you to the user as what
+it says: an ended turn or an exit is not a finished issue, and it starts no
+review, merge or launch. You need no hc terminal of your own.
 
 Keep the current harness, model and reasoning effort. Workers inherit them
 unless the user explicitly chooses otherwise: a Claude Code leader starts Claude

@@ -27,7 +27,9 @@ reports to the user in its own terminal. Do not message it, wait for it, poll
 it or read its terminal for progress; the user watches it in its Herdr space and
 [steers it there](references/steering.md). After launching, confirm the worker
 started and cleared any trust prompt, tell the user what runs where, and end the
-turn.
+turn. A note hc types into the launching session when a worker is blocked, errors
+or exits goes to the user as what it says, not as a finished task, and starts
+nothing.
 
 ## Assess a worker's result
 
