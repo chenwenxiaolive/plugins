@@ -38,9 +38,12 @@ switching the leader or starting another leadership session.
 ## Prepare a worktree per issue
 
 Each worker gets one issue, one worktree and one branch, and keeps them for that
-issue alone. Create the worktree at `/volume/worktree/<repo>/issue-<iid>` under
-implement's [branch and worktree rules](../implement/SKILL.md#start-or-resume)
-before launching, and pass it as the worker's `--cwd`; a worker that changes no
+issue alone. Create the worktree and its branch at
+`/volume/worktree/<repo>/issue-<iid>`, or named for the task when it has no
+issue, under implement's
+[branch and worktree rules](../implement/SKILL.md#start-or-resume) before
+launching, and pass it as the worker's `--cwd`; say in the brief that the
+checkout is ready, so the worker does not create it again; a worker that changes no
 repository files, such as a deployment, gets its own directory too and names the
 remote paths it needs in its brief instead of working in them. Invoking this
 skill authorizes creating those worktrees and branches. The first build in a new

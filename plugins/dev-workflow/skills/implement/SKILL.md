@@ -14,7 +14,7 @@ when authorized by the [merge rules](#merge). On GitHub, use `gh` for the same w
 
 - Read the issue, its discussions and any existing MR. An agreed task needs no issue.
 - Name a new issue branch `issue-<iid>-<2-4 words>`, e.g. `issue-42-fix-cache`, created from the fetched target branch; base it on another unmerged branch only for an intended dependency.
-- One issue gets one worktree and one branch, for that issue alone: create it with `git worktree add --no-track -b <branch> /volume/worktree/<repo>/issue-<iid> origin/<target>`, and leave it to its own task rather than switching it to the next one. Never remove a worktree unless the user asks.
+- One issue gets one worktree and one branch, for that issue alone. Create them if they don't exist yet, with `git worktree add --no-track -b <branch> /volume/worktree/<repo>/issue-<iid> origin/<target>`, naming the worktree for the task when it has no issue; a checkout prepared for this task and already on its branch needs nothing. Leave a worktree to its own task rather than switching it to the next one, and never remove one unless the user asks.
 - If the MR was already merged, update the execution record and report; don't recreate its branch.
 
 ## Execution record
