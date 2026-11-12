@@ -11,7 +11,7 @@ GPT-6-Astra at xhigh, in its own new worktree for issue #31 (such as
 three files including README.md. The leader keeps no part of the implementation
 and spawns no native subagent in /volume/workspace/launcher: it plans, writes the
 brief, launches and ends its turn. The worker owns Git, the MR, review and the
-merge its risk score allows under implement, reports to the user in its own
+merge its risk rating allows under implement, reports to the user in its own
 terminal, and preserves the offending-key behavior, CPU-only checks on committed
 code and no memory writes.
 

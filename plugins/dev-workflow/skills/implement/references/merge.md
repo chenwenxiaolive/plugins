@@ -1,18 +1,10 @@
 # Merge
 
-Once the review passes, score the MR's risk and record the score and its reasons
-beside the review status. Start at 1 and add, up to 10:
-
-- 1 for every full 200 changed lines of non-test code, up to 3;
-- 2 when changed runtime code has no test covering the change;
-- 1 for each corrective review round used;
-- 1 for a behavior change users will notice;
-- 4 when it touches CI, build, deployment, dependencies, credentials, data migrations or stored formats, public interfaces (APIs, CLI flags, config formats), or skills and agent instructions.
-
-At 3 or below, merge it yourself without asking and report the merge, unless the
-project's instructions opt out of automatic merges. Above 3, set the execution
-record to `needs-human` with the score, tell the user, and merge only when they ask.
-A request covers the source SHA it was made for; a later commit needs a new request.
+Once the review passes, rate the request's risk by
+[pr's rule](../../pr/references/risk.md) and record the rating, with the
+dimensions behind it, beside the review status. A low rating merges on your own
+authority; medium and high wait for the user, as that rule describes. A merge
+request covers the source SHA it was made for; a later commit needs a new request.
 
 Every merge:
 

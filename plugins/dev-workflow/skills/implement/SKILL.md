@@ -48,6 +48,6 @@ post it to the MR only when asked.
 ## Merge
 
 After review passes, or when the user requests a merge, read
-[merge.md](references/merge.md) for the risk score, authorization, current-commit
+[merge.md](references/merge.md) for the risk rating, authorization, current-commit
 checks, guarded merge and recovery after a timeout. Do not treat a pending merge
 as completed.
