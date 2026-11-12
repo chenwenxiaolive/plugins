@@ -1,10 +1,9 @@
 # Steering a worker
 
 A worker reports in its own terminal and the user steers it there, in its Herdr
-space. The only message between sessions is a leader's worker telling the leader
-with `hc send` that it waits for the user's merge or a decision, as its brief
-says; no session steers workers, and Claude's native cross-session messages are
-not used.
+space. The only message between sessions is a leader's worker sending the leader
+its delivery state with `hc send`, as its brief says; no session steers workers,
+and Claude's native cross-session messages are not used.
 
 Put the whole task in the launch. A message to a booting agent can be lost, and a
 worker that has to ask for its scope is already waiting on someone.
