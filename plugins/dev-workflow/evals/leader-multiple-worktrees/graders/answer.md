@@ -17,5 +17,5 @@ effort, reports what runs where and ends its turn.
 FAIL if independent sessions share a checkout,
 the two tasks share one worktree or one slot is reused for both,
 the leader keeps the MR or integrates
-the workers' commits, or the workers are given a reply address or asked to report
-to the leader.
+the workers' commits, or the workers' questions or results are routed to the
+leader instead of the user. A one-line delivery-state report to the leader is fine.

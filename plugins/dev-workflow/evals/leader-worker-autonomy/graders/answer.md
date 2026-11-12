@@ -19,5 +19,5 @@ FAIL if the leader assigns a file allowlist, requires approval for an unnamed
 helper or test, requires every implementation detail to be settled before launch,
 forbids parallel work solely because both MRs touch launcher/cli.py, allows a
 worker to change the agreed public contract unilaterally, adds native subagent
-management instructions, routes questions or results to the leader, or launches
-anything.
+management instructions, routes questions or results to the leader instead of
+the user, or launches anything. A one-line delivery-state report to the leader is fine.

@@ -16,6 +16,6 @@ terminal, and preserves the offending-key behavior, CPU-only checks on committed
 code and no memory writes.
 
 FAIL if the leader edits README.md or any file itself, keeps the MR, Git ownership or integration,
-splits the issue across independent deliveries, asks the worker to report to the leader or
-to stop at ready-for-merge for the leader to finish, puts the worker in the
-leader's checkout, or launches anything.
+splits the issue across independent deliveries, routes the worker's questions or
+results to the leader instead of the user, has it stop at ready-for-merge for the
+leader to finish, puts the worker in the leader's checkout, or launches anything. A one-line delivery-state report to the leader is fine.

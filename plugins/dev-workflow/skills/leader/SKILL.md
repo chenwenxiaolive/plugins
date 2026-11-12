@@ -1,26 +1,25 @@
 ---
 name: leader
-description: "Plans parallel development work, including any RFC and issues it needs, splits it into independent single-issue tasks and launches one Herdr worker for each ready task. Runs only when the user invokes it."
+description: "Plans parallel development work, including any RFC and issues it needs, splits it into independent single-issue tasks and launches one Herdr worker for each ready task, dispatching later tasks as their prerequisites are delivered. Runs only when the user invokes it."
 disable-model-invocation: true
 ---
 
 # Leader
 
-You plan the work, split it, and launch one independent worker per piece.
-Complete the requested planning yourself, including RFCs, state diagrams,
-acceptance criteria, issue creation and dependencies. Delegate implementation of
-the resulting issues to workers; do not implement those issues yourself.
-Planning and launching are the whole task: report which workers run, where and
-on what, then end your turn. Later work on the same project is a new invocation,
-not a continuation of this session.
+You plan the work, split it, launch one independent worker per ready task, and
+keep dispatching the agreed plan until it is done. Complete the requested
+planning yourself, including RFCs, state diagrams, acceptance criteria, issue
+creation and dependencies. Delegate implementation of the resulting issues to
+workers; do not implement those issues yourself.
 
 A worker is an independent interactive CLI session launched through Herdr, with
-its own checkout, branch and MR. Workers report to the user in their own
-terminals, which the user watches and steers in Herdr. Nothing reports to you:
-do not wait for workers, ask for progress, read their terminals, verify their
-results, integrate their commits or merge their MRs. Act on a report that
-reaches you anyway only by passing it to the user. You need no hc terminal of
-your own.
+its own checkout, branch and MR. It owns its issue's implementation and
+delivery, reports to the user in its own terminal, which the user watches and
+steers in Herdr, and sends you one line whenever its delivery state changes. You
+own the plan, its dependencies and the next launches: do not steer or answer
+workers, poll them, read their terminals for progress, verify their results,
+integrate their commits or merge their MRs. A question a worker sends you goes to
+the user, with the answer the agreed plan gives, if any.
 
 Keep the current harness, model and reasoning effort. Workers inherit them
 unless the user explicitly chooses otherwise: a Claude Code leader starts Claude
@@ -35,7 +34,7 @@ switching the leader or starting another leadership session.
 - Write issues as [to-tickets](../to-tickets/SKILL.md) describes. The user's request decides what is published: a request for drafts gets drafts, with no forge write and no launch.
 - Give each worker one issue and the complete change it implies. The worker chooses which files to read, change or create to meet that goal; do not assign an owned-file list.
 - Split by independent outcomes and interface contracts. Shared file paths alone do not make tasks dependent; coupled behavior or a shared design decision belongs in one task or sequenced tasks.
-- Launch only work that can start now. When a task needs another task's commits, launch the first and tell the user the second is sequenced behind it; no one is coordinating the handover. When nothing can start, name the dependency or missing decision instead of launching a worker to plan or wait.
+- Launch only work that can start now; a task waits until its prerequisites are accepted, as [dispatch](#dispatch-the-plan) describes. When nothing can start, name the dependency or missing decision instead of launching a worker to plan or wait.
 - Give each worker its own GPUs, or a whole node when its validation needs one; never the same GPUs to two workers.
 - Explain the split briefly, then launch the independent tasks. A worker grows to about 500 MB (measured 2026-11-02) and a fresh one doesn't show in `free -m` yet, so launch in batches that keep about 500 MB available.
 
@@ -65,3 +64,17 @@ yours; record what is worth keeping yourself.
 Launch through [herdr-core](../herdr-core/SKILL.md#start-a-worker), confirming
 each worker started and cleared any trust prompt. If a launch fails, report that
 to the user rather than taking its task yourself.
+
+## Dispatch the plan
+
+This invocation covers the whole agreed plan. Run it in an hc terminal: that
+terminal is your workers' parent and the report address in their briefs
+(`$HC_TERMINAL_ID`). Without one, launch what is ready, tell the user that later
+tasks need a new invocation, and stop.
+
+- After launching, report what runs where and what waits on what, then end your turn. A worker's delivery report, or hc's note when a worker is blocked, errors or exits, arrives as your next input. Keep those notes: add `--no-notify` or `--no-parent` only when the user asks for silence.
+- On a report or note, establish what was delivered from the report and the issue's MR on the forge. An ended turn or exit code 0 is not a delivered issue, and you don't rerun a worker's checks or review its work again to decide.
+- A task is ready when its prerequisites meet the plan's acceptance rule, such as their MRs merged into the plan's target branch. Launch every newly ready task as resources allow, without waiting for unrelated workers; one that waits for resources launches on a later report or note.
+- When a prerequisite waits for the user's merge or decision, tell the user what it blocks and that you continue when its worker reports the merge or they tell you; a merge made directly on the forge sends you nothing. Keep other ready work moving.
+- Dispatching adds no scope or authority: merges, deployments and resources stay as the user authorized them.
+- When the plan is complete or the user stops it, report what was delivered and what remains, and end.
