@@ -35,6 +35,43 @@
 
 ## GPUs
 
+### Machine allocation
+
+Workers on the control machine share a whole-machine table: node alias → worker
+session ID. Run [scripts/allocations.py](scripts/allocations.py) there, from the
+installed skill, so every checkout uses the same file:
+
+```sh
+python3 ~/.agents/skills/gpu-cluster/scripts/allocations.py list
+python3 ~/.agents/skills/gpu-cluster/scripts/allocations.py claim sh-1
+python3 ~/.agents/skills/gpu-cluster/scripts/allocations.py release sh-1
+```
+
+- Before asking for GPUs, read the table, check an unregistered candidate's GPU
+  processes below, and recommend a specific machine. Claim only after the user
+  confirms it. A listed machine belongs to that worker even between GPU runs.
+- Claims cover the whole machine and refuse an existing different owner. If
+  another worker claims it first, recommend another machine for confirmation.
+  Existing allocation and further runs on that machine need no repeated approval.
+- `claim` and `release` use `HC_TERMINAL_ID`. Outside Herdr, pass
+  `--worker <session-id>` consistently. Normal release uses your own identity.
+- Once the task no longer needs GPUs and its jobs have ended, release the machine
+  without another confirmation. Pausing, finishing one run or ending one answer
+  does not release it. Later GPU work after release needs a new confirmed claim.
+- An exited worker leaves its record intact. After checking for leftover jobs and
+  obtaining the user's confirmation, release with `--worker <recorded-owner>`.
+  This removes only that owner's record, not a later replacement's.
+- The table records allocation, not authorization or live GPU use. The worker
+  checks confirmation and job completion; the script neither probes nor stops
+  processes. Enter existing assignments with their owners when first adopting it.
+
+The control-machine file is `~/.local/state/gpu-cluster/allocations.sqlite3`, a
+single SQLite table with atomic updates. `--database <path>` isolates tests;
+normal workers use the default. An absent entry never establishes that GPUs are
+idle. Use canonical `sh-<n>`, `zg-<n>` and `th-<n>` aliases from [machines.md](machines.md).
+
+### GPU checks
+
 - Before launching, confirm the GPUs are free with enough memory: `nvidia-smi --query-gpu=index,uuid,memory.free --format=csv` and `nvidia-smi --query-compute-apps=gpu_uuid,pid,used_memory --format=csv`, then each PID's `/proc/<pid>/cmdline`.
   - The nodes run cluster-ops `keepalive.py` so pods aren't reclaimed as idle: while no other process holds a GPU, each GPU carries a `keepalive.py --occupy <GPU UUID>` worker (cwd `/`) at 100% utilization. The workers leave within about 0.25 s of a CUDA context opening, so time a job only after warm-up, and return after 10 idle minutes. They and their memory count as free; never stop them.
 - Over ssh, `pgrep -f <pattern>` also matches the `bash -c` running it; check each PID's command before stopping it.

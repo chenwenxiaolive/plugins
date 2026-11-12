@@ -17,7 +17,7 @@ Each skill lives in `plugins/<group>/skills/<name>/`:
 - `improve-codebase-architecture`, `leader` and `retro` run only when invoked: `disable-model-invocation` in `SKILL.md` for Claude Code, `allow_implicit_invocation: false` in `agents/openai.yaml` for Codex.
 - `to-tickets` is also selected for plain requests to create or draft issues; the user's request, not the skill, decides whether anything is published.
 - They expect this environment: `gpu-cluster` the global instructions, SSH aliases and cluster layout; `aliyun-pai` authenticated `pai` and `aliyun` CLIs; `siflow` `uv` and the SiFlow AK/SK environment variables; `docker-build` the build host and registry access; `herdr-core` `hc` on `PATH` and signed-in Claude Code and Codex. Installing them creates no infrastructure and authorizes no jobs, cloud changes or publication.
-- The workflow skills state rules and facts; the agent runs `git`, `glab`, `ssh`, `nvidia-smi`, `pai`, `aliyun` and the SiFlow SDK itself. The only skill script is `docker-build`'s `run-build.sh`; `preview` bundles its server.
+- The workflow skills state rules and facts; the agent runs `git`, `glab`, `ssh`, `nvidia-smi`, `pai`, `aliyun` and the SiFlow SDK itself. `gpu-cluster` bundles its machine allocation table, `docker-build` its `run-build.sh`, and `preview` its server.
 - `preview` needs Linux, Python 3.10+ and Node.js 18+. This machine's settings are in [service.md](plugins/preview/skills/preview/references/service.md), the server's features and tests in [its README](plugins/preview/skills/preview/server/README.md).
 
 ## Install
@@ -43,6 +43,7 @@ python3 scripts/validate.py [group...]   # Markdown links and anchors, `claude p
 python3 -B -m unittest discover -s tests/docker-build -v
 python3 -B -m unittest discover -s tests/preview -v
 python3 -B -m unittest discover -s tests/repository -v
+GPU_ALLOCATION_TEST_TMPDIR=<run-directory> python3 -B -m unittest discover -s tests/gpu-cluster -v
 python3 -B -m unittest discover -s plugins/preview/skills/preview/server/tests -v
 ```
 
