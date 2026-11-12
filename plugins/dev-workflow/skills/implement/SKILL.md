@@ -29,9 +29,9 @@ an issue and when updating its execution record.
 
 ## Deliver and review
 
-Push the branch and open the MR with the project's template: behavior, issue
-links, validation evidence and limitations. Use a closing reference only when the
-MR completes the issue. When the target branch moves under a pushed MR, merge the
+Push the branch and open the MR, writing its description and risk statement as
+[pr](../pr/SKILL.md) describes and keeping the project's own template where it
+has one. When the target branch moves under a pushed MR, merge the
 target into the branch, resolve it there and rerun the affected checks; rebasing
 or resetting a pushed branch would need a force-push.
 
@@ -48,6 +48,6 @@ post it to the MR only when asked.
 ## Merge
 
 After review passes, or when the user requests a merge, read
-[merge.md](references/merge.md) for the risk score, authorization, current-commit
+[merge.md](references/merge.md) for the risk rating, authorization, current-commit
 checks, guarded merge and recovery after a timeout. Do not treat a pending merge
 as completed.

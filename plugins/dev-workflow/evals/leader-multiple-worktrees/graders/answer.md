@@ -12,7 +12,7 @@ targeting main. A directory has one independent session, which may create native
 subagents only within its own checkout: the leader cannot assign its native
 subagents to those worktrees, and native worktree isolation does not make that
 valid. Each worker owns one issue with its Git mutations, MR, review and the
-merge its risk score allows, and reports to the user in its own terminal, which
+merge its risk rating allows, and reports to the user in its own terminal, which
 the user watches in Herdr. The leader inherits the current harness, model and
 effort, reports what runs where and ends its turn.
 
