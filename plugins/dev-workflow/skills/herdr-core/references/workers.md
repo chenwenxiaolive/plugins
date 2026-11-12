@@ -1,6 +1,6 @@
 # Launching coding workers
 
-Tested with hc 0.1.16, Claude Code 2.1.295 and Codex 0.167.0.
+Tested with hc 0.1.16, Claude Code 2.1.295 and Codex 0.167.2.
 
 ## Before the first worker
 
@@ -12,7 +12,7 @@ Check `hc --version` and only the client selected for this launch:
 Install a missing CLI needed for this launch with its official installer; ask the
 user to sign in only if that client's authentication is missing.
 
-- Workers inherit the core's environment, whose `PATH` lacks `~/.local/bin` (`hc`, `uv`): launch them through `env PATH="$PATH"`.
+- A worker gets the Herdr core's environment, which depends on how the core started, plus the caller's `TERM` and `COLORTERM`; no other caller variable reaches it, `NO_COLOR` included. Its command runs without a shell, so `.bashrc` doesn't apply. An agent's tool shell may pass `TERM=dumb`, which turns Claude Code monochrome and strips most of Codex's colors, and the core's `PATH` may lack `~/.local/bin` (`hc`, `uv`). Launch every worker through `env PATH="$PATH" TERM=xterm-256color COLORTERM=truecolor`, as below; add `NO_COLOR=1` there when the user asks for no color.
 - Claude Code reports status from 2.1.295, Codex from 0.163.0. Older versions stay `reported: false`: no Herdr sidebar entry, and waits end only at exit or timeout.
 
 ## Start a worker
@@ -40,13 +40,15 @@ Fill the model and effort placeholders below from the selected role.
 # Claude Code (IS_SANDBOX=1 lets root use --dangerously-skip-permissions)
 hc run --bg --name <name> --cwd <dir> \
   --label "herdr.space=sp$(python3 -c 'import uuid; print(uuid.uuid4().hex)')" \
-  env IS_SANDBOX=1 PATH="$PATH" claude --dangerously-skip-permissions \
+  env IS_SANDBOX=1 PATH="$PATH" TERM=xterm-256color COLORTERM=truecolor \
+  claude --dangerously-skip-permissions \
   --name <name> --model <model> --effort <effort> "<whole task>"
 
 # Codex
 hc run --bg --name <name> --cwd <dir> \
   --label "herdr.space=sp$(python3 -c 'import uuid; print(uuid.uuid4().hex)')" \
-  env PATH="$PATH" codex --no-daemon --yolo -m <model> \
+  env PATH="$PATH" TERM=xterm-256color COLORTERM=truecolor \
+  codex --no-daemon --yolo -m <model> \
   -c 'model_reasoning_effort="<effort>"' "<whole task>"
 ```
 
