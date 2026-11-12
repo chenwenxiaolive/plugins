@@ -30,9 +30,9 @@ instead of substituting. Both run with full access and no approval prompts, so t
 task sets what the worker is authorized to accomplish.
 
 Use the launching session's harness, model and reasoning effort unless the user
-explicitly chooses otherwise. The task carries no reply address: the worker
-reports to the user in its own terminal, which the user
-[steers in Herdr](steering.md). Build implementation assignments from the
+explicitly chooses otherwise. The worker reports to the user in its own
+terminal, which the user [steers in Herdr](steering.md); only a leader's brief
+adds a delivery report to the leader. Build implementation assignments from the
 [worker brief](../../leader/delegation-brief.md#worker-brief).
 Fill the model and effort placeholders below from the selected role.
 

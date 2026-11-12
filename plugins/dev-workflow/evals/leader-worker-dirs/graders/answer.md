@@ -11,5 +11,5 @@ does no implementation; it reports what runs where and stops.
 
 FAIL if a worker's `--cwd` is the leader's checkout or another independent
 instance's directory, both jobs share one directory, the leader runs the
-diagnosis in its own session, or the workers are
-asked to report back to the leader.
+diagnosis in its own session, or the workers' questions or results go to the
+leader instead of the user. A one-line delivery-state report to the leader is fine.

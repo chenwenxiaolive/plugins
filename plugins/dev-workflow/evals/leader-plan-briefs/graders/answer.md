@@ -14,6 +14,7 @@ its turn after launching.
 
 FAIL if two independent deliveries share a worktree, a worktree is reused for
 both issues, a brief omits the target branch, the plan folds both issues into one
-MR, the leader keeps part of the implementation, or a brief gives a reply address
-or asks the worker to report to the leader or to stop at ready-for-merge for the
-leader to finish, or an owned-file list restricts either worker's implementation.
+MR, the leader keeps part of the implementation, a brief routes the worker's
+questions or results to the leader instead of the user or has it stop at
+ready-for-merge for the leader to finish, or an owned-file list restricts either
+worker's implementation. A one-line delivery-state report to the leader is fine.

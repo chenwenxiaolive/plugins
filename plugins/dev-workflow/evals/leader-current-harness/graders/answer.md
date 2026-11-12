@@ -18,5 +18,5 @@ subagent management.
 
 FAIL if it requires switching the leader to another harness, defaults the worker
 to Opus despite the stated inherited model, chooses a Codex worker, gives the
-worker a reply address or asks it to report to the leader, leaves the leader to
-integrate or merge the work, or launches anything.
+worker's questions or results to the leader instead of the user, leaves the
+leader to integrate or merge the work, or launches anything. A one-line delivery-state report to the leader is fine.
