@@ -9,12 +9,12 @@ details and test commands may be marked for verification before launch.
 PASS if it keeps the current Claude Code leader, selects a Claude Code worker with
 sonnet at high matching the leader's verified settings, and places it in its own
 interactive Herdr terminal in a new worktree for issue #19 with main as the MR
-target. Both files are assigned, the worker carries the issue through implement
+target. Both files are included as context, the worker carries the issue through implement
 including the merge its risk rating allows, validation runs on committed code with
 CPU-only checks, and the worker reports to the user in its own terminal, which the
 user watches in Herdr. The brief forbids memory writes and additional independent
-workers, while allowing native subagents only within its own checkout and
-retaining Git and delivery ownership.
+workers, while retaining delivery responsibility without prescribing native
+subagent management.
 
 FAIL if it requires switching the leader to another harness, defaults the worker
 to Opus despite the stated inherited model, chooses a Codex worker, gives the

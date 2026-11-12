@@ -7,9 +7,9 @@ neither of them the leader's checkout /volume/workspace/mini-vllm and neither
 shared with another independent instance: the deployment worker's brief names the
 remote paths it needs on sh-1 instead of working in them, and the diagnosis
 worker gets a directory of its own. The leader takes neither job itself and
-spawns no native subagent for them; it reports what runs where and stops.
+does no implementation; it reports what runs where and stops.
 
 FAIL if a worker's `--cwd` is the leader's checkout or another independent
 instance's directory, both jobs share one directory, the leader runs the
-diagnosis itself or through a native subagent in its checkout, or the workers are
+diagnosis in its own session, or the workers are
 asked to report back to the leader.

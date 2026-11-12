@@ -5,13 +5,6 @@ description: "Runs persistent programs and independent interactive coding worker
 
 # herdr-core runtime
 
-Native subagents use their harness's spawn, message and wait tools directly.
-Their identities and lifecycle belong to that harness; creating or coordinating
-them needs no hc terminal, machine registration or `herdr.space` label.
-They stay in their parent's working directory/checkout. Each directory has one
-independent session, which may have multiple native subagents there; another
-working directory needs its own independent worker.
-
 Independent workers and persistent programs run as hc terminals while the
 conversation stays in this session. Launching a worker needs no hc terminal of
 your own: a worker owns its task and reports to the user in its own terminal.
