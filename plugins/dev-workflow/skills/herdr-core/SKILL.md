@@ -67,10 +67,10 @@ worker's transcript. Elapsed time is not a reason.
 
 ## Clean up
 
-A leader's worker ends its own program once its MR is merged, and Herdr then
-removes its pane, closing its space when nothing else is in it. Leave every
-other worker's terminal and space, and every worktree, for the user; they close
-a worker when the work is accepted, or ask for `hc kill <name>` and `hc rm
-<name>`.
+A worker launched by a leader in an hc terminal ends its own program once its MR
+is merged, and Herdr then removes its pane, closing its space when nothing else
+is in it. Leave every other worker's terminal and space, and every worktree, for
+the user; they close a worker when the work is accepted, or ask for `hc kill
+<name>` and `hc rm <name>`.
 Remove only the program terminals you started, and never stop or restart the
 user's core unless asked.

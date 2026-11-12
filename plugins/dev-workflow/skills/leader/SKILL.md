@@ -70,8 +70,10 @@ to the user rather than taking its task yourself.
 
 This invocation covers the whole agreed plan. Run it in an hc terminal: that
 terminal is your workers' parent and the report address in their briefs
-(`$HC_TERMINAL_ID`). Without one, launch what is ready, tell the user that later
-tasks need a new invocation, and stop.
+(`$HC_TERMINAL_ID`). Without one, launch what is ready with briefs that leave
+out the report to the leader and the exit after merge, so each worker keeps its
+terminal and final report for the user; tell the user that later tasks need a
+new invocation, and stop.
 
 - After launching, report what runs where and what waits on what, then end your turn. A worker's delivery report, or hc's note when a worker is blocked, errors or exits, arrives as your next input; a worker exits once its MR is merged, so that exit note is how a merge reaches you. Keep those notes: add `--no-notify` or `--no-parent` only when the user asks for silence.
 - On a report or note, establish what was delivered from the report and the issue's MR on the forge, and tell the user, since a merged worker's terminal has closed. An ended turn or an exit alone is not a delivered issue, and you don't rerun a worker's checks or review its work again to decide.
