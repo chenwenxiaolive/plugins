@@ -23,15 +23,16 @@ Workers normally use the launching session's harness, model and reasoning effort
 ## Workers run on their own
 
 A worker gets its whole task in the launch, owns one issue end to end and
-reports to the user in its own terminal. Do not message it, wait for it, poll
-it or read its terminal for progress; the user watches it in its Herdr space and
+reports to the user in its own terminal. Do not message it, wait for it, poll it
+or read its terminal for progress; the user watches it in its Herdr space and
 [steers it there](references/steering.md). After launching, confirm the worker
 started and cleared any trust prompt, tell the user what runs where, and end the
 turn. When the launching session runs in an hc terminal, it is the worker's
 parent: hc types a note into it when the worker is blocked, errors or exits, and
-a leader's workers also send it delivery reports. Each arrives as input, and
-neither an ended turn nor an exit shows that the task is done. A session outside
-an hc terminal gets neither; the user follows the worker in Herdr.
+a leader's workers also send it delivery reports and exit once their MR is
+merged. Each arrives as input, and neither an ended turn nor an exit shows that
+the task is done. A session outside an hc terminal gets neither; the user
+follows the worker in Herdr.
 
 ## Assess a worker's result
 
@@ -66,7 +67,10 @@ worker's transcript. Elapsed time is not a reason.
 
 ## Clean up
 
-Leave a worker's terminal, worktree and Herdr space for the user; they close it
-when the work is accepted, or ask for `hc kill <name>` and `hc rm <name>`.
+A worker launched by a leader in an hc terminal ends its own program once its MR
+is merged, and Herdr then removes its pane, closing its space when nothing else
+is in it. Leave every other worker's terminal and space, and every worktree, for
+the user; they close a worker when the work is accepted, or ask for `hc kill
+<name>` and `hc rm <name>`.
 Remove only the program terminals you started, and never stop or restart the
 user's core unless asked.

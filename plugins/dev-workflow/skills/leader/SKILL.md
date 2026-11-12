@@ -15,11 +15,12 @@ workers; do not implement those issues yourself.
 A worker is an independent interactive CLI session launched through Herdr, with
 its own checkout, branch and MR. It owns its issue's implementation and
 delivery, reports to the user in its own terminal, which the user watches and
-steers in Herdr, and sends you one line whenever its delivery state changes. You
-own the plan, its dependencies and the next launches: do not steer or answer
-workers, poll them, read their terminals for progress, verify their results,
-integrate their commits or merge their MRs. A question a worker sends you goes to
-the user, with the answer the agreed plan gives, if any.
+steers in Herdr, sends you one line whenever its delivery state changes, and
+ends its own session once its MR is merged. You own the plan, its dependencies
+and the next launches: do not steer or answer workers, poll them, read their
+terminals for progress, verify their results, integrate their commits or merge
+their MRs. A question a worker sends you goes to the user, with the answer the
+agreed plan gives, if any.
 
 Keep the current harness, model and reasoning effort. Workers inherit them
 unless the user explicitly chooses otherwise: a Claude Code leader starts Claude
@@ -69,11 +70,13 @@ to the user rather than taking its task yourself.
 
 This invocation covers the whole agreed plan. Run it in an hc terminal: that
 terminal is your workers' parent and the report address in their briefs
-(`$HC_TERMINAL_ID`). Without one, launch what is ready, tell the user that later
-tasks need a new invocation, and stop.
+(`$HC_TERMINAL_ID`). Without one, launch what is ready with briefs that leave
+out the report to the leader and the exit after merge, so each worker keeps its
+terminal and final report for the user; tell the user that later tasks need a
+new invocation, and stop.
 
-- After launching, report what runs where and what waits on what, then end your turn. A worker's delivery report, or hc's note when a worker is blocked, errors or exits, arrives as your next input. Keep those notes: add `--no-notify` or `--no-parent` only when the user asks for silence.
-- On a report or note, establish what was delivered from the report and the issue's MR on the forge. An ended turn or exit code 0 is not a delivered issue, and you don't rerun a worker's checks or review its work again to decide.
+- After launching, report what runs where and what waits on what, then end your turn. A worker's delivery report, or hc's note when a worker is blocked, errors or exits, arrives as your next input; a merged worker reports and then exits, so its exit note can follow a report you already handled. Keep those notes: add `--no-notify` or `--no-parent` only when the user asks for silence.
+- On a report or note, establish what was delivered from the report and the issue's MR on the forge, and tell the user, since a merged worker's terminal has closed. An ended turn or an exit alone is not a delivered issue, and you don't rerun a worker's checks or review its work again to decide.
 - A task is ready when its prerequisites meet the plan's acceptance rule, such as their MRs merged into the plan's target branch. Launch every newly ready task as resources allow, without waiting for unrelated workers; one that waits for resources launches on a later report or note.
 - When a prerequisite waits for the user's merge or decision, tell the user what it blocks and that you continue when its worker reports the merge or they tell you; a merge made directly on the forge sends you nothing. Keep other ready work moving.
 - Dispatching adds no scope or authority: merges, deployments and resources stay as the user authorized them.
