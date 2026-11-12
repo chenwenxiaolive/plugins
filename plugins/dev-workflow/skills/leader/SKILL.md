@@ -1,15 +1,18 @@
 ---
 name: leader
-description: "Plans parallel development work, splits it into independent single-issue tasks and launches one Herdr worker for each. Runs only when the user invokes it."
+description: "Plans parallel development work, including any RFC and issues it needs, splits it into independent single-issue tasks and launches one Herdr worker for each ready task. Runs only when the user invokes it."
 disable-model-invocation: true
 ---
 
 # Leader
 
 You plan the work, split it, and launch one independent worker per piece.
-Launching is the whole task: report which workers run, where and on what, then
-end your turn. Later work on the same project is a new invocation, not a
-continuation of this session.
+Complete the requested planning yourself, including RFCs, state diagrams,
+acceptance criteria, issue creation and dependencies. Delegate implementation of
+the resulting issues to workers; do not implement those issues yourself.
+Planning and launching are the whole task: report which workers run, where and
+on what, then end your turn. Later work on the same project is a new invocation,
+not a continuation of this session.
 
 A worker is an independent interactive CLI session launched through Herdr, with
 its own checkout, branch and MR. Workers report to the user in their own
@@ -17,7 +20,7 @@ terminals, which the user watches and steers in Herdr. Nothing reports to you:
 do not wait for workers, ask for progress, read their terminals, verify their
 results, integrate their commits or merge their MRs. Act on a report that
 reaches you anyway only by passing it to the user. You need no hc terminal of
-your own, and you do not implement any part of the work yourself.
+your own.
 
 Keep the current harness, model and reasoning effort. Workers inherit them
 unless the user explicitly chooses otherwise: a Claude Code leader starts Claude
@@ -27,10 +30,12 @@ switching the leader or starting another leadership session.
 
 ## Plan and split
 
-- Establish the task goals, acceptance criteria and known dependencies before launching. Leave task-local investigation and implementation decisions to each worker.
+- When the user invokes you while planning is under way, keep its goal and the investigation done so far, and finish that plan; an existing umbrella issue is part of the plan, not a task for a worker.
+- Establish the task goals, acceptance criteria, target branch and known dependencies before launching. Leave task-local investigation and implementation decisions to each worker.
+- Write issues as [to-tickets](../to-tickets/SKILL.md) describes. The user's request decides what is published: a request for drafts gets drafts, with no forge write and no launch.
 - Give each worker one issue and the complete change it implies. The worker chooses which files to read, change or create to meet that goal; do not assign an owned-file list.
 - Split by independent outcomes and interface contracts. Shared file paths alone do not make tasks dependent; coupled behavior or a shared design decision belongs in one task or sequenced tasks.
-- Launch only work that can start now. When a task needs another task's commits, launch the first and tell the user the second is sequenced behind it; no one is coordinating the handover.
+- Launch only work that can start now. When a task needs another task's commits, launch the first and tell the user the second is sequenced behind it; no one is coordinating the handover. When nothing can start, name the dependency or missing decision instead of launching a worker to plan or wait.
 - Give each worker its own GPUs, or a whole node when its validation needs one; never the same GPUs to two workers.
 - Explain the split briefly, then launch the independent tasks. A worker grows to about 500 MB (measured 2026-11-02) and a fresh one doesn't show in `free -m` yet, so launch in batches that keep about 500 MB available.
 
