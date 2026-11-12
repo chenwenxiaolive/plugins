@@ -26,6 +26,7 @@ an issue and when updating its execution record.
 
 - Update docs when documented behavior or usage changes; add or adjust tests when the changed behavior needs coverage beyond existing checks. Choose validation to match the task and its acceptance criteria.
 - Expected results come from a specification, known example or independent reference.
+- Let errors propagate and the task or process fail unless a requirement calls for handling or recovery: the original error and traceback are an acceptable result, also for a reachable file, dependency or resource failure. That a call can fail is no such requirement and earns no guard, catch, retry, fallback, default, wrapper or failure-only test. Implement and check the recovery a task does ask for.
 
 ## Deliver and review
 
