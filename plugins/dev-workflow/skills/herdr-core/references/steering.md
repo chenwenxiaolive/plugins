@@ -3,9 +3,7 @@
 A worker reports in its own terminal and the user steers it there, in its Herdr
 space. No session coordinates workers: there is no reply address in a launch, no
 leader terminal to report to, and neither Claude's native cross-session messages
-nor `hc send` is part of the normal workflow. Native subagents are separate: they
-use their harness's spawn, message and wait tools and return results to their
-parent, with no Herdr terminal or identity mapping.
+nor `hc send` is part of the normal workflow.
 
 Put the whole task in the launch. A message to a booting agent can be lost, and a
 worker that has to ask for its scope is already waiting on someone.

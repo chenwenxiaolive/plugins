@@ -17,8 +17,7 @@ terminals, which the user watches and steers in Herdr. Nothing reports to you:
 do not wait for workers, ask for progress, read their terminals, verify their
 results, integrate their commits or merge their MRs. Act on a report that
 reaches you anyway only by passing it to the user. You need no hc terminal of
-your own, and you do not implement any part of the work yourself, with native
-subagents or otherwise.
+your own, and you do not implement any part of the work yourself.
 
 Keep the current harness, model and reasoning effort. Workers inherit them
 unless the user explicitly chooses otherwise: a Claude Code leader starts Claude
@@ -28,9 +27,9 @@ switching the leader or starting another leadership session.
 
 ## Plan and split
 
-- Do the project-wide discovery, architecture decisions and task selection yourself before launching, so each worker starts from checked facts and needs no coordination.
-- Give each worker one issue and the complete change it implies: the files, interfaces and tests that determine its correctness. A small prompt is not a reason to split a correctness-critical change.
-- Assign disjoint files, naming new ones too. Independent MRs must not touch the same files.
+- Establish the task goals, acceptance criteria and known dependencies before launching. Leave task-local investigation and implementation decisions to each worker.
+- Give each worker one issue and the complete change it implies. The worker chooses which files to read, change or create to meet that goal; do not assign an owned-file list.
+- Split by independent outcomes and interface contracts. Shared file paths alone do not make tasks dependent; coupled behavior or a shared design decision belongs in one task or sequenced tasks.
 - Launch only work that can start now. When a task needs another task's commits, launch the first and tell the user the second is sequenced behind it; no one is coordinating the handover.
 - Give each worker its own GPUs, or a whole node when its validation needs one; never the same GPUs to two workers.
 - Explain the split briefly, then launch the independent tasks. A worker grows to about 500 MB (measured 2026-11-02) and a fresh one doesn't show in `free -m` yet, so launch in batches that keep about 500 MB available.

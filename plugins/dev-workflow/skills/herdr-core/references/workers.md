@@ -17,20 +17,17 @@ user to sign in only if that client's authentication is missing.
 
 ## Start a worker
 
-Each working directory has one independent session. A worker may create native
-subagents in its own working directory/checkout under the
-[subagent rules](../../leader/delegation-brief.md#native-subagents-inside-a-workers-checkout).
-Never place a native subagent in another working directory or worktree; arrange
-an independent worker there instead. For code work, subdirectories within the
-same checkout/worktree are part of the same boundary.
+Each working directory has one independent session. For code work,
+subdirectories within the same checkout/worktree are part of the same boundary.
 
-Give each Herdr worker its own `--name`, an exact scope and the whole task in the
-launch (a message to a booting agent can be lost), and a `--cwd` where no other
-independent Claude Code or Codex session runs: sessions in one directory share
+Give each Herdr worker its own `--name`, a task goal and acceptance criteria,
+the whole task in the launch (a message to a booting agent can be lost), and a
+`--cwd` where no other independent Claude Code or Codex session runs: sessions
+in one directory share
 its working tree, Git index and HEAD, uncommitted files, and per-directory session
 state and settings. Set the model and effort explicitly; if unavailable, tell the user
 instead of substituting. Both run with full access and no approval prompts, so the
-task sets what they and their local native subagents may change.
+task sets what the worker is authorized to accomplish.
 
 Use the launching session's harness, model and reasoning effort unless the user
 explicitly chooses otherwise. The task carries no reply address: the worker
