@@ -51,27 +51,3 @@ The tests use fake external commands and temporary directories; they never touch
 Don't remove client-supported frontmatter such as `disable-model-invocation` to
 satisfy a generic validator. Work on a branch with a pull request; merge only on
 the owner's request.
-
-## Evals
-
-Each group's `evals/` holds three or more cases per skill, tagged with the skills they test, for
-Claude Code's [`claude plugin eval`](https://code.claude.com/docs/en/plugin-evals): a
-prompt a user might type and graders for the answer, each run with and without the
-group's skills to show what the skills add. Cases for the skills only the user
-invokes start with their slash command, and a few cases create sample files first.
-
-```sh
-scripts/run_evals.sh dev-workflow --runs 1 --judge-model sonnet [--tag <skill>...]
-scripts/run_evals.sh docker-build --runs 1 --judge-model sonnet
-scripts/run_evals.sh preview --runs 1 --judge-model sonnet
-```
-
-The script runs a copy of the group with a plugin manifest in a new `/volume/tmp`
-run directory, which receives the results and `report.html`. It also gives every
-run your global instructions (`~/.claude/CLAUDE.md`), in both arms, as real
-sessions load them, so a case measures what its skill adds on top of them; set
-`EVAL_INSTRUCTIONS` to another file to test a change to them first. Runs get
-no credentials or ssh configuration and only read-only tools, so the cases test
-what the skills tell the agent, not the live machines. Each run is a
-full Claude Code session billed to your account; `--runs 1` keeps a pass at one
-session per case and arm (the default is three), and `--model` tests another model.
