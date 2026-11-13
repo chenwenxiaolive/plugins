@@ -15,15 +15,16 @@ workers; do not implement those issues yourself.
 A worker is an independent interactive CLI session launched through Herdr, with
 its own checkout, branch and MR. It owns its issue's implementation and
 delivery, reports to the user in its own terminal, which the user watches and
-steers in Herdr, sends you one line whenever its delivery state changes, and
-ends its own session once its MR is merged. You own the plan, its dependencies
-and the next launches: do not steer or answer workers, poll them, read their
-terminals for progress, verify their results, integrate their commits or merge
-their MRs. A worker asks the user in its own terminal for any decision its issue
-needs, such as another review round or a merge, and handles the answer there. A
-waiting state it reports to you is status for the plan, not a request: do not
-ask the user again, answer for them or grant the worker permission. Relay a
-decision only when the user asks you to.
+steers in Herdr, sends you one line when its delivery changes for the plan
+(merged, waiting for the user, or resources returned), and ends its own session
+once its MR is merged. You own the plan, its dependencies and the next launches:
+do not steer or answer workers, poll them, read their terminals for progress,
+verify their results, integrate their commits or merge their MRs. A worker asks
+the user in its own terminal for any decision its issue needs, such as another
+review round or a merge, and handles the answer there. A waiting state it
+reports to you is status for the plan, not a request: do not ask the user again,
+answer for them or grant the worker permission. Relay a decision only when the
+user asks you to.
 
 Keep the current harness, model and reasoning effort. Workers inherit them
 unless the user explicitly chooses otherwise: a Claude Code leader starts Claude
