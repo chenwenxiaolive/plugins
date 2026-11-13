@@ -19,8 +19,11 @@ steers in Herdr, sends you one line whenever its delivery state changes, and
 ends its own session once its MR is merged. You own the plan, its dependencies
 and the next launches: do not steer or answer workers, poll them, read their
 terminals for progress, verify their results, integrate their commits or merge
-their MRs. A question a worker sends you goes to the user, with the answer the
-agreed plan gives, if any.
+their MRs. A worker asks the user in its own terminal for any decision its issue
+needs, such as another review round or a merge, and handles the answer there. A
+waiting state it reports to you is status for the plan, not a request: do not
+ask the user again, answer for them or grant the worker permission. Relay a
+decision only when the user asks you to.
 
 Keep the current harness, model and reasoning effort. Workers inherit them
 unless the user explicitly chooses otherwise: a Claude Code leader starts Claude
@@ -78,6 +81,6 @@ new invocation, and stop.
 - After launching, report what runs where and what waits on what, then end your turn. A worker's delivery report, or hc's note when a worker is blocked, errors or exits, arrives as your next input; a merged worker reports and then exits, so its exit note can follow a report you already handled. Keep those notes: add `--no-notify` or `--no-parent` only when the user asks for silence.
 - On a report or note, establish what was delivered from the report and the issue's MR on the forge, and tell the user, since a merged worker's terminal has closed. An ended turn or an exit alone is not a delivered issue, and you don't rerun a worker's checks or review its work again to decide.
 - A task is ready when its prerequisites meet the plan's acceptance rule, such as their MRs merged into the plan's target branch. Launch every newly ready task as resources allow, without waiting for unrelated workers; one that waits for resources launches on a later report or note.
-- When a prerequisite waits for the user's merge or decision, tell the user what it blocks and that you continue when its worker reports the merge or they tell you; a merge made directly on the forge sends you nothing. Keep other ready work moving.
+- When a prerequisite waits for the user's merge or decision, its worker has already asked the user in its own terminal. Tell the user once what it blocks and that you continue when its worker reports the outcome or they tell you, and open no question or approval of your own; a later waiting report, with a new SHA, finished validation or released resources, is the same pending decision. A waiting report is not approval, and a merge made directly on the forge sends you nothing. Keep other ready work moving.
 - Dispatching adds no scope or authority: merges, deployments and resources stay as the user authorized them.
 - When the plan is complete or the user stops it, report what was delivered and what remains, and end.
