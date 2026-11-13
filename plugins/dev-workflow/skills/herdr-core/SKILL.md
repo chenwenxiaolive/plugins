@@ -57,7 +57,9 @@ input, possibly late, while work may continue; it is not output to fetch with
 neither a failure nor news, so wait again or do other work.
 `hc wait --children` needs `all` or `any`. Fit the timeout to the expected work
 and the client's tool time limit, so user messages are still handled between
-waits.
+waits. Never wait on your own terminal (`$HC_TERMINAL_ID`), directly or through
+a helper you start: it can stay `working` for as long as that wait runs (seen
+with Codex 0.167.2).
 
 Wait for a plain program through `hc wait` rather than a sleep loop, and read its
 exit status and output with `hc read`. For a worker, inspect its terminal only
