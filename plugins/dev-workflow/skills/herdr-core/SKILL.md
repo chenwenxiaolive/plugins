@@ -74,5 +74,12 @@ is merged, and Herdr then removes its pane, closing its space when nothing else
 is in it. Leave every other worker's terminal and space, and every worktree, for
 the user; they close a worker when the work is accepted, or ask for `hc kill
 <name>` and `hc rm <name>`.
-Remove only the program terminals you started, and never stop or restart the
-user's core unless asked.
+Remove only the program terminals you started. `hc kill`, an exit or a closed
+pane ends a terminal's program and foreground job, not the processes it detached
+with `nohup`, `setsid` or as a daemon; stop those yourself.
+
+Never stop or restart the user's core unless asked. A plain `hc update` or
+`hc server restart` keeps the core's environment, but `--fresh`, and an update
+from a core older than 0.1.19, give new terminals the caller's environment: run
+those from the user's normal login, not an agent's tool shell, whose session
+variables would reach every new terminal.
