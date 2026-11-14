@@ -32,7 +32,8 @@ DISABLE_TELEMETRY=1 npx skills add /volume/repo/plugins \
 
 The files land in `~/.agents/skills/<name>` (read by Codex), linked from
 `~/.claude/skills/` (Claude Code). `skills update` skips local sources, so rerun
-`skills add` to refresh. `python3 scripts/check_installation.py [--source-ref <sha>]`
+`skills add` to refresh. `skills add` keeps a skill deleted from this repository installed;
+remove it with `DISABLE_TELEMETRY=1 npx skills remove <name> --global --yes`. `python3 scripts/check_installation.py [--source-ref <sha>]`
 compares the installation with a commit (contents, modes, links and the recorded
 source) and never writes anything.
 

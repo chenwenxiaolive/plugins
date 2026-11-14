@@ -42,16 +42,17 @@ hc run --bg --name <name> --cwd <dir> \
   --label "herdr.space=sp$(python3 -c 'import uuid; print(uuid.uuid4().hex)')" \
   env IS_SANDBOX=1 PATH="$PATH" \
   claude --dangerously-skip-permissions \
-  --name <name> --model <model> --effort <effort> "<whole task>"
+  --name <name> --model <model> --effort <effort> "$(cat <run_dir>/brief.txt)"
 
 # Codex
 hc run --bg --name <name> --cwd <dir> \
   --label "herdr.space=sp$(python3 -c 'import uuid; print(uuid.uuid4().hex)')" \
   env PATH="$PATH" \
   codex --no-daemon --yolo -m <model> \
-  -c 'model_reasoning_effort="<effort>"' "<whole task>"
+  -c 'model_reasoning_effort="<effort>"' "$(cat <run_dir>/brief.txt)"
 ```
 
+- Write the whole task to `<run_dir>/brief.txt` (a new run directory as [gpu-cluster](../gpu-cluster/jobs.md#temporary-files) describes) with a quoted heredoc, `cat > <run_dir>/brief.txt <<'EOF'`, and pass it as above. The brief contains backticks, `$HC_TERMINAL_ID` and apostrophes, which the launching shell would expand or split inside a literal quoted argument; backticks around `hc kill "$HC_TERMINAL_ID"` would run it in the leader's terminal.
 - Keep hc's default parent and notes: launched from an hc terminal, the worker is its child, and hc tells that terminal when the worker is blocked, errors or exits. Add `--no-notify` or `--no-parent` only when the user asks for silence.
 - Launch a coding worker directly as interactive `claude` or `codex`, as above, so its Herdr space shows the agent's own UI and stays steerable. Never use `claude -p`, `codex exec`, `codex review`, or a shell, redirect, `tee` or log tail around the agent in place of that UI; for saved evidence, have the worker write files or save `hc read` output afterwards. A worker runs its own checks, installs and jobs with its normal tools, not as hc terminals.
 - hc's `cwd` can be stale; list the directories agents really run in with `for p in $(pgrep -x claude; pgrep -x codex); do readlink /proc/$p/cwd; done`.
