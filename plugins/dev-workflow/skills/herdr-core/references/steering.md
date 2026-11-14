@@ -1,9 +1,10 @@
 # Steering a worker
 
 A worker reports in its own terminal and the user steers it there, in its Herdr
-space. The only message between sessions is a leader's worker sending the leader
-its delivery state with `hc send`, as its brief says; no session steers workers,
-and Claude's native cross-session messages are not used.
+space. Sessions send each other no workflow messages: a worker sends its leader
+nothing, the leader learns of a worker's state from hc's lifecycle notes and the
+forge, no session steers workers, and Claude's native cross-session messages are
+not used. `hc send` carries only text the user asks to be sent.
 
 Put the whole task in the launch. A message to a booting agent can be lost, and a
 worker that has to ask for its scope is already waiting on someone.
@@ -15,7 +16,8 @@ hc send <worker-terminal> '<text from the user>'
 ```
 
 `hc send` pastes text and presses Enter, steering a working session instead of
-queuing a new turn, so processing can wait for the next model/tool boundary. Send
+queuing a new turn, so processing can wait for the next model/tool boundary; it
+can also interrupt a question the worker is waiting on. Send
 without `--wait`. For Codex, keep `--no-daemon` so commands execute under the
 Herdr terminal, and do not use `codex queue`, which defers the message to the
 next turn. A worker's `HC_TERMINAL_ID` is its own address; `CODEX_THREAD_ID` is a
@@ -27,8 +29,7 @@ than using `--force` to bypass a decision.
 Another server's thread tools can read saved history while reporting `notLoaded`;
 that status, or an immediate `wait_threads` return, establishes neither that a
 worker is idle nor that it finished. Never resume a second copy of a live worker
-to fix those statuses. `hc wait --output` is for plain programs, not agent
-reports.
+to fix those statuses.
 
 ## Sources
 

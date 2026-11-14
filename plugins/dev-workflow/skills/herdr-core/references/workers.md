@@ -31,8 +31,8 @@ task sets what the worker is authorized to accomplish.
 
 Use the launching session's harness, model and reasoning effort unless the user
 explicitly chooses otherwise. The worker reports to the user in its own
-terminal, which the user [steers in Herdr](steering.md); only a leader's brief
-adds a delivery report to the leader. Build implementation assignments from the
+terminal, which the user [steers in Herdr](steering.md), and sends its launcher
+nothing. Build implementation assignments from the
 [worker brief](../../leader/delegation-brief.md#worker-brief).
 Fill the model and effort placeholders below from the selected role.
 
@@ -53,7 +53,7 @@ hc run --bg --name <name> --cwd <dir> \
 ```
 
 - Keep hc's default parent and notes: launched from an hc terminal, the worker is its child, and hc tells that terminal when the worker is blocked, errors or exits. Add `--no-notify` or `--no-parent` only when the user asks for silence.
-- Launch a coding worker directly as interactive `claude` or `codex`, as above, so its Herdr space shows the agent's own UI and stays steerable. Never use `claude -p`, `codex exec`, `codex review`, or a shell, redirect, `tee` or log tail around the agent in place of that UI; for saved evidence, have the worker write files or save `hc read` output afterwards. Checks and evals may run as background programs, but they are not workers; don't report them as such.
+- Launch a coding worker directly as interactive `claude` or `codex`, as above, so its Herdr space shows the agent's own UI and stays steerable. Never use `claude -p`, `codex exec`, `codex review`, or a shell, redirect, `tee` or log tail around the agent in place of that UI; for saved evidence, have the worker write files or save `hc read` output afterwards. A worker runs its own checks, installs and jobs with its normal tools, not as hc terminals.
 - hc's `cwd` can be stale; list the directories agents really run in with `for p in $(pgrep -x claude; pgrep -x codex); do readlink /proc/$p/cwd; done`.
 - `--no-daemon` keeps Codex's execution backend under the Herdr terminal; the shared daemon would execute commands outside hc's process ownership. Don't pass Codex `--worktree`: it ignores `-c` for its root and leaves `<root>/<hex>/<repo>` checkouts behind. Prepare the issue's own worktree first and pass it as `--cwd`.
 - The `herdr.space=<id>` label puts the worker's live terminal in that Herdr space, naming a new one after its folder. Give every worker its own new id, as above: a shared id opens the workers as panes of one space, which this owner never wants. Unlabeled workers appear only under their parent. Closing a placed terminal's space or pane in the app ends it.
