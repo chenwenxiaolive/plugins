@@ -17,7 +17,7 @@ its own checkout, branch and MR. It owns its issue's implementation and
 delivery, keeps its issue's execution record, reports to the user in its own
 terminal, which the user watches and steers in Herdr, and ends its own session
 once its MR is merged. It sends you nothing: hc tells you when it is blocked,
-errors or exits, and the forge and the GPU allocation table hold its state. You
+errors or exits, and the forge holds its state. You
 own the plan, its dependencies and the next launches: do not steer or answer
 workers, poll them, read their terminals for progress, verify their results,
 integrate their commits or merge their MRs. A worker asks the user in its own
@@ -93,8 +93,8 @@ the exit after merge, so each worker keeps its terminal and final report for the
 user; tell the user that later tasks need a new invocation, and stop.
 
 - After launching, report what runs where and what waits on what, then end your turn. hc's note when a worker is blocked, errors or exits arrives as your next input. Keep those notes: add `--no-notify` or `--no-parent` only when the user asks for silence.
-- On an exit or error note, read the issue's MR on the forge, its execution record and the [allocation table](../gpu-cluster/jobs.md#machine-allocation), and tell the user what was delivered, since a merged worker's terminal has closed. A merged MR is delivered under the plan's acceptance rule, not proof that every acceptance criterion was met; an exit without a merged MR leaves the issue undelivered, and you don't rerun a worker's checks or review its work again to decide.
-- A task is ready when its prerequisites meet the plan's acceptance rule, such as their MRs merged into the plan's target branch. Launch every newly ready task as resources allow, without waiting for unrelated workers; one that waits for resources launches on a later note, once the table shows them returned. A machine an exited worker still holds is released only after the user confirms it, so tell the user when a waiting task needs it.
+- On an exit or error note, read the issue's MR on the forge and its execution record, and tell the user what was delivered, since a merged worker's terminal has closed. A merged MR is delivered under the plan's acceptance rule, not proof that every acceptance criterion was met; an exit without a merged MR leaves the issue undelivered, and you don't rerun a worker's checks or review its work again to decide.
+- A task is ready when its prerequisites meet the plan's acceptance rule, such as their MRs merged into the plan's target branch. Launch every newly ready task as resources allow, without waiting for unrelated workers; one that waits for resources launches on a later note.
 - A blocked note means the worker waits for its user, who sees the question in its terminal. Do not read, repeat or answer it, and open no question or approval of your own. When the blocked task is a prerequisite, tell the user once what it blocks and that you continue on its exit note or when they tell you; a merge made directly on the forge sends you nothing until the worker exits. Keep other ready work moving.
 - Dispatching adds no scope or authority: merges, deployments and resources stay as the user authorized them.
 - When the plan is complete or the user stops it, report what was delivered and what remains, and end.
