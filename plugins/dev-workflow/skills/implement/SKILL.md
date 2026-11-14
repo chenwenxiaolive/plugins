@@ -42,7 +42,7 @@ When asked to fix a published diagram, correct the MR/PR's Mermaid source as wel
 as any preview copy.
 
 For the implementation's review or a requested standalone review, read
-[review.md](references/review.md): the review command, finding criteria, corrective
+[review.md](references/review.md): the reviewer for each client, finding criteria, corrective
 round limit and status record. A standalone review ends with a verdict in chat;
 post it to the MR only when asked.
 
