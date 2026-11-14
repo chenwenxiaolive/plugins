@@ -1,6 +1,6 @@
 ---
 name: leader
-description: "Plans parallel development work, including any RFC and issues it needs, splits it into independent single-issue tasks and launches one Herdr worker for each ready task, dispatching later tasks as their prerequisites are delivered. Runs only when the user invokes it."
+description: "Plans parallel development work, including any RFC and issues it needs, splits it into independent single-issue tasks and launches one interactive Claude Code or Codex worker through hc and Herdr for each ready task, dispatching later tasks from hc's lifecycle notes as their prerequisites are delivered. Runs only when the user invokes it."
 disable-model-invocation: true
 ---
 
@@ -14,17 +14,18 @@ workers; do not implement those issues yourself.
 
 A worker is an independent interactive CLI session launched through Herdr, with
 its own checkout, branch and MR. It owns its issue's implementation and
-delivery, reports to the user in its own terminal, which the user watches and
-steers in Herdr, sends you one line when its delivery changes for the plan
-(merged, waiting for the user, or resources returned), and ends its own session
-once its MR is merged. You own the plan, its dependencies and the next launches:
-do not steer or answer workers, poll them, read their terminals for progress,
-verify their results, integrate their commits or merge their MRs. A worker asks
-the user in its own terminal for any decision its issue needs, such as another
-review round or a merge, and handles the answer there. A waiting state it
-reports to you is status for the plan, not a request: do not ask the user again,
-answer for them or grant the worker permission. Relay a decision only when the
-user asks you to.
+delivery, keeps its issue's execution record, reports to the user in its own
+terminal, which the user watches and steers in Herdr, and ends its own session
+once its MR is merged. It sends you nothing: hc tells you when it is blocked,
+errors or exits, and the forge holds its state. You
+own the plan, its dependencies and the next launches: do not steer or answer
+workers, poll them, read their terminals for progress, verify their results,
+integrate their commits or merge their MRs. A worker asks the user in its own
+terminal for any decision its issue needs, such as another review round or a
+merge, and handles the answer there. A blocked note is status for the plan, not
+a request: do not repeat the worker's question, ask the user again, answer for
+them or grant the worker permission. Relay a decision only when the user asks
+you to.
 
 Keep the current harness, model and reasoning effort. Workers inherit them
 unless the user explicitly chooses otherwise: a Claude Code leader starts Claude
@@ -66,22 +67,60 @@ the target branch: project docs may say `main` while this work goes into a featu
 branch. Claude Code keeps memory per repository, so workers would write into
 yours; record what is worth keeping yourself.
 
-Launch through [herdr-core](../herdr-core/SKILL.md#start-a-worker), confirming
-each worker started and cleared any trust prompt. If a launch fails, report that
-to the user rather than taking its task yourself.
+## Launch a worker
+
+Before launching, read [workers.md](workers.md) for the selected client's
+checks, exact interactive launch, model choices, working directory and Herdr
+space rules. Confirm each worker started and cleared any trust prompt. If a
+launch fails, report that to the user rather than taking its task yourself.
+Send a worker text only when the user asks you to, as
+[steering.md](steering.md) describes. `hc --skill` prints hc's full manual;
+read it only for worker operations not covered here.
+
+hc terminals are for workers alone. Installs, tests, evals, benchmarks, baseline
+or environment preparation, SSH jobs and file copies, yours or a worker's, run
+with ordinary shell and job tools, as
+[gpu-cluster](../gpu-cluster/jobs.md#background-jobs) describes for remote
+jobs. A long command, concurrent commands, retained output or running inside an
+hc terminal is no reason for `hc run`, `hc exec` or hc file commands.
 
 ## Dispatch the plan
 
 This invocation covers the whole agreed plan. Run it in an hc terminal: that
-terminal is your workers' parent and the report address in their briefs
-(`$HC_TERMINAL_ID`). Without one, launch what is ready with briefs that leave
-out the report to the leader and the exit after merge, so each worker keeps its
-terminal and final report for the user; tell the user that later tasks need a
-new invocation, and stop.
+terminal is your workers' parent, which hc notifies when a worker is blocked,
+errors or exits. Without one, launch what is ready with briefs that leave out
+the exit after merge, so each worker keeps its terminal and final report for the
+user; tell the user that later tasks need a new invocation, and stop.
 
-- After launching, report what runs where and what waits on what, then end your turn. A worker's delivery report, or hc's note when a worker is blocked, errors or exits, arrives as your next input; a merged worker reports and then exits, so its exit note can follow a report you already handled. Keep those notes: add `--no-notify` or `--no-parent` only when the user asks for silence.
-- On a report or note, establish what was delivered from the report and the issue's MR on the forge, and tell the user, since a merged worker's terminal has closed. An ended turn or an exit alone is not a delivered issue, and you don't rerun a worker's checks or review its work again to decide.
-- A task is ready when its prerequisites meet the plan's acceptance rule, such as their MRs merged into the plan's target branch. Launch every newly ready task as resources allow, without waiting for unrelated workers; one that waits for resources launches on a later report or note.
-- When a prerequisite waits for the user's merge or decision, its worker has already asked the user in its own terminal. Tell the user once what it blocks and that you continue when its worker reports the outcome or they tell you, and open no question or approval of your own; a later waiting report, with a new SHA, finished validation or released resources, is the same pending decision. A waiting report is not approval, and a merge made directly on the forge sends you nothing. Keep other ready work moving.
+- After launching, report what runs where and what waits on what, then end your turn. hc's note when a worker is blocked, errors or exits arrives as your next input. Keep those notes: add `--no-notify` or `--no-parent` only when the user asks for silence.
+- On an exit or error note, read the issue's MR on the forge and its execution record, and tell the user what was delivered, since a merged worker's terminal has closed. A merged MR is delivered under the plan's acceptance rule, not proof that every acceptance criterion was met; an exit without a merged MR leaves the issue undelivered, and you don't rerun a worker's checks or review its work again to decide.
+- A task is ready when its prerequisites meet the plan's acceptance rule, such as their MRs merged into the plan's target branch. Launch every newly ready task as resources allow, without waiting for unrelated workers; one that waits for resources launches on a later note.
+- A blocked note means the worker waits for its user, who sees the question in its terminal. Do not read, repeat or answer it, and open no question or approval of your own. When the blocked task is a prerequisite, tell the user once what it blocks and that you continue on its exit note or when they tell you; a merge made directly on the forge sends you nothing until the worker exits. Keep other ready work moving.
 - Dispatching adds no scope or authority: merges, deployments and resources stay as the user authorized them.
 - When the plan is complete or the user stops it, report what was delivered and what remains, and end.
+
+## Inspect and clean up
+
+```sh
+hc get <name> --json                # terminal state and reported agent status
+hc read <name> --lines 400          # terminal diagnostics or transcript capture
+```
+
+Inspect a worker only for a concrete reason, and name it: a startup, trust or
+exit failure at launch, the user's request, or evidence they asked to keep, such
+as saving a finished worker's transcript. Elapsed time is not a reason. Status
+`idle` or `done` means a turn ended, not that the task finished. Never wait on
+your own terminal (`$HC_TERMINAL_ID`), directly or through a helper you start:
+it can stay `working` for as long as that wait runs (seen with Codex 0.167.2).
+
+A worker you launch from an hc terminal ends its own program once its MR is
+merged, and Herdr then removes its pane, closing its space when nothing else is
+in it. Leave every other worker's terminal and space, and every worktree, for
+the user; they close a worker when the work is accepted, or ask for `hc kill
+<name>` and `hc rm <name>`.
+
+Never stop or restart the user's core unless asked. A plain `hc update` or
+`hc server restart` keeps the core's environment, but `--fresh`, and an update
+from a core older than 0.1.19, give new terminals the caller's environment: run
+those from the user's normal login, not an agent's tool shell, whose session
+variables would reach every new terminal.
