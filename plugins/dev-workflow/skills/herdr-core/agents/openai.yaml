@@ -1,3 +1,0 @@
-interface:
-  display_name: "Herdr Core (hc)"
-  short_description: "Launch and handle independent Herdr coding workers"

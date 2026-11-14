@@ -1,6 +1,6 @@
 ---
 name: leader
-description: "Plans parallel development work, including any RFC and issues it needs, splits it into independent single-issue tasks and launches one Herdr worker for each ready task, dispatching later tasks as their prerequisites are delivered. Runs only when the user invokes it."
+description: "Plans parallel development work, including any RFC and issues it needs, splits it into independent single-issue tasks and launches one interactive Claude Code or Codex worker through hc and Herdr for each ready task, dispatching later tasks from hc's lifecycle notes as their prerequisites are delivered. Runs only when the user invokes it."
 disable-model-invocation: true
 ---
 
@@ -67,9 +67,22 @@ the target branch: project docs may say `main` while this work goes into a featu
 branch. Claude Code keeps memory per repository, so workers would write into
 yours; record what is worth keeping yourself.
 
-Launch through [herdr-core](../herdr-core/SKILL.md#start-a-worker), confirming
-each worker started and cleared any trust prompt. If a launch fails, report that
-to the user rather than taking its task yourself.
+## Launch a worker
+
+Before launching, read [workers.md](workers.md) for the selected client's
+checks, exact interactive launch, model choices, working directory and Herdr
+space rules. Confirm each worker started and cleared any trust prompt. If a
+launch fails, report that to the user rather than taking its task yourself.
+Send a worker text only when the user asks you to, as
+[steering.md](steering.md) describes. `hc --skill` prints hc's full manual;
+read it only for worker operations not covered here.
+
+hc terminals are for workers alone. Installs, tests, evals, benchmarks, baseline
+or environment preparation, SSH jobs and file copies, yours or a worker's, run
+with ordinary shell and job tools, as
+[gpu-cluster](../gpu-cluster/jobs.md#background-jobs) describes for remote
+jobs. A long command, concurrent commands, retained output or running inside an
+hc terminal is no reason for `hc run`, `hc exec` or hc file commands.
 
 ## Dispatch the plan
 
@@ -85,3 +98,29 @@ user; tell the user that later tasks need a new invocation, and stop.
 - A blocked note means the worker waits for its user, who sees the question in its terminal. Do not read, repeat or answer it, and open no question or approval of your own. When the blocked task is a prerequisite, tell the user once what it blocks and that you continue on its exit note or when they tell you; a merge made directly on the forge sends you nothing until the worker exits. Keep other ready work moving.
 - Dispatching adds no scope or authority: merges, deployments and resources stay as the user authorized them.
 - When the plan is complete or the user stops it, report what was delivered and what remains, and end.
+
+## Inspect and clean up
+
+```sh
+hc get <name> --json                # terminal state and reported agent status
+hc read <name> --lines 400          # terminal diagnostics or transcript capture
+```
+
+Inspect a worker only for a concrete reason, and name it: a startup, trust or
+exit failure at launch, the user's request, or evidence they asked to keep, such
+as saving a finished worker's transcript. Elapsed time is not a reason. Status
+`idle` or `done` means a turn ended, not that the task finished. Never wait on
+your own terminal (`$HC_TERMINAL_ID`), directly or through a helper you start:
+it can stay `working` for as long as that wait runs (seen with Codex 0.167.2).
+
+A worker you launch from an hc terminal ends its own program once its MR is
+merged, and Herdr then removes its pane, closing its space when nothing else is
+in it. Leave every other worker's terminal and space, and every worktree, for
+the user; they close a worker when the work is accepted, or ask for `hc kill
+<name>` and `hc rm <name>`.
+
+Never stop or restart the user's core unless asked. A plain `hc update` or
+`hc server restart` keeps the core's environment, but `--fresh`, and an update
+from a core older than 0.1.19, give new terminals the caller's environment: run
+those from the user's normal login, not an agent's tool shell, whose session
+variables would reach every new terminal.
