@@ -49,5 +49,4 @@ python3 -B -m unittest discover -s plugins/preview/skills/preview/server/tests -
 
 The tests use fake external commands and temporary directories; they never touch a node, the registry or the deployed preview service.
 Don't remove client-supported frontmatter such as `disable-model-invocation` to
-satisfy a generic validator. Work on a branch with a pull request; merge only on
-the owner's request.
+satisfy a generic validator. Work on a branch with a pull request.
