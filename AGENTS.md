@@ -9,10 +9,10 @@
   under `~/.agents/skills` and preserve local edits in the repository before updates.
   Keep the installation at the latest `origin/main`: after a merge into `main`,
   before reporting it, and whenever the installation is behind, fetch and
-  fast-forward `/volume/repo/plugins` to `origin/main` and install from it, only
-  while that checkout is clean on `main`, with
-  `DISABLE_TELEMETRY=1 npx skills add /volume/repo/plugins --skill '*' --global --agent codex claude-code --yes`;
-  `skills update` skips local sources, so rerun that command to refresh them.
+  fast-forward `/volume/repo/plugins`, then install from it with
+  `DISABLE_TELEMETRY=1 npx skills add /volume/repo/plugins --skill '*' --global --agent codex claude-code --yes`
+  if it is clean at `origin/main`, and report the installation as behind if it
+  is not. `skills update` skips local sources, so rerun that command to refresh them.
 - Run `python3 scripts/check_installation.py` from `/volume/repo/plugins` to
   compare the installed skills with a source commit before editing and after
   installation; see README.md.
