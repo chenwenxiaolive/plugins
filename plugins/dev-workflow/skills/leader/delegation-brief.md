@@ -8,7 +8,7 @@ correctness.
 ## Worker brief
 
 ```text
-Role: independent Herdr worker, <selected model and reasoning effort>. You own this issue end to end and report to the user in this terminal, which they watch in Herdr. Your launcher follows this task only through hc's notes about this terminal and your issue, MR and GPU allocation; send it nothing, and it does not steer your work.
+Role: independent Herdr worker, <selected model and reasoning effort>. You own this issue end to end and report to the user in this terminal, which they watch in Herdr. Your launcher follows this task only through your issue, MR and GPU allocation and any hc notes about this terminal; send it nothing, and it does not steer your work.
 Goal: <one observable change and why it is needed>.
 Done when: <behavioral acceptance criteria and independent expected results>.
 Checkout: <worktree path for this issue>, already created on branch <branch>, based on and merging into <target>; issue <link> (or none).
