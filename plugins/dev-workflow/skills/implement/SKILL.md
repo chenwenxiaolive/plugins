@@ -16,6 +16,7 @@ when authorized by the [merge rules](#merge). On GitHub, use `gh` for the same w
 - Name a new issue branch `issue-<iid>-<2-4 words>`, e.g. `issue-42-fix-cache`, created from the fetched target branch; base it on another unmerged branch only for an intended dependency.
 - One issue gets one worktree and one branch, for that issue alone. Create them if they don't exist yet, with `git worktree add --no-track -b <branch> /volume/worktree/<repo>/issue-<iid> origin/<target>`, naming the worktree for the task when it has no issue; a checkout prepared for this task and already on its branch needs nothing. Leave a worktree to its own task rather than switching it to the next one, and never remove one unless the user asks.
 - If the MR was already merged, update the execution record and report; don't recreate its branch.
+- In a fork, the issue, branch and MR stay in the fork: without a default set, `gh` resolves a clone that has an `upstream` remote to the parent, so pass `-R <fork>` and the fork's own base branch, and write nothing to the upstream repository. Name an upstream issue as `upstream issue <n>`, its URL only in a code span: a linked reference in a commit or request shows up on that issue.
 
 ## Execution record
 
@@ -27,6 +28,8 @@ an issue and when updating its execution record.
 - Update docs when documented behavior or usage changes; add or adjust tests when the changed behavior needs coverage beyond existing checks. Choose validation to match the task and its acceptance criteria.
 - Expected results come from a specification, known example or independent reference.
 - Take each acceptance criterion's run from the issue as written. Where the issue gives none, state one before changing code, against the real surface: the command, the request or the stored value; a criterion on instruction text needs none ([review.md](references/review.md)). The MR's evidence carries the runs, marks the ones you stated and gives the reason for any of the issue's you had to change; the review repeats them, so a criterion without one is a gap to report, not a pass.
+- Which reading of the issue holds is the owner's decision. When two of its statements call for different output on one input, or one statement reads two ways there, ask before changing code, with the input and each reading's output, all such questions in one message; work that no answer changes continues meanwhile.
+- When the diff rewrites or moves code that behavior outside the issue runs through, name what must stay the same and run it on the target commit and on the change: same input, same output. The MR's contract lists each with its run.
 - A bug fix starts from a run that fails on the target commit for the reported reason; when that run is a new test, commit the test before the fix.
 - Tests on the target commit pass unedited. Edit or delete one only when a requirement changes what it expects, and list it in the MR's contract.
 - Where the project has a [verify skill](references/project-verify.md), launch and drive it as that says, and update it in the same MR when the task changes how the project starts or what a feature shows.
