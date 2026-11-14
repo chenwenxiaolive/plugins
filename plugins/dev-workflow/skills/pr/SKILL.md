@@ -18,9 +18,10 @@ argument, so newlines and backticks survive.
 
 ## What a body carries
 
-Behavior, a view of it, evidence, risk and limitations, in that order.
+Behavior, its contract, a view of it, evidence, risk and limitations, in that order.
 
 - Behavior: what changes for someone using the code, in the owner's words, with the issue link. A closing reference only when the request completes the issue.
+- Contract: what changed in what outlives the implementation, each as old and new: a public signature, CLI flag, schema, stored format, dependency, or what an existing check expects. `None` when nothing did. The owner reads this list instead of the diff, so a contract change missing from it is a change nobody mentioned.
 - A view, when a sentence cannot carry the change: the smallest one that makes the point. Behavior moving between states already owes its statechart, written under implement's [rule for `;` in labels](../implement/SKILL.md#deliver-and-review); reach gets a call or file tree, and a changed shape gets a short diff. A view that restates the prose earns nothing.
 - Evidence: which checks ran, on which commit, and what they returned, with a path to the full logs instead of their contents. A page change adds its preview link or screenshot as the preview skill describes, and reports visual acceptance apart from the functional checks.
 - Risk: the rating from [risk.md](references/risk.md) with every dimension that is not at its best, and the dimension that holds the merge when one does. If that rule cannot be read, say so instead of leaving a gap in the body.
