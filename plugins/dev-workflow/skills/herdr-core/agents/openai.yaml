@@ -1,3 +1,0 @@
-interface:
-  display_name: "Herdr Core (hc)"
-  short_description: "Run external worker terminals and programs with hc"
