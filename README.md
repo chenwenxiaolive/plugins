@@ -35,8 +35,7 @@ The files land in `~/.agents/skills/<name>` (read by Codex), linked from
 `skills add` to refresh. `python3 scripts/check_installation.py [--source-ref <sha>]`
 compares the installation with a commit (contents, modes, links and the recorded
 source) and never writes anything. `scripts/sync_installation.sh` brings the
-main checkout and the installation to `origin/main`, and stops when the checkout
-is not clean on `main` or the installation differs from it.
+main checkout and the installation to `origin/main`.
 
 ## Checks
 
