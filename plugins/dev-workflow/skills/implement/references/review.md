@@ -20,8 +20,14 @@ without the rounds below.
    - Claude Code: a `general-purpose` agent from the Agent tool; call no Codex.
    - Codex: from the checkout, `codex exec -s danger-full-access -o <run_dir>/verify-0.md - < <run_dir>/brief-0.md > <run_dir>/verify-0.log 2>&1` (minutes; run it in the background). Codex's sandbox is off by the owner's decision: inside it ssh has no network and its shared connection ends with each command.
 2. Make the runs the verifier left to you and repeat each finding's run. Keep a finding when the output shows the failure and the failure breaks a requirement or a contract; an error that propagates where no requirement asks for recovery breaks neither. Drop the rest and give their count in the MR, each with a one-line reason. Read the comments the diff adds yourself, since they need no run: when one narrates the code or states a constraint the code could enforce, turn it into a name, type, assertion or test, or delete it. A pass means every requirement has a run that meets it, no kept finding is left and the checks pass on the current commit.
-3. Otherwise, with a kept finding, fix it in scope with the smallest change, push, rerun the affected checks and start the verifier again on the new commit (a named node checkout brought to it first), the kept findings' runs added to its acceptance runs: one corrective round. If that does not pass either, or a requirement has no run that you or the verifier can make, stop, set `needs-human` and report what remains. After that, follow the user's feedback; another round needs their explicit allowance. With the round spent, a change or merge recheck that needs a review goes back to the user as `needs-human`.
-4. Record each round's commit, runs and outcome in a review-status section of the MR description, so that the count survives interruptions. A later merge recheck uses the corrective round if it is unspent and never resets it.
+3. Otherwise, with a kept finding, fix it in scope with the smallest change, commit each kept finding's run as a test where the project's suite can hold it, push, rerun the affected checks and start the verifier again on the new commit (a named node checkout brought to it first), the kept findings' runs added to its acceptance runs: a corrective round. Rounds repeat without asking the user until one passes or a stop is reached. Stop, set `needs-human` and report what remains when:
+   - a run that an earlier round fixed fails again;
+   - a kept finding has no fix that meets every requirement, or its fix changes a contract the issue does not ask to change;
+   - the third corrective round does not pass;
+   - a requirement has no run that you or the verifier can make.
+
+   After a stop, follow the user's feedback: another round needs their explicit allowance, and a change or merge recheck that needs a review goes back to the user as `needs-human`.
+4. Record each round's commit, runs and outcome in a review-status section of the MR description, so that the count survives interruptions. A later merge recheck uses a corrective round if one is left and never resets the count.
 
 A standalone review the user requests uses a detached checkout at the MR's source
 commit, the same verifier, and a verdict in chat; post it to the MR only when asked.

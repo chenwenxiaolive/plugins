@@ -47,7 +47,7 @@ as any preview copy.
 
 For the implementation's review or a requested standalone review, read
 [review.md](references/review.md): the verifier for each client and where it runs, what counts as a finding, what instruction text gets instead, the
-single corrective round and the status record. A standalone review ends with a verdict in chat;
+corrective rounds, where they stop and the status record. A standalone review ends with a verdict in chat;
 post it to the MR only when asked.
 
 ## Merge
