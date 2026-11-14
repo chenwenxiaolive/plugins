@@ -17,6 +17,6 @@ It is a draft until a fresh session has followed it once end to end on a node:
 launch, check, one feature, cleanup, evidence still there. Record the commit of
 that run and what it did not cover.
 
-Write or correct one through the project's own issue and MR, when the owner asks
-or a review left a requirement without a run because nobody could launch or drive
-the project.
+Write or correct one through the project's own issue and MR, when the owner asks.
+A review that left a requirement without a run because nobody could launch or
+drive the project reports that and proposes it.
