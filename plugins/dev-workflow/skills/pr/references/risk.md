@@ -47,7 +47,9 @@ it, set the execution record to `needs-human`, and say which dimension holds the
 merge.
 
 Name the rating and every dimension that is not at its best, each with the file,
-caller or command behind the verdict. Never move one verdict to express another
+caller or command behind the verdict. A verdict at its best rests on something
+you checked as well, such as the search that found the callers or the check
+that covers the behavior; with nothing checked it is middle. Never move one verdict to express another
 concern: a one-way door is reported as reversibility at its worst, not as weak
 verification.
 

@@ -26,7 +26,10 @@ an issue and when updating its execution record.
 
 - Update docs when documented behavior or usage changes; add or adjust tests when the changed behavior needs coverage beyond existing checks. Choose validation to match the task and its acceptance criteria.
 - Expected results come from a specification, known example or independent reference.
-- Before changing code, state each acceptance criterion as a run against the real surface: the command, the request, the stored value, or for instruction text a case and its outcome. The MR's evidence carries those runs and the review repeats them, so a criterion without one is a gap to report, not a pass.
+- Take each acceptance criterion's run from the issue as written. Where the issue gives none, state one before changing code, against the real surface: the command, the request, the stored value, or for instruction text a case and its outcome. The MR's evidence carries the runs, marks the ones you stated and gives the reason for any of the issue's you had to change; the review repeats them, so a criterion without one is a gap to report, not a pass.
+- A bug fix starts from a run that fails on the target commit for the reported reason; when that run is a new test, commit the test before the fix.
+- Tests on the target commit pass unedited. Edit or delete one only when a requirement changes what it expects, and list it in the MR's contract.
+- Where the project has a [verify skill](references/project-verify.md), launch and drive it as that says, and update it in the same MR when the task changes how the project starts or what a feature shows.
 - Let errors propagate and the task or process fail unless a requirement calls for handling or recovery: the original error and traceback are an acceptable result, also for a reachable file, dependency or resource failure. That a call can fail is no such requirement and earns no guard, catch, retry, fallback, default, wrapper or failure-only test. Implement and check the recovery a task does ask for.
 
 ## Deliver and review
@@ -43,7 +46,7 @@ When asked to fix a published diagram, correct the MR/PR's Mermaid source as wel
 as any preview copy.
 
 For the implementation's review or a requested standalone review, read
-[review.md](references/review.md): the verifier for each client, what counts as a finding, the
+[review.md](references/review.md): the verifier for each client and where it runs, what counts as a finding, the
 single corrective round and the status record. A standalone review ends with a verdict in chat;
 post it to the MR only when asked.
 
