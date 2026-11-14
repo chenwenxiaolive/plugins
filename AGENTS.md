@@ -7,12 +7,14 @@
 - Install and update this repository's skills with `npx skills`, targeting both
   `codex` and `claude-code` in symlink mode. Keep one shared active installation
   under `~/.agents/skills` and preserve local edits in the repository before updates.
-  The installation follows `main`: the session that merges a request
-  fast-forwards `/volume/repo/plugins` and installs from it with
+  The installation follows `main`: a session that merges a request into `main`,
+  or finds the installation behind it, fast-forwards `/volume/repo/plugins` to
+  that commit and, with the checkout clean, installs from it with
   `DISABLE_TELEMETRY=1 npx skills add /volume/repo/plugins --skill '*' --global --agent codex claude-code --yes`;
   `skills update` skips local sources, so rerun that command to refresh them.
-- Use `python3 scripts/check_installation.py` to compare the installed skills
-  with a source commit before editing and after installation; see README.md.
+- Run `python3 scripts/check_installation.py` from `/volume/repo/plugins` to
+  compare the installed skills with a source commit before editing and after
+  installation; see README.md.
 - Keep plugin instructions focused on their workflow. Put machine-specific
   service mappings in a referenced file.
 - Keep credentials, generated previews, runtime logs, and local installation
