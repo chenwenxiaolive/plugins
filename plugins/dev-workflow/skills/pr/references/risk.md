@@ -22,9 +22,9 @@ owner for, or was forbidden, before (such as merge, delete, publish, deploy, use
 GPUs, touch credentials or shared configuration), when it drops or weakens a
 confirmation, a review or a check that gates a session's work, or when it
 changes who may merge or how a request is rated, any part of this file included.
-A change that does none of these and only restricts sessions further, clarifies
-or corrects a fact does not. When it is unclear what a change lets a session do,
-it widens.
+Any other change does not, such as one that restricts sessions further,
+clarifies, corrects a fact or adds a step within what a session could already
+do. When it is unclear what a change lets a session do, it widens.
 
 Instruction text is the Markdown of skills and project instructions and of the
 files they reference, commands in it included, not their frontmatter, scripts,
@@ -38,7 +38,7 @@ large to check is not verified.
 
 ## The rating and what it authorizes
 
-- Low: alignment, reversibility, verification and detection are each at their best, and blast radius is best or middle. A diff of instruction text alone is also low when alignment is at its best, blast radius is not at its worst, the project's gates pass and part of the change was exercised by hand; the table's reversibility, verification and detection do not count against it. Merge it yourself and report the merge, unless the project's instructions opt out of automatic merges.
+- Low: alignment, reversibility, verification and detection are each at their best, and blast radius is best or middle. A diff of instruction text alone is also low when alignment and reversibility are at their best, blast radius is not at its worst, the project's gates pass and every behavior it changes was exercised by hand from the committed text; the table's verification and detection do not count against it. Merge it yourself and report the merge, unless the project's instructions opt out of automatic merges.
 - High: not low, and any dimension is at its worst.
 - Medium: anything else.
 
