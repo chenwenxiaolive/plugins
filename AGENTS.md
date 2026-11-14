@@ -7,7 +7,8 @@
 - Install and update this repository's skills with `npx skills`, targeting both
   `codex` and `claude-code` in symlink mode. Keep one shared active installation
   under `~/.agents/skills` and preserve local edits in the repository before updates.
-  After committing, install from this checkout with
+  The installation follows `main`: the session that merges a request
+  fast-forwards `/volume/repo/plugins` and installs from it with
   `DISABLE_TELEMETRY=1 npx skills add /volume/repo/plugins --skill '*' --global --agent codex claude-code --yes`;
   `skills update` skips local sources, so rerun that command to refresh them.
 - Use `python3 scripts/check_installation.py` to compare the installed skills
